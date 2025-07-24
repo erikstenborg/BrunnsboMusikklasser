@@ -4,6 +4,15 @@
 
 Brunnsbo Musikklasser is a Flask-based web application for a Swedish music school that has been operating for 40 years (1985-2025). The application manages student applications, events, news posts, and contact information. It's designed to help the school handle admissions for their music classes and provide information to prospective students and parents.
 
+## Recent Changes
+
+**2025-07-24**: 
+- Replaced SVG logo with 40th anniversary GIF logo throughout the website
+- Removed "Hedersuppdrag från Hans Majestät Konungen" and "Vi älskar att sjunga all sorts musik!" sections from homepage for cleaner layout
+- Fixed footer text colors for better readability against dark background
+- Resolved JavaScript errors and missing error templates (404.html, 500.html)
+- Fixed SQLAlchemy model constructor issues for proper database handling
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
