@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Hem - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4">Välkommen till Brunnsbo Musikklasser</h1>
+                    <p class="lead mb-4">
+                        Musikklasser för barn i Göteborgsområdet med möjlighet att utveckla sitt musikintresse 
+                        och bygga en grund för fortsatt musicerande resten av livet.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="{{ url_for('application') }}" class="btn btn-gold btn-lg me-3">
+                            <i class="fas fa-edit me-2"></i>Ansök nu
+                        </a>
+                        <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>Läs mer
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <img src="https://brunnsbomusikklasser.wordpress.com/wp-content/uploads/2019/11/img_6732.jpg" 
+                         alt="Brunnsbo Musikklasser elever" class="img-fluid rounded shadow-lg">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+{% if upcoming_events %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title text-center mb-5">Kommande evenemang</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for event in upcoming_events %}
+            <div class="col-lg-4 mb-4">
+                <div class="card event-card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="event-date text-gold fw-bold mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            {{ event.event_date.strftime('%d %B %Y kl. %H:%M') }}
+                        </div>
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        {% if event.description %}
+                        <p class="card-text text-muted">{{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}</p>
+                        {% endif %}
+                        {% if event.location %}
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt text-gold me-2"></i>
+                            {{ event.location }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% if event.ticket_url %}
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ event.ticket_url }}" target="_blank" class="btn btn-gold btn-sm">
+                            <i class="fas fa-ticket-alt me-2"></i>Köp biljetter
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Summer Concert Highlight -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <img src="https://brunnsbomusikklasser.wordpress.com/wp-content/uploads/2025/04/sommarkonsert-2025-facebook.jpg" 
+                     alt="Sommarkonsert 2025" class="img-fluid rounded shadow">
+            </div>
+            <div class="col-lg-6">
+                <div class="content-block ms-lg-4">
+                    <h2 class="display-5 fw-bold mb-4">Sommarkonsert 2025</h2>
+                    <div class="event-details mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-calendar-alt text-gold me-3"></i>
+                            <span class="fw-bold">Tisdag 27 Maj 2025 kl. 18:30</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-map-marker-alt text-gold me-3"></i>
+                            <span>Annedalskyrkan</span>
+                        </div>
+                    </div>
+                    <p class="lead mb-4">
+                        Varmt välkomna till årets sommarkonsert i vackra Annedalskyrkan! 
+                        Insläpp 30 min innan konsertens start.
+                    </p>
+                    <a href="https://secure.tickster.com/sv/e4r02h74g6w5g54/products" 
+                       target="_blank" class="btn btn-gold btn-lg">
+                        <i class="fas fa-ticket-alt me-2"></i>Köp biljetter här
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Application Reminder -->
+<section class="py-5 bg-gradient-gold text-white">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-4">Ansökan inför läsåret 2025/2026!</h2>
+                <p class="lead mb-4">
+                    Nu är det slutspurten inför sista ansökningsdag den 10 januari. 
+                    Skicka in er ansökan redan idag!
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('application') }}" class="btn btn-dark btn-lg">
+                        <i class="fas fa-edit me-2"></i>Ansök nu
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=8KLaNsPZyhw" target="_blank" class="btn btn-outline-dark btn-lg">
+                        <i class="fab fa-youtube me-2"></i>Se ansökningsvideo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Preview -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="content-block me-lg-4">
+                    <h2 class="display-5 fw-bold mb-4">Intresserad av körsång?</h2>
+                    <p class="lead mb-4">
+                        Älskar du att sjunga? Skulle du vilja gå på en skola där musik står på schemat varje dag? 
+                        Brunnsbo Musikklasser har funnits sedan 1985, och ger barn i Göteborgsområdet möjlighet 
+                        att utveckla sitt musikintresse och bygga en grund för fortsatt musicerande resten av livet.
+                    </p>
+                    <p class="mb-4">
+                        Vid sidan av skolarbetet händer mycket annat spännande och roligt – konserter, skivinspelningar, 
+                        medverkan i TV, teater och operauppsättningar och utbyte med ungdomar i andra länder.
+                    </p>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-arrow-right me-2"></i>Läs mer om oss
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://brunnsbomusikklasser.wordpress.com/wp-content/uploads/2019/11/x6a9979.jpg" 
+                     alt="Musikklasslärare" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Social Media Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title text-center mb-5">Följ oss på sociala medier</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Instagram Feed -->
+            <div class="col-lg-6 mb-4">
+                <div class="social-embed-container">
+                    <h4 class="text-center mb-3">
+                        <i class="fab fa-instagram text-gold me-2"></i>Instagram
+                    </h4>
+                    <div class="instagram-embed" id="instagram-feed">
+                        <div class="text-center p-4">
+                            <div class="spinner-border text-gold" role="status">
+                                <span class="visually-hidden">Laddar...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Laddar Instagram-flöde...</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="https://www.instagram.com/brunnsbo_musikklasser/" 
+                           target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-instagram me-2"></i>Besök vår Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Facebook Feed -->
+            <div class="col-lg-6 mb-4">
+                <div class="social-embed-container">
+                    <h4 class="text-center mb-3">
+                        <i class="fab fa-facebook text-gold me-2"></i>Facebook
+                    </h4>
+                    <div class="facebook-embed" id="facebook-feed">
+                        <div class="text-center p-4">
+                            <div class="spinner-border text-gold" role="status">
+                                <span class="visually-hidden">Laddar...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Laddar Facebook-flöde...</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="https://www.facebook.com/BrunnsboMusikklasser/" 
+                           target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-facebook me-2"></i>Besök vår Facebook
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Royal Performance Highlight -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">Hedersuppdrag från Hans Majestät Konungen</h2>
+                <p class="lead mb-4">
+                    Se vårt fina hedersuppdrag som vi fick när Hans Majestät Konungen invigde Hisingsbron den 5 september 2021.
+                </p>
+                
+                <!-- YouTube Video Embed -->
+                <div class="ratio ratio-16x9 mb-4">
+                    <iframe src="https://www.youtube.com/embed/Mr7fXFaYwUs?start=317" 
+                            title="Hisingsbrons invigningsceremoni" 
+                            allowfullscreen></iframe>
+                </div>
+                
+                <p class="text-muted">
+                    Ett stort hedersuppdrag för våra elever att få medverka vid denna historiska händelse.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Music Archive -->
+<section class="bg-light py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-4">Vi älskar att sjunga all sorts musik!</h2>
+                <p class="lead mb-4">
+                    Lyssna på vad vi har gjort tidigare i vårt musikarkiv.
+                </p>
+                <img src="https://brunnsbomusikklasser.wordpress.com/wp-content/uploads/2019/11/dd209-woman-girl-technology-music.jpg" 
+                     alt="Musik och teknik" class="img-fluid rounded shadow mb-4" style="max-height: 400px; object-fit: cover;">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Load social media feeds when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSocialFeeds();
+    });
+</script>
+{% endblock %}

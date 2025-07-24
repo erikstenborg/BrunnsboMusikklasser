@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Brunnsbo Musikklasser{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Brunnsbo Musikklasser" height="80" class="me-3">
+                <div>
+                    <h1 class="mb-0 brand-title">Brunnsbo Musikklasser</h1>
+                    <small class="text-muted">40 år • 1985-2025</small>
+                </div>
+            </a>
+            
+            <!-- Mobile menu button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>Hem
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                            <i class="fas fa-users me-1"></i>Om oss
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'application' %}active{% endif %}" href="{{ url_for('application') }}">
+                            <i class="fas fa-edit me-1"></i>Ansökan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
+                            <i class="fas fa-envelope me-1"></i>Kontakt
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Brunnsbo Musikklasser" height="60" class="me-3">
+                        <div>
+                            <h5 class="text-gold mb-1">Brunnsbo Musikklasser</h5>
+                            <small class="text-muted">40 år • 1985-2025</small>
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        Musikklasser för barn i Göteborgsområdet med möjlighet att utveckla sitt musikintresse 
+                        och bygga en grund för fortsatt musicerande resten av livet.
+                    </p>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-gold mb-3">Kontakt</h5>
+                    <div class="contact-info">
+                        <p class="mb-2">
+                            <i class="fas fa-envelope text-gold me-2"></i>
+                            <a href="mailto:info@brunnsbomusikklasser.nu" class="text-light text-decoration-none">
+                                info@brunnsbomusikklasser.nu
+                            </a>
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-phone text-gold me-2"></i>
+                            <a href="tel:031-36686 50" class="text-light text-decoration-none">031-366 86 50</a>
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-map-marker-alt text-gold me-2"></i>
+                            Brunnsboskolan, Klassikergatan<br>
+                            <span class="ms-4">422 41 Hisings Backa</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-gold mb-3">Följ oss</h5>
+                    <div class="social-links mb-3">
+                        <a href="https://www.facebook.com/BrunnsboMusikklasser/" target="_blank" class="text-light me-3">
+                            <i class="fab fa-facebook fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/brunnsbo_musikklasser/" target="_blank" class="text-light me-3">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                        <a href="https://www.youtube.com/channel/UCTIiYeEESHrDqAW4ac2WUfw" target="_blank" class="text-light">
+                            <i class="fab fa-youtube fa-2x"></i>
+                        </a>
+                    </div>
+                    
+                    <h6 class="text-gold mb-2">Stöd oss</h6>
+                    <p class="small text-muted mb-1">Swish: 123 26 83 258</p>
+                    <p class="small text-muted">Pg: 51 90 63-2</p>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-secondary">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted small">
+                        &copy; {{ current_year }} Brunnsbo Musikklasser. Alla rättigheter förbehållna.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted small">
+                        <a href="https://goteborg.se" target="_blank" class="text-light text-decoration-none">
+                            En del av Göteborgs Stad
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

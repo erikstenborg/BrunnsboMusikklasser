@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}Ansökan - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="page-header bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold mb-3">Ansökan inför läsåret 2025/2026</h1>
+                <p class="lead">Din väg till en musikfylld skolgång börjar här</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Important Information -->
+<section class="py-5 bg-warning-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                        <div>
+                            <h4 class="alert-heading mb-2">Viktig information</h4>
+                            <p class="mb-2">Nu är det slutspurten inför sista ansökningsdag den <strong>10 januari</strong>.</p>
+                            <p class="mb-0">Tänk på att även göra en ansökan till Grundskoleförvaltningens övriga skolor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Information -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-4">Ansökningsprocessen</h2>
+                    <p class="lead">
+                        Ansökan följs av provsjungningar där eleverna prövas individuellt avseende 
+                        musikalitet, gehör, sångröst, rytmsinne och tonsäkerhet.
+                    </p>
+                </div>
+                
+                <!-- Process Steps -->
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="process-step text-center">
+                            <div class="step-icon bg-gold text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fw-bold fs-3">1</span>
+                            </div>
+                            <h4>Fyll i ansökan</h4>
+                            <p class="text-muted">Fyll i ansökningsformuläret nedan med all nödvändig information.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="process-step text-center">
+                            <div class="step-icon bg-gold text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fw-bold fs-3">2</span>
+                            </div>
+                            <h4>Provsjungning</h4>
+                            <p class="text-muted">Du blir inbjuden till en individuell provsjungning där vi bedömer musikaliska färdigheter.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="process-step text-center">
+                            <div class="step-icon bg-gold text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fw-bold fs-3">3</span>
+                            </div>
+                            <h4>Besked</h4>
+                            <p class="text-muted">Du får besked om antagning och kan börja din musikresa med oss.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Application Video -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">Se vår ansökningsvideo</h2>
+                <p class="lead mb-4">
+                    Få en inblick i vad det innebär att gå i Brunnsbo Musikklasser.
+                </p>
+                
+                <!-- YouTube Video Embed -->
+                <div class="ratio ratio-16x9 mb-4">
+                    <iframe src="https://www.youtube.com/embed/8KLaNsPZyhw" 
+                            title="Ansökningsvideo för 2025/2026" 
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Application Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-gold text-white text-center py-4">
+                        <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Ansökningsformulär</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" class="needs-validation" novalidate>
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- Student Information -->
+                            <div class="section-header mb-4">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-user me-2"></i>Elevens uppgifter
+                                </h4>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.student_name.label(class="form-label fw-bold") }}
+                                    {{ form.student_name(class="form-control") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.student_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.student_personnummer.label(class="form-label fw-bold") }}
+                                    {{ form.student_personnummer(class="form-control", placeholder="YYYYMMDD-XXXX") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.student_personnummer.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Parent Information -->
+                            <div class="section-header mb-4 mt-5">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-users me-2"></i>Vårdnadshavares uppgifter
+                                </h4>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.parent_name.label(class="form-label fw-bold") }}
+                                    {{ form.parent_name(class="form-control") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.parent_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.parent_email.label(class="form-label fw-bold") }}
+                                    {{ form.parent_email(class="form-control") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.parent_email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.parent_phone.label(class="form-label fw-bold") }}
+                                {{ form.parent_phone(class="form-control") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.parent_phone.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Address Information -->
+                            <div class="section-header mb-4 mt-5">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-home me-2"></i>Adressuppgifter
+                                </h4>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.address.label(class="form-label fw-bold") }}
+                                {{ form.address(class="form-control") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.address.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.postal_code.label(class="form-label fw-bold") }}
+                                    {{ form.postal_code(class="form-control", placeholder="XXX XX") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.postal_code.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.city.label(class="form-label fw-bold") }}
+                                    {{ form.city(class="form-control") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.city.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- School Information -->
+                            <div class="section-header mb-4 mt-5">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-school me-2"></i>Skoluppgifter
+                                </h4>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.current_school.label(class="form-label fw-bold") }}
+                                    {{ form.current_school(class="form-control") }}
+                                    <small class="form-text text-muted">Valfritt</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.grade_applying_for.label(class="form-label fw-bold") }}
+                                    {{ form.grade_applying_for(class="form-select") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.grade_applying_for.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Musical Background -->
+                            <div class="section-header mb-4 mt-5">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-music me-2"></i>Musikbakgrund
+                                </h4>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.musical_experience.label(class="form-label fw-bold") }}
+                                {{ form.musical_experience(class="form-control", rows="4") }}
+                                <small class="form-text text-muted">Berätta gärna om tidigare musikundervisning, instrument, körsång eller andra musikaliska erfarenheter.</small>
+                                <div class="invalid-feedback">
+                                    {% for error in form.musical_experience.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.motivation.label(class="form-label fw-bold") }}
+                                {{ form.motivation(class="form-control", rows="4") }}
+                                <small class="form-text text-muted">Berätta varför eleven vill gå i musikklass och vad hen hoppas få ut av utbildningen.</small>
+                                <div class="invalid-feedback">
+                                    {% for error in form.motivation.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Practical Information -->
+                            <div class="section-header mb-4 mt-5">
+                                <h4 class="text-gold border-bottom pb-2">
+                                    <i class="fas fa-info-circle me-2"></i>Praktisk information
+                                </h4>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.has_transportation(class="form-check-input") }}
+                                    {{ form.has_transportation.label(class="form-check-label") }}
+                                </div>
+                                <small class="form-text text-muted">
+                                    Brunnsbo Musikklasser finns på Brunnsboskolan, Klassikergatan, 422 41 Hisings Backa.
+                                </small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.additional_info.label(class="form-label fw-bold") }}
+                                {{ form.additional_info(class="form-control", rows="3") }}
+                                <small class="form-text text-muted">
+                                    Är det något annat du vill att vi ska veta? Till exempel särskilda behov, 
+                                    allergier eller annan viktig information.
+                                </small>
+                                <div class="invalid-feedback">
+                                    {% for error in form.additional_info.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-gold btn-lg px-5">
+                                    <i class="fas fa-paper-plane me-2"></i>Skicka ansökan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Information -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center">
+                    <h3 class="mb-4">Ytterligare information</h3>
+                    <p class="lead mb-4">
+                        Du som bor utanför Göteborg kan också söka till musikklasserna!
+                    </p>
+                    <p class="mb-4">
+                        För mer information från Göteborgs stad, besök den officiella sidan.
+                    </p>
+                    <a href="https://goteborg.se/wps/portal/enhetssida/musikklasser-i-goteborgs-stad/brunnsboskolan" 
+                       target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-2"></i>Mer information från Göteborgs stad
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+    
+    // Format personnummer input
+    document.getElementById('student_personnummer').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 8) {
+            value = value.slice(0, 8) + '-' + value.slice(8, 12);
+        }
+        e.target.value = value;
+    });
+    
+    // Format postal code input
+    document.getElementById('postal_code').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 3) {
+            value = value.slice(0, 3) + ' ' + value.slice(3, 5);
+        }
+        e.target.value = value;
+    });
+</script>
+{% endblock %}
