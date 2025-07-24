@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Sidan hittades inte - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="error-content">
+                    <h1 class="display-1 text-gold fw-bold">404</h1>
+                    <h2 class="display-5 mb-4">Sidan hittades inte</h2>
+                    <p class="lead mb-4">
+                        Tyvärr kunde vi inte hitta sidan du letar efter. 
+                        Den kan ha flyttats eller raderas.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ url_for('index') }}" class="btn btn-gold btn-lg">
+                            <i class="fas fa-home me-2"></i>Tillbaka till startsidan
+                        </a>
+                        <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-envelope me-2"></i>Kontakta oss
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

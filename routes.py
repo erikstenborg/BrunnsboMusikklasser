@@ -37,23 +37,22 @@ def application():
     if form.validate_on_submit():
         try:
             # Create new application
-            new_application = Application(
-                student_name=form.student_name.data,
-                student_personnummer=form.student_personnummer.data,
-                parent_name=form.parent_name.data,
-                parent_email=form.parent_email.data,
-                parent_phone=form.parent_phone.data,
-                address=form.address.data,
-                postal_code=form.postal_code.data,
-                city=form.city.data,
-                current_school=form.current_school.data,
-                musical_experience=form.musical_experience.data,
-                motivation=form.motivation.data,
-                grade_applying_for=form.grade_applying_for.data,
-                has_transportation=form.has_transportation.data,
-                additional_info=form.additional_info.data,
-                application_year="2025/2026"
-            )
+            new_application = Application()
+            new_application.student_name = form.student_name.data
+            new_application.student_personnummer = form.student_personnummer.data
+            new_application.parent_name = form.parent_name.data
+            new_application.parent_email = form.parent_email.data
+            new_application.parent_phone = form.parent_phone.data
+            new_application.address = form.address.data
+            new_application.postal_code = form.postal_code.data
+            new_application.city = form.city.data
+            new_application.current_school = form.current_school.data
+            new_application.musical_experience = form.musical_experience.data
+            new_application.motivation = form.motivation.data
+            new_application.grade_applying_for = form.grade_applying_for.data
+            new_application.has_transportation = form.has_transportation.data
+            new_application.additional_info = form.additional_info.data
+            new_application.application_year = "2025/2026"
             
             db.session.add(new_application)
             db.session.commit()
@@ -62,7 +61,7 @@ def application():
             try:
                 msg = Message(
                     subject='Bekräftelse av ansökan till Brunnsbo Musikklasser',
-                    recipients=[form.parent_email.data],
+                    recipients=[form.parent_email.data] if form.parent_email.data else [],
                     body=f"""
 Tack för din ansökan till Brunnsbo Musikklasser!
 
@@ -102,13 +101,12 @@ def contact():
     if form.validate_on_submit():
         try:
             # Save contact form submission
-            new_contact = Contact(
-                name=form.name.data,
-                email=form.email.data,
-                phone=form.phone.data,
-                subject=form.subject.data,
-                message=form.message.data
-            )
+            new_contact = Contact()
+            new_contact.name = form.name.data
+            new_contact.email = form.email.data
+            new_contact.phone = form.phone.data
+            new_contact.subject = form.subject.data
+            new_contact.message = form.message.data
             
             db.session.add(new_contact)
             db.session.commit()
