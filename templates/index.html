@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}Hem - Brunnsbo Musikklasser{% endblock %}
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/sv_SE/sdk.js#xfbml=1&version=v23.0"></script>
 
 {% block content %}
 <!-- Hero Section -->
@@ -11,7 +13,7 @@
                 <div class="hero-content">
                     <h1 class="display-4 fw-bold mb-4">Välkommen till Brunnsbo Musikklasser</h1>
                     <p class="lead mb-4">
-                        Musikklasser för barn i Göteborgsområdet med möjlighet att utveckla sitt musikintresse 
+                        Brunnsbo Musikklasser ger barn i Göteborgsområdet möjlighet att utveckla sitt musikintresse 
                         och bygga en grund för fortsatt musicerande resten av livet.
                     </p>
                     <div class="hero-buttons">
@@ -220,6 +222,12 @@
                         </a>
                     </div>
                 </div>
+            </div>
+            <!-- Facebook feed  (working?) -->
+            <div class="col-lg-6 mb-4">
+                <div class="social-embed-container">
+            <div class="fb-page" data-href="https://www.facebook.com/BrunnsboMusikklasser/" data-tabs="timeline" data-width="500" data-height="1000" data-small-header="true" data-adapt-container-width="true" data-hide-cover="true" data-show-facepile="true"><blockquote cite="https://www.facebook.com/BrunnsboMusikklasser/" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/BrunnsboMusikklasser/">Brunnsbo Musikklasser</a></blockquote></div>
+            </div>
             </div>
         </div>
     </div>
