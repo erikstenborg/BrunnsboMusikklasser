@@ -245,22 +245,35 @@
         // Facebook SDK will handle the fb-page elements automatically
         // Instagram embeds will be processed by the Instagram embed script
         
-        // Optional: Handle loading states or fallbacks
+        // Force Facebook widget to be responsive after loading
         setTimeout(function() {
-            // Check if social media widgets loaded properly
             const fbElements = document.querySelectorAll('.fb-page');
-            const instagramElements = document.querySelectorAll('.instagram-media');
             
             fbElements.forEach(function(element) {
-                if (!element.querySelector('iframe')) {
+                const iframe = element.querySelector('iframe');
+                if (iframe) {
+                    // Force the iframe to be responsive
+                    iframe.style.width = '100%';
+                    iframe.style.maxWidth = '100%';
+                    
+                    // Also update the parent span if it exists
+                    const parentSpan = iframe.parentElement;
+                    if (parentSpan && parentSpan.tagName === 'SPAN') {
+                        parentSpan.style.width = '100%';
+                        parentSpan.style.maxWidth = '100%';
+                    }
+                } else {
                     console.log('Facebook widget may not have loaded properly');
                 }
             });
-            
-            instagramElements.forEach(function(element) {
-                if (!element.querySelector('iframe')) {
-                    console.log('Instagram widget may not have loaded properly');
-                }
+        }, 3000);
+        
+        // Additional check after more time has passed
+        setTimeout(function() {
+            const fbIframes = document.querySelectorAll('.facebook-embed iframe');
+            fbIframes.forEach(function(iframe) {
+                iframe.style.width = '100%';
+                iframe.style.maxWidth = '100%';
             });
         }, 5000);
     });

@@ -265,15 +265,40 @@ h1, h2, h3, h4, h5, h6 {
 .facebook-embed {
     width: 100%;
     overflow: hidden;
+    align-content: center;
 }
 
 .fb-page {
     width: 100% !important;
+    max-width: 100% !important;
 }
 
 .fb-page span,
 .fb-page iframe {
     width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Force Facebook widget to be responsive */
+.facebook-embed .fb-page > span {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.facebook-embed .fb-page iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Additional Facebook responsiveness */
+.fb-page[data-adapt-container-width="true"] {
+    width: 100% !important;
+}
+
+.fb-page[data-adapt-container-width="true"] > span,
+.fb-page[data-adapt-container-width="true"] iframe {
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Footer */
