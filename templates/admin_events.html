@@ -43,8 +43,7 @@
                         </td>
                         <td>
                             {{ event.event_date.strftime('%Y-%m-%d %H:%M') }}
-                            {% set now = moment.utcnow() if moment else datetime.utcnow() %}
-                            {% if event.event_date > now %}
+                            {% if event.event_date > moment().utcnow() %}
                                 <span class="badge bg-success ms-1">Kommande</span>
                             {% else %}
                                 <span class="badge bg-secondary ms-1">Passerat</span>

@@ -6,6 +6,15 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 
 ## Recent Changes
 
+**2025-07-29**: 
+- Added comprehensive event management system with public events page (/evenemang) and admin interface
+- Created admin user authentication system with database table (AdminUser model)
+- Implemented protected admin routes for event creation, editing, and deletion
+- Added Flask-Login integration for session management
+- Created admin login page (/admin/login) and event management dashboard (/admin/events)
+- Set up initial admin user (username: admin, password: admin123) and sample events
+- Added "Evenemang" navigation link to main menu
+
 **2025-07-24**: 
 - Replaced SVG logo with 40th anniversary GIF logo throughout the website
 - Removed "Hedersuppdrag från Hans Majestät Konungen" and "Vi älskar att sjunga all sorts musik!" sections from homepage for cleaner layout

@@ -155,10 +155,13 @@ def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
 
-# Context processor to make current year available in all templates
+# Context processor to make current year and datetime available in all templates
 @app.context_processor
 def inject_current_year():
-    return {'current_year': datetime.now().year}
+    return {
+        'current_year': datetime.now().year,
+        'moment': lambda: datetime
+    }
 
 @app.route('/evenemang')
 def events():
