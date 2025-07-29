@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initNavigation();
     initScrollEffects();
     initFormValidation();
-    initSocialFeeds();
     initImageLazyLoading();
 });
 
@@ -143,84 +142,8 @@ function initFormValidation() {
     }
 }
 
-// Social media feeds
-function initSocialFeeds() {
-    loadInstagramFeed();
-    loadFacebookFeed();
-}
-
-function loadInstagramFeed() {
-    const instagramContainer = document.getElementById('instagram-feed');
-    if (!instagramContainer) return;
-    
-    // Simulate Instagram feed loading
-    setTimeout(() => {
-        instagramContainer.innerHTML = `
-            <div class="text-center p-4">
-                <div class="row">
-                    <div class="col-6 mb-3">
-                        <div class="instagram-post bg-light rounded p-3" style="aspect-ratio: 1;">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="bg-gold rounded-circle me-2" style="width: 30px; height: 30px;"></div>
-                                <small class="fw-bold">brunnsbo_musikklasser</small>
-                            </div>
-                            <div class="bg-secondary rounded mb-2" style="height: 80px;"></div>
-                            <small class="text-muted">Senaste inlägget från våra musikelever...</small>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <div class="instagram-post bg-light rounded p-3" style="aspect-ratio: 1;">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="bg-gold rounded-circle me-2" style="width: 30px; height: 30px;"></div>
-                                <small class="fw-bold">brunnsbo_musikklasser</small>
-                            </div>
-                            <div class="bg-secondary rounded mb-2" style="height: 80px;"></div>
-                            <small class="text-muted">Från vår senaste konsert...</small>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-muted small mt-2">
-                    <i class="fas fa-info-circle me-1"></i>
-                    För att se vårt fullständiga Instagram-flöde, besök 
-                    <a href="https://www.instagram.com/brunnsbo_musikklasser/" target="_blank" class="text-decoration-none">
-                        @brunnsbo_musikklasser
-                    </a>
-                </p>
-            </div>
-        `;
-    }, 1500);
-}
-
-function loadFacebookFeed() {
-    const facebookContainer = document.getElementById('facebook-feed');
-    if (!facebookContainer) return;
-    
-    // Simulate Facebook feed loading
-    setTimeout(() => {
-        facebookContainer.innerHTML = `
-            <div class="text-center p-4">
-                <div class="facebook-post bg-light rounded p-3 mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-primary rounded-circle me-2" style="width: 30px; height: 30px;"></div>
-                        <small class="fw-bold">Brunnsbo Musikklasser</small>
-                    </div>
-                    <div class="text-start">
-                        <p class="small mb-2">Vilken fantastisk konsert vi hade igår! Tack till alla som kom och lyssnade på våra duktiga elever. 🎵</p>
-                        <div class="bg-secondary rounded mb-2" style="height: 120px;"></div>
-                        <small class="text-muted">För 2 dagar sedan</small>
-                    </div>
-                </div>
-                <p class="text-muted small">
-                    <i class="fas fa-info-circle me-1"></i>
-                    För att se vårt fullständiga Facebook-flöde, besök vår 
-                    <a href="https://www.facebook.com/BrunnsboMusikklasser/" target="_blank" class="text-decoration-none">
-                        Facebook-sida
-                    </a>
-                </p>
-            </div>
-        `;
-    }, 2000);
-}
+// Social media embeds are now handled by official SDKs
+// This section can be used for additional social media functionality if needed
 
 // Lazy loading for images
 function initImageLazyLoading() {
