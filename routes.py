@@ -160,7 +160,8 @@ def internal_error(error):
 def inject_current_year():
     return {
         'current_year': datetime.now().year,
-        'moment': lambda: datetime
+        'moment': lambda: datetime,
+        'instagram_access_token': os.environ.get('INSTAGRAM_ACCESS_TOKEN', '')
     }
 
 @app.route('/evenemang')
