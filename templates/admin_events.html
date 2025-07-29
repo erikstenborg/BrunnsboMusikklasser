@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Hantera Evenemang - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 text-gold">Hantera Evenemang</h1>
+            <p class="text-muted">Administrera kommande evenemang och konserter</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_event_new') }}" class="btn btn-gold">
+                <i class="fas fa-plus me-2"></i>Skapa nytt event
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-sign-out-alt me-2"></i>Logga ut
+            </a>
+        </div>
+    </div>
+
+    {% if events %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Datum</th>
+                        <th>Plats</th>
+                        <th>Status</th>
+                        <th>Skapad</th>
+                        <th>Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>
+                            <strong>{{ event.title }}</strong>
+                            {% if event.description %}
+                                <br><small class="text-muted">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ event.event_date.strftime('%Y-%m-%d %H:%M') }}
+                            {% set now = moment.utcnow() if moment else datetime.utcnow() %}
+                            {% if event.event_date > now %}
+                                <span class="badge bg-success ms-1">Kommande</span>
+                            {% else %}
+                                <span class="badge bg-secondary ms-1">Passerat</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.location or '-' }}</td>
+                        <td>
+                            {% if event.is_active %}
+                                <span class="badge bg-success">Aktivt</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inaktivt</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin_event_edit', event_id=event.id) }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete({{ event.id }}, '{{ event.title }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-calendar-times fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">Inga evenemang registrerade</h3>
+            <p class="text-muted mb-4">Börja med att skapa ditt första event.</p>
+            <a href="{{ url_for('admin_event_new') }}" class="btn btn-gold">
+                <i class="fas fa-plus me-2"></i>Skapa nytt event
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bekräfta borttagning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Är du säker på att du vill ta bort eventet <strong id="eventTitle"></strong>?</p>
+                <p class="text-muted">Denna åtgärd kan inte ångras.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Ta bort</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(eventId, eventTitle) {
+    document.getElementById('eventTitle').textContent = eventTitle;
+    document.getElementById('deleteForm').action = '/admin/events/delete/' + eventId;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}

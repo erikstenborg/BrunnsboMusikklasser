@@ -1,6 +1,8 @@
 from app import db
 from datetime import datetime
 from sqlalchemy import String, Text, DateTime, Boolean, Integer
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 class Event(db.Model):
     """Model for storing upcoming events and concerts"""
@@ -66,3 +68,26 @@ class Contact(db.Model):
     
     def __repr__(self):
         return f'<Contact {self.name} - {self.subject}>'
+
+class AdminUser(UserMixin, db.Model):
+    """Model for admin users who can manage events"""
+    __tablename__ = 'admin_users'
+    
+    id = db.Column(Integer, primary_key=True)
+    username = db.Column(String(64), unique=True, nullable=False)
+    email = db.Column(String(120), unique=True, nullable=False)
+    password_hash = db.Column(String(256), nullable=False)
+    active = db.Column(Boolean, default=True)
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+    last_login = db.Column(DateTime)
+    
+    def set_password(self, password):
+        """Set password hash"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check if provided password matches hash"""
+        return check_password_hash(self.password_hash, password)
+    
+    def __repr__(self):
+        return f'<AdminUser {self.username}>'

@@ -1,8 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_mail import Message
+from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
-from models import Event, Application, NewsPost, Contact
-from forms import ApplicationForm, ContactForm
+from models import Event, Application, NewsPost, Contact, AdminUser
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm
 from datetime import datetime, timedelta
 import logging
 
@@ -158,3 +159,127 @@ def internal_error(error):
 @app.context_processor
 def inject_current_year():
     return {'current_year': datetime.now().year}
+
+@app.route('/evenemang')
+def events():
+    """Page showing all upcoming events"""
+    upcoming_events = Event.query.filter(
+        Event.event_date > datetime.utcnow(),
+        Event.is_active == True
+    ).order_by(Event.event_date.asc()).all()
+    
+    return render_template('evenemang.html', events=upcoming_events)
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    """Admin login page"""
+    if current_user.is_authenticated:
+        return redirect(url_for('admin_events'))
+    
+    form = LoginForm()
+    
+    if form.validate_on_submit():
+        user = AdminUser.query.filter_by(username=form.username.data).first()
+        
+        if user and user.check_password(form.password.data) and user.active:
+            login_user(user)
+            user.last_login = datetime.utcnow()
+            db.session.commit()
+            
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('admin_events')
+            return redirect(next_page)
+        else:
+            flash('Felaktigt användarnamn eller lösenord.', 'error')
+    
+    return render_template('admin_login.html', form=form)
+
+@app.route('/admin/logout')
+@login_required
+def admin_logout():
+    """Admin logout"""
+    logout_user()
+    flash('Du har loggats ut.', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/admin/events')
+@login_required
+def admin_events():
+    """Admin page for managing events"""
+    events = Event.query.order_by(Event.event_date.desc()).all()
+    return render_template('admin_events.html', events=events)
+
+@app.route('/admin/events/new', methods=['GET', 'POST'])
+@login_required
+def admin_event_new():
+    """Create new event"""
+    form = EventForm()
+    
+    if form.validate_on_submit():
+        try:
+            new_event = Event()
+            new_event.title = form.title.data
+            new_event.description = form.description.data
+            new_event.event_date = form.event_date.data
+            new_event.location = form.location.data
+            new_event.ticket_url = form.ticket_url.data
+            new_event.is_active = form.is_active.data
+            
+            db.session.add(new_event)
+            db.session.commit()
+            
+            flash('Eventet har skapats!', 'success')
+            return redirect(url_for('admin_events'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error creating event: {str(e)}")
+            flash('Ett fel uppstod när eventet skulle skapas.', 'error')
+    
+    return render_template('admin_event_form.html', form=form, title='Skapa nytt event')
+
+@app.route('/admin/events/edit/<int:event_id>', methods=['GET', 'POST'])
+@login_required
+def admin_event_edit(event_id):
+    """Edit existing event"""
+    event = Event.query.get_or_404(event_id)
+    form = EventForm(obj=event)
+    
+    if form.validate_on_submit():
+        try:
+            event.title = form.title.data
+            event.description = form.description.data
+            event.event_date = form.event_date.data
+            event.location = form.location.data
+            event.ticket_url = form.ticket_url.data
+            event.is_active = form.is_active.data
+            
+            db.session.commit()
+            
+            flash('Eventet har uppdaterats!', 'success')
+            return redirect(url_for('admin_events'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error updating event: {str(e)}")
+            flash('Ett fel uppstod när eventet skulle uppdateras.', 'error')
+    
+    return render_template('admin_event_form.html', form=form, event=event, title='Redigera event')
+
+@app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
+@login_required
+def admin_event_delete(event_id):
+    """Delete event"""
+    event = Event.query.get_or_404(event_id)
+    
+    try:
+        db.session.delete(event)
+        db.session.commit()
+        flash('Eventet har tagits bort!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error deleting event: {str(e)}")
+        flash('Ett fel uppstod när eventet skulle tas bort.', 'error')
+    
+    return redirect(url_for('admin_events'))

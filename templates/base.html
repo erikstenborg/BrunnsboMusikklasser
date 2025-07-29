@@ -54,6 +54,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'events' %}active{% endif %}" href="{{ url_for('events') }}">
+                            <i class="fas fa-calendar me-1"></i>Evenemang
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'application' %}active{% endif %}" href="{{ url_for('application') }}">
                             <i class="fas fa-edit me-1"></i>Ansökan
                         </a>

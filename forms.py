@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, BooleanField, EmailField, TelField
-from wtforms.validators import DataRequired, Email, Length, Regexp
+from wtforms import StringField, TextAreaField, SelectField, BooleanField, EmailField, TelField, PasswordField, DateTimeLocalField
+from wtforms.validators import DataRequired, Email, Length, Regexp, URL, Optional
 
 class ApplicationForm(FlaskForm):
     """Form for student applications to music classes"""
@@ -105,3 +105,42 @@ class ContactForm(FlaskForm):
         DataRequired(message='Meddelande är obligatoriskt'),
         Length(min=20, max=2000, message='Meddelandet måste vara mellan 20 och 2000 tecken')
     ])
+
+class LoginForm(FlaskForm):
+    """Form for admin login"""
+    
+    username = StringField('Användarnamn', validators=[
+        DataRequired(message='Användarnamn är obligatoriskt'),
+        Length(min=3, max=64)
+    ])
+    
+    password = PasswordField('Lösenord', validators=[
+        DataRequired(message='Lösenord är obligatoriskt')
+    ])
+
+class EventForm(FlaskForm):
+    """Form for creating and editing events"""
+    
+    title = StringField('Eventtitel', validators=[
+        DataRequired(message='Titel är obligatorisk'),
+        Length(min=5, max=200, message='Titeln måste vara mellan 5 och 200 tecken')
+    ])
+    
+    description = TextAreaField('Beskrivning', validators=[
+        Length(max=2000, message='Beskrivningen får vara max 2000 tecken')
+    ])
+    
+    event_date = DateTimeLocalField('Datum och tid', validators=[
+        DataRequired(message='Datum och tid är obligatoriskt')
+    ], format='%Y-%m-%dT%H:%M')
+    
+    location = StringField('Plats', validators=[
+        Length(max=200, message='Platsen får vara max 200 tecken')
+    ])
+    
+    ticket_url = StringField('Länk för biljetter (valfritt)', validators=[
+        Optional(),
+        URL(message='Ange en giltig URL')
+    ])
+    
+    is_active = BooleanField('Aktivt event', default=True)

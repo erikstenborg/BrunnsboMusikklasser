@@ -3,6 +3,7 @@ import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
+from flask_login import LoginManager
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -14,6 +15,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 mail = Mail()
+login_manager = LoginManager()
 
 # create the app
 app = Flask(__name__)
@@ -38,11 +40,19 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'info@
 # initialize the app with extensions
 db.init_app(app)
 mail.init_app(app)
+login_manager.init_app(app)
+login_manager.login_view = 'admin_login'
+login_manager.login_message = 'Du måste logga in för att komma åt denna sida.'
 
 with app.app_context():
     # Import models and routes
     import models
     import routes
+    
+    # Set up user loader for Flask-Login
+    @login_manager.user_loader
+    def load_user(user_id):
+        return models.AdminUser.query.get(int(user_id))
     
     # Create all tables
     db.create_all()
