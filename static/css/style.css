@@ -257,14 +257,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Social media embeds */
+.social-embed-container {
+    min-height: 400px;
+}
+
 .instagram-embed,
 .facebook-embed {
-    min-height: 400px;
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+.fb-page {
+    width: 100% !important;
+}
+
+.fb-page span,
+.fb-page iframe {
+    width: 100% !important;
 }
 
 /* Footer */
