@@ -301,6 +301,38 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 100% !important;
 }
 
+/* Ultra-strong Facebook width enforcement */
+.facebook-embed {
+    width: 100% !important;
+}
+
+.facebook-embed * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* Target Facebook's specific elements */
+.facebook-embed .fb-page,
+.facebook-embed .fb-page > span,
+.facebook-embed .fb-page iframe,
+.facebook-embed iframe[src*="facebook"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* Force container adaptation */
+.social-embed-container .facebook-embed {
+    width: 100% !important;
+    display: block !important;
+}
+
+.social-embed-container .fb-page {
+    width: 100% !important;
+    display: block !important;
+}
+
 /* Force Facebook widget full width on desktop */
 @media (min-width: 768px) {
     .facebook-embed {

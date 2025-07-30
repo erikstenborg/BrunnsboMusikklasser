@@ -274,6 +274,16 @@
                 });
             }, 1000);
         });
+        
+        // Continuous monitoring to force Facebook width
+        setInterval(function() {
+            const fbElements = document.querySelectorAll('.facebook-embed .fb-page, .facebook-embed iframe, .facebook-embed span');
+            fbElements.forEach(function(element) {
+                element.style.width = '100%';
+                element.style.maxWidth = '100%';
+                element.style.minWidth = '100%';
+            });
+        }, 3000);
     });
     
     function initBeholdInstagramFeed() {
