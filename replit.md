@@ -17,6 +17,7 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - Implemented production-ready admin creation script (create_production_admin.py)
 - Added database export tools for development to production migration
 - Verified admin user creation and active/inactive status management working correctly
+- Removed insecure temporary admin creation route for better security
 
 **2025-07-29**: 
 - Added comprehensive event management system with public events page (/evenemang) and admin interface

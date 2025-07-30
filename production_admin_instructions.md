@@ -42,15 +42,13 @@ VALUES ('yourusername', 'your@email.com', 'HASHED_PASSWORD', true, NOW());
 
 **Note:** You'll need to generate the password hash using Werkzeug's `generate_password_hash()` function.
 
-### Method 4: Temporary Web Route (No Console Access)
+### Alternative Methods
 
-If you don't have console access to production:
-
-1. **Add the temporary route** from `create_admin_route.py` to your `routes.py`
-2. **Deploy the updated code** to production
-3. **Visit the URL**: `https://yoursite.com/create-admin-temp?secret=brunnsbo-admin-setup-2025`
-4. **Fill out the form** to create your admin user
-5. **IMPORTANT**: Remove the temporary route from your code and redeploy immediately after use
+**For platforms without console access:**
+- Contact your hosting provider for SSH access
+- Use hosting control panel terminals (if available)
+- Consider migrating to a platform with better admin access
+- Use database management tools to manually insert admin users (advanced users only)
 
 ## Production Environment Types
 
