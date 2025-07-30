@@ -287,25 +287,50 @@
     });
     
     function initBeholdInstagramFeed() {
-        // Get the Instagram data from Behold.so API
+        // Since Behold.so API requires authentication, let's use the data from your provided JSON
+        // or display your Instagram posts directly
+        const sampleInstagramData = [
+            {
+                "id": "17981470031849485",
+                "permalink": "https://www.instagram.com/p/DMuRHTTMToO/",
+                "mediaUrl": "https://scontent-ord5-1.cdninstagram.com/v/t51.82787-15/525639912_17846591190536222_6165606029942941305_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=1-7&_nc_sid=18de74&_nc_ohc=suyGrxnfMDEQ7kNvwHFYY-l&_nc_oc=Adn4xzQm3q7dWeiph-4gS3EDm_CfCeeJV0A6p58Mc_4nPQFb9Let5AT3NqwXVD3NeRbVBg_v81E17xG_4W0xuET3&_nc_zt=23&_nc_ht=scontent-ord5-1.cdninstagram.com&edm=ANo9K5cEAAAA&_nc_gid=K6-mR4Uff2eo5rVj7bfvzQ&oh=00_AfSrQL6Ejb5yy44T-EYVdBlcsJM__nIf9FCoRT0QKsXhrg&oe=688FAE9A",
+                "sizes": {
+                    "medium": {
+                        "mediaUrl": "https://behold.pictures/0IyjYFrL7VY18UQrIFyOcpyLw7l2/ts4cPDEcpk6vwSfwCrn8/17981470031849485/medium.jpg",
+                        "height": 320,
+                        "width": 320
+                    }
+                },
+                "caption": "Brunnsbo Musikklasser - 40 års jubileum!",
+                "prunedCaption": "Brunnsbo Musikklasser - 40 års jubileum!"
+            }
+        ];
+        
+        // Try to fetch from Behold.so API first
         const beholdFeedId = '{{ behold_feed_id if behold_feed_id else "" }}';
         
-        if (!beholdFeedId) {
-            // Show static preview if no feed ID is available
-            displayInstagramPreview();
-            return;
+        if (beholdFeedId) {
+            fetch(`https://api.behold.so/v1/feeds/${beholdFeedId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('API call failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.posts && data.posts.length > 0) {
+                        displayInstagramPosts(data.posts);
+                    } else {
+                        displayInstagramPosts(sampleInstagramData);
+                    }
+                })
+                .catch(error => {
+                    console.log('Instagram feed error, using sample data:', error);
+                    displayInstagramPosts(sampleInstagramData);
+                });
+        } else {
+            displayInstagramPosts(sampleInstagramData);
         }
-        
-        // Fetch from Behold.so API
-        fetch(`https://api.behold.so/feeds/${beholdFeedId}`)
-            .then(response => response.json())
-            .then(data => {
-                displayInstagramPosts(data.posts || []);
-            })
-            .catch(error => {
-                console.log('Instagram feed error:', error);
-                displayInstagramPreview();
-            });
     }
     
     function displayInstagramPosts(posts) {

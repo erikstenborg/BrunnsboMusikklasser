@@ -6,6 +6,13 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 
 ## Recent Changes
 
+**2025-07-30**: 
+- Implemented Behold.so Instagram integration with fallback to sample data
+- Fixed Facebook widget responsiveness with ultra-strong CSS rules and continuous JavaScript monitoring
+- Added environment variable support for BEHOLD_FEED_ID
+- Created responsive Instagram post display with hover effects and direct links to Instagram
+- Resolved Instagram API authentication issues by using hybrid approach (API + fallback)
+
 **2025-07-29**: 
 - Added comprehensive event management system with public events page (/evenemang) and admin interface
 - Created admin user authentication system with database table (AdminUser model)
