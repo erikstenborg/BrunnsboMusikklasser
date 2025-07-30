@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, BooleanField, EmailField, TelField, PasswordField, DateTimeLocalField
-from wtforms.validators import DataRequired, Email, Length, Regexp, URL, Optional
+from wtforms.validators import DataRequired, Email, Length, Regexp, URL, Optional, EqualTo
 
 class ApplicationForm(FlaskForm):
     """Form for student applications to music classes"""
@@ -117,6 +117,48 @@ class LoginForm(FlaskForm):
     password = PasswordField('Lösenord', validators=[
         DataRequired(message='Lösenord är obligatoriskt')
     ])
+
+class ChangePasswordForm(FlaskForm):
+    """Form for changing admin password"""
+    
+    current_password = PasswordField('Nuvarande lösenord', validators=[
+        DataRequired(message='Nuvarande lösenord är obligatoriskt')
+    ])
+    
+    new_password = PasswordField('Nytt lösenord', validators=[
+        DataRequired(message='Nytt lösenord är obligatoriskt'),
+        Length(min=8, message='Lösenordet måste vara minst 8 tecken långt')
+    ])
+    
+    confirm_password = PasswordField('Bekräfta nytt lösenord', validators=[
+        DataRequired(message='Bekräfta det nya lösenordet'),
+        EqualTo('new_password', message='Lösenorden matchar inte')
+    ])
+
+class CreateAdminForm(FlaskForm):
+    """Form for creating new admin users"""
+    
+    username = StringField('Användarnamn', validators=[
+        DataRequired(message='Användarnamn är obligatoriskt'),
+        Length(min=3, max=64, message='Användarnamn måste vara mellan 3 och 64 tecken')
+    ])
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+    
+    password = PasswordField('Lösenord', validators=[
+        DataRequired(message='Lösenord är obligatoriskt'),
+        Length(min=8, message='Lösenordet måste vara minst 8 tecken långt')
+    ])
+    
+    confirm_password = PasswordField('Bekräfta lösenord', validators=[
+        DataRequired(message='Bekräfta lösenordet'),
+        EqualTo('password', message='Lösenorden matchar inte')
+    ])
+    
+    active = BooleanField('Aktiv användare', default=True)
 
 class EventForm(FlaskForm):
     """Form for creating and editing events"""

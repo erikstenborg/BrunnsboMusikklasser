@@ -4,7 +4,7 @@ from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
 from models import Event, Application, NewsPost, Contact, AdminUser
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm
 from datetime import datetime, timedelta
 import logging
 
@@ -243,6 +243,66 @@ def admin_event_new():
             flash('Ett fel uppstod när eventet skulle skapas.', 'error')
     
     return render_template('admin_event_form.html', form=form, title='Skapa nytt event')
+
+@app.route('/admin/change-password', methods=['GET', 'POST'])
+@login_required
+def admin_change_password():
+    """Change admin password"""
+    form = ChangePasswordForm()
+    
+    if form.validate_on_submit():
+        if current_user.check_password(form.current_password.data):
+            current_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash('Lösenordet har ändrats!', 'success')
+            return redirect(url_for('admin_events'))
+        else:
+            flash('Nuvarande lösenord är felaktigt.', 'error')
+    
+    return render_template('admin_change_password.html', form=form)
+
+@app.route('/admin/create-user', methods=['GET', 'POST'])
+@login_required
+def admin_create_user():
+    """Create new admin user"""
+    form = CreateAdminForm()
+    
+    if form.validate_on_submit():
+        # Check if username or email already exists
+        existing_user = AdminUser.query.filter(
+            (AdminUser.username == form.username.data) | 
+            (AdminUser.email == form.email.data)
+        ).first()
+        
+        if existing_user:
+            flash('Användarnamn eller e-postadress finns redan.', 'error')
+        else:
+            try:
+                new_user = AdminUser()
+                new_user.username = form.username.data
+                new_user.email = form.email.data
+                new_user.set_password(form.password.data)
+                new_user.active = form.active.data
+                
+                db.session.add(new_user)
+                db.session.commit()
+                
+                flash(f'Administratörsanvändare "{form.username.data}" har skapats!', 'success')
+                return redirect(url_for('admin_users'))
+                
+            except Exception as e:
+                db.session.rollback()
+                logging.error(f"Error creating admin user: {str(e)}")
+                flash('Ett fel uppstod när användaren skulle skapas.', 'error')
+    
+    return render_template('admin_create_user.html', form=form)
+
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    """List all admin users"""
+    users = AdminUser.query.all()
+    return render_template('admin_users.html', users=users)
 
 @app.route('/admin/events/edit/<int:event_id>', methods=['GET', 'POST'])
 @login_required
