@@ -372,20 +372,18 @@
             return;
         }
         
-        let html = '<div class="row">';
+        let html = '<div class="instagram-grid">';
         posts.slice(0, 6).forEach(post => {
             const imageUrl = post.sizes?.medium?.mediaUrl || post.mediaUrl;
             const caption = post.caption || post.prunedCaption || '';
             const displayCaption = caption.length > 60 ? caption.substring(0, 60) + '...' : caption;
             
             html += `
-                <div class="col-md-4 col-sm-6 mb-3">
-                    <div class="instagram-post">
-                        <a href="${post.permalink}" target="_blank" rel="noopener">
-                            <img src="${imageUrl}" alt="${displayCaption}" class="img-fluid rounded" loading="lazy">
-                            ${displayCaption ? `<div class="instagram-overlay p-2"><small class="text-white">${displayCaption}</small></div>` : ''}
-                        </a>
-                    </div>
+                <div class="instagram-post">
+                    <a href="${post.permalink}" target="_blank" rel="noopener">
+                        <img src="${imageUrl}" alt="${displayCaption}" loading="lazy">
+                        ${displayCaption ? `<div class="instagram-overlay p-2"><small class="text-white">${displayCaption}</small></div>` : ''}
+                    </a>
                 </div>
             `;
         });
@@ -411,26 +409,20 @@
                     Se våra senaste bilder och videor från konserter, övningar och musikundervisning. 
                     Klicka på länken nedan för att besöka vår Instagram-profil.
                 </p>
-                <div class="row">
-                    <div class="col-4 mb-2">
-                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                            <div class="position-absolute top-50 start-50 translate-middle">
-                                <i class="fas fa-music text-white"></i>
-                            </div>
+                <div class="instagram-grid">
+                    <div class="instagram-post">
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-secondary rounded">
+                            <i class="fas fa-music text-white" style="font-size: 2rem;"></i>
                         </div>
                     </div>
-                    <div class="col-4 mb-2">
-                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                            <div class="position-absolute top-50 start-50 translate-middle">
-                                <i class="fas fa-microphone text-white"></i>
-                            </div>
+                    <div class="instagram-post">
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-secondary rounded">
+                            <i class="fas fa-microphone text-white" style="font-size: 2rem;"></i>
                         </div>
                     </div>
-                    <div class="col-4 mb-2">
-                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                            <div class="position-absolute top-50 start-50 translate-middle">
-                                <i class="fas fa-users text-white"></i>
-                            </div>
+                    <div class="instagram-post">
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-secondary rounded">
+                            <i class="fas fa-users text-white" style="font-size: 2rem;"></i>
                         </div>
                     </div>
                 </div>
