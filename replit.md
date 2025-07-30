@@ -13,9 +13,10 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - Created responsive Instagram post display with hover effects and direct links to Instagram
 - Resolved Instagram API authentication issues by using hybrid approach (API + fallback)
 - Added comprehensive admin password management system with self-service password changes
-- Created admin user management interface for creating new administrators
+- Created admin user management interface for creating new administrators  
 - Implemented production-ready admin creation script (create_production_admin.py)
 - Added database export tools for development to production migration
+- Verified admin user creation and active/inactive status management working correctly
 
 **2025-07-29**: 
 - Added comprehensive event management system with public events page (/evenemang) and admin interface

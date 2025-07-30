@@ -267,15 +267,7 @@ def admin_create_user():
     """Create new admin user"""
     form = CreateAdminForm()
     
-    # Debug form validation
-    if request.method == 'POST':
-        logging.debug(f"Form submitted. Valid: {form.validate()}")
-        if not form.validate():
-            logging.debug(f"Form errors: {form.errors}")
-    
     if form.validate_on_submit():
-        # Debug form data
-        logging.debug(f"Form data - Username: {form.username.data}, Email: {form.email.data}, Active: {form.active.data}")
         
         # Check if username or email already exists
         existing_user = AdminUser.query.filter(
@@ -302,9 +294,7 @@ def admin_create_user():
             except Exception as e:
                 db.session.rollback()
                 logging.error(f"Error creating admin user: {str(e)}")
-                import traceback
-                logging.error(f"Full traceback: {traceback.format_exc()}")
-                flash(f'Ett fel uppstod när användaren skulle skapas: {str(e)}', 'error')
+                flash('Ett fel uppstod när användaren skulle skapas.', 'error')
     
     return render_template('admin_create_user.html', form=form)
 
