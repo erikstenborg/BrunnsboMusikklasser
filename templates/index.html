@@ -150,53 +150,12 @@
                         <i class="fab fa-instagram text-gold me-2"></i>Instagram
                     </h4>
                     <div class="instagram-embed">
-                        <div id="instafeed-container" class="instagram-feed-container">
+                        <div id="behold-instagram-feed" class="instagram-feed-container">
                             <div class="text-center p-4">
                                 <div class="spinner-border text-gold mb-3" role="status">
                                     <span class="visually-hidden">Laddar Instagram-flöde...</span>
                                 </div>
                                 <p class="text-muted">Laddar senaste inlägg från @brunnsbo_musikklasser</p>
-                            </div>
-                        </div>
-                        <div id="instagram-error" class="d-none">
-                            <div class="bg-light rounded p-4 mb-3">
-                                <div class="d-flex align-items-center justify-content-center mb-3">
-                                    <i class="fab fa-instagram text-primary me-2" style="font-size: 2rem;"></i>
-                                    <div>
-                                        <h5 class="mb-0">@brunnsbo_musikklasser</h5>
-                                        <small class="text-muted">Följ oss på Instagram</small>
-                                    </div>
-                                </div>
-                                <p class="text-muted mb-3">
-                                    Instagram-flödet kunde inte laddas just nu. Besök vår Instagram-profil direkt för att se våra senaste bilder och videor från konserter, övningar och musikundervisning.
-                                </p>
-                                <div class="row">
-                                    <div class="col-4 mb-2">
-                                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                                            <div class="position-absolute top-50 start-50 translate-middle">
-                                                <i class="fas fa-music text-white"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-4 mb-2">
-                                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                                            <div class="position-absolute top-50 start-50 translate-middle">
-                                                <i class="fas fa-microphone text-white"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-4 mb-2">
-                                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
-                                            <div class="position-absolute top-50 start-50 translate-middle">
-                                                <i class="fas fa-users text-white"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Instagram API-nyckel krävs för att visa flödet
-                                </small>
                             </div>
                         </div>
                     </div>
@@ -248,14 +207,11 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Include Instafeed.js -->
-<script src="https://cdn.jsdelivr.net/gh/stevenschobert/instafeed.js@2.0.0/dist/instafeed.min.js"></script>
-
 <script>
     // Initialize social media embeds when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Instagram feed
-        initInstagramFeed();
+        // Initialize Instagram feed with Behold.so
+        initBeholdInstagramFeed();
         
         // Facebook SDK will handle the fb-page elements automatically
         
@@ -292,48 +248,105 @@
         }, 5000);
     });
     
-    function initInstagramFeed() {
-        // Check if we have an Instagram access token
-        const instagramAccessToken = '{{ instagram_access_token if instagram_access_token else "" }}';
+    function initBeholdInstagramFeed() {
+        // Get the Instagram data from Behold.so API
+        const beholdFeedId = '{{ behold_feed_id if behold_feed_id else "" }}';
         
-        if (!instagramAccessToken) {
-            // Show error message if no token is available
-            document.getElementById('instafeed-container').classList.add('d-none');
-            document.getElementById('instagram-error').classList.remove('d-none');
+        if (!beholdFeedId) {
+            // Show static preview if no feed ID is available
+            displayInstagramPreview();
             return;
         }
         
-        try {
-            const feed = new Instafeed({
-                accessToken: instagramAccessToken,
-                target: 'instafeed-container',
-                template: '<div class="col-md-4 mb-3"><div class="instagram-post"><a href="{{link}}" target="_blank" rel="noopener"><img src="{{image}}" alt="{{caption}}" class="img-fluid rounded" loading="lazy"><div class="instagram-overlay p-2"><small class="text-white">{{caption}}</small></div></a></div></div>',
-                limit: 6,
-                transform: function(item) {
-                    // Truncate long captions
-                    if (item.caption && item.caption.length > 100) {
-                        item.caption = item.caption.substring(0, 100) + '...';
-                    }
-                    return item;
-                },
-                success: function() {
-                    // Instagram feed loaded successfully
-                    console.log('Instagram feed loaded successfully');
-                },
-                error: function(message) {
-                    console.log('Instagram feed error:', message);
-                    // Show error message
-                    document.getElementById('instafeed-container').classList.add('d-none');
-                    document.getElementById('instagram-error').classList.remove('d-none');
-                }
+        // Fetch from Behold.so API
+        fetch(`https://api.behold.so/feeds/${beholdFeedId}`)
+            .then(response => response.json())
+            .then(data => {
+                displayInstagramPosts(data.posts || []);
+            })
+            .catch(error => {
+                console.log('Instagram feed error:', error);
+                displayInstagramPreview();
             });
-            
-            feed.run();
-        } catch (error) {
-            console.log('Instagram feed initialization error:', error);
-            document.getElementById('instafeed-container').classList.add('d-none');
-            document.getElementById('instagram-error').classList.remove('d-none');
+    }
+    
+    function displayInstagramPosts(posts) {
+        const container = document.getElementById('behold-instagram-feed');
+        if (!container) return;
+        
+        if (!posts.length) {
+            displayInstagramPreview();
+            return;
         }
+        
+        let html = '<div class="row">';
+        posts.slice(0, 6).forEach(post => {
+            const imageUrl = post.sizes?.medium?.mediaUrl || post.mediaUrl;
+            const caption = post.caption || post.prunedCaption || '';
+            const displayCaption = caption.length > 60 ? caption.substring(0, 60) + '...' : caption;
+            
+            html += `
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="instagram-post">
+                        <a href="${post.permalink}" target="_blank" rel="noopener">
+                            <img src="${imageUrl}" alt="${displayCaption}" class="img-fluid rounded" loading="lazy">
+                            ${displayCaption ? `<div class="instagram-overlay p-2"><small class="text-white">${displayCaption}</small></div>` : ''}
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        container.innerHTML = html;
+    }
+    
+    function displayInstagramPreview() {
+        const container = document.getElementById('behold-instagram-feed');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="bg-light rounded p-4 mb-3">
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                    <i class="fab fa-instagram text-primary me-2" style="font-size: 2rem;"></i>
+                    <div>
+                        <h5 class="mb-0">@brunnsbo_musikklasser</h5>
+                        <small class="text-muted">Följ oss på Instagram</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-3">
+                    Se våra senaste bilder och videor från konserter, övningar och musikundervisning. 
+                    Klicka på länken nedan för att besöka vår Instagram-profil.
+                </p>
+                <div class="row">
+                    <div class="col-4 mb-2">
+                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="fas fa-music text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-2">
+                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="fas fa-microphone text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-2">
+                        <div class="bg-secondary rounded" style="height: 100px; position: relative;">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Behold.so feed-ID krävs för att visa Instagram-inlägg
+                </small>
+            </div>
+        `;
     }
 </script>
 {% endblock %}

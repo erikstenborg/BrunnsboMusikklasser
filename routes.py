@@ -1,3 +1,4 @@
+import os
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
@@ -161,7 +162,7 @@ def inject_current_year():
     return {
         'current_year': datetime.now().year,
         'moment': lambda: datetime,
-        'instagram_access_token': os.environ.get('INSTAGRAM_ACCESS_TOKEN', '')
+        'behold_feed_id': os.environ.get('BEHOLD_FEED_ID', '')
     }
 
 @app.route('/evenemang')
