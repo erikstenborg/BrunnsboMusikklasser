@@ -180,7 +180,7 @@
                         <div class="fb-page" 
                              data-href="https://www.facebook.com/BrunnsboMusikklasser/" 
                              data-tabs="timeline" 
-                             data-width="" 
+                             data-width="500" 
                              data-height="600" 
                              data-small-header="true" 
                              data-adapt-container-width="true" 
@@ -244,8 +244,36 @@
             fbIframes.forEach(function(iframe) {
                 iframe.style.width = '100%';
                 iframe.style.maxWidth = '100%';
+                iframe.style.minWidth = '100%';
             });
         }, 5000);
+        
+        // Force Facebook container width on window resize
+        window.addEventListener('resize', function() {
+            setTimeout(function() {
+                const fbElements = document.querySelectorAll('.facebook-embed .fb-page');
+                const fbSpans = document.querySelectorAll('.facebook-embed .fb-page > span');
+                const fbIframes = document.querySelectorAll('.facebook-embed iframe');
+                
+                fbElements.forEach(function(element) {
+                    element.style.width = '100%';
+                    element.style.maxWidth = '100%';
+                    element.style.minWidth = '100%';
+                });
+                
+                fbSpans.forEach(function(span) {
+                    span.style.width = '100%';
+                    span.style.maxWidth = '100%';
+                    span.style.minWidth = '100%';
+                });
+                
+                fbIframes.forEach(function(iframe) {
+                    iframe.style.width = '100%';
+                    iframe.style.maxWidth = '100%';
+                    iframe.style.minWidth = '100%';
+                });
+            }, 1000);
+        });
     });
     
     function initBeholdInstagramFeed() {

@@ -301,6 +301,45 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 100% !important;
 }
 
+/* Force Facebook widget full width on desktop */
+@media (min-width: 768px) {
+    .facebook-embed {
+        width: 100% !important;
+    }
+    
+    .facebook-embed .fb-page {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .facebook-embed .fb-page > span {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+    }
+    
+    .facebook-embed .fb-page iframe {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Override Facebook's inline styles */
+    .facebook-embed .fb-page[style] {
+        width: 100% !important;
+    }
+    
+    .facebook-embed .fb-page > span[style] {
+        width: 100% !important;
+    }
+    
+    .facebook-embed .fb-page iframe[style] {
+        width: 100% !important;
+    }
+}
+
 /* Instagram feed styling */
 .instagram-feed-container {
     display: flex;
