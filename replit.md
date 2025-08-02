@@ -6,6 +6,12 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 
 ## Recent Changes
 
+**2025-08-02**:
+- Added date-conditional application reminder (visible only December 1st - January 15th) to both front page and application page
+- Implemented dynamic school year calculation based on current date (second half of year shows next school year, first half shows current school year)
+- Updated email confirmations to use dynamic school year
+- Currently showing school year 2026/2027 (since today is August 2025)
+
 **2025-07-30**: 
 - Implemented Behold.so Instagram integration with fallback to sample data
 - Fixed Facebook widget responsiveness with ultra-strong CSS rules and continuous JavaScript monitoring

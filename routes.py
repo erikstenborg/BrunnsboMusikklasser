@@ -40,10 +40,17 @@ def index():
         (dec_1_previous <= now <= jan_15_current)  # Dec 1 previous year to Jan 15 current year
     )
     
+    # Calculate dynamic school year for front page as well
+    if now.month >= 7:  # July-December: next school year
+        school_year = f"{current_year + 1}/{current_year + 2}"
+    else:  # January-June: current school year
+        school_year = f"{current_year}/{current_year + 1}"
+    
     return render_template('index.html', 
                          upcoming_events=upcoming_events,
                          latest_news=latest_news,
-                         show_application_reminder=show_application_reminder)
+                         show_application_reminder=show_application_reminder,
+                         school_year=school_year)
 
 @app.route('/om-oss')
 def about():
@@ -54,6 +61,32 @@ def about():
 def application():
     """Application page for music classes"""
     form = ApplicationForm()
+    
+    # Check if we're in application reminder period (Dec 1 - Jan 15)
+    now = datetime.now()
+    current_year = now.year
+    
+    # December 1st of current year
+    dec_1_current = datetime(current_year, 12, 1)
+    # January 15th of next year
+    jan_15_next = datetime(current_year + 1, 1, 15, 23, 59, 59)
+    
+    # Also check if we're in Jan 1-15 of current year (from previous year's Dec)
+    jan_15_current = datetime(current_year, 1, 15, 23, 59, 59)
+    dec_1_previous = datetime(current_year - 1, 12, 1)
+    
+    show_application_reminder = (
+        (dec_1_current <= now <= jan_15_next) or  # Dec 1 current year to Jan 15 next year
+        (dec_1_previous <= now <= jan_15_current)  # Dec 1 previous year to Jan 15 current year
+    )
+    
+    # Calculate dynamic school year based on current date
+    if now.month >= 7:  # July-December: next school year
+        school_year = f"{current_year + 1}/{current_year + 2}"
+        application_year = f"{current_year + 1}/{current_year + 2}"
+    else:  # January-June: current school year
+        school_year = f"{current_year}/{current_year + 1}"
+        application_year = f"{current_year}/{current_year + 1}"
     
     if form.validate_on_submit():
         try:
@@ -73,7 +106,7 @@ def application():
             new_application.grade_applying_for = form.grade_applying_for.data
             new_application.has_transportation = form.has_transportation.data
             new_application.additional_info = form.additional_info.data
-            new_application.application_year = "2025/2026"
+            new_application.application_year = application_year
             
             db.session.add(new_application)
             db.session.commit()
@@ -86,7 +119,7 @@ def application():
                     body=f"""
 Tack för din ansökan till Brunnsbo Musikklasser!
 
-Vi har mottagit ansökan för {form.student_name.data} till årskurs {form.grade_applying_for.data} för läsåret 2025/2026.
+Vi har mottagit ansökan för {form.student_name.data} till årskurs {form.grade_applying_for.data} för läsåret {application_year}.
 
 Ansökan följs av provsjungningar där eleverna prövas individuellt avseende musikalitet, gehör, sångröst, rytmsinne och tonsäkerhet.
 
@@ -112,7 +145,10 @@ Telefon: 031-366 86 50
             logging.error(f"Error saving application: {str(e)}")
             flash('Ett fel uppstod när ansökan skulle skickas. Försök igen.', 'error')
     
-    return render_template('ansokan.html', form=form)
+    return render_template('ansokan.html', 
+                         form=form,
+                         show_application_reminder=show_application_reminder,
+                         school_year=school_year)
 
 @app.route('/kontakt', methods=['GET', 'POST'])
 def contact():

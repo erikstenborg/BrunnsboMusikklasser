@@ -8,14 +8,15 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
-                <h1 class="display-4 fw-bold mb-3">Ansökan inför läsåret 2025/2026</h1>
+                <h1 class="display-4 fw-bold mb-3">Ansökan inför läsåret {{ school_year }}</h1>
                 <p class="lead">Din väg till en musikfylld skolgång börjar här</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Important Information -->
+<!-- Important Information (only visible Dec 1 - Jan 15) -->
+{% if show_application_reminder %}
 <section class="py-5 bg-warning-light">
     <div class="container">
         <div class="row">
@@ -34,6 +35,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- Process Information -->
 <section class="py-5">
@@ -96,7 +98,7 @@
                 <!-- YouTube Video Embed -->
                 <div class="ratio ratio-16x9 mb-4">
                     <iframe src="https://www.youtube.com/embed/8KLaNsPZyhw" 
-                            title="Ansökningsvideo för 2025/2026" 
+                            title="Ansökningsvideo för {{ school_year }}" 
                             allowfullscreen></iframe>
                 </div>
             </div>
