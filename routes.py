@@ -22,9 +22,28 @@ def index():
         NewsPost.is_published == True
     ).order_by(NewsPost.published_date.desc()).limit(3).all()
     
+    # Check if we're in application reminder period (Dec 1 - Jan 15)
+    now = datetime.now()
+    current_year = now.year
+    
+    # December 1st of current year
+    dec_1_current = datetime(current_year, 12, 1)
+    # January 15th of next year
+    jan_15_next = datetime(current_year + 1, 1, 15, 23, 59, 59)
+    
+    # Also check if we're in Jan 1-15 of current year (from previous year's Dec)
+    jan_15_current = datetime(current_year, 1, 15, 23, 59, 59)
+    dec_1_previous = datetime(current_year - 1, 12, 1)
+    
+    show_application_reminder = (
+        (dec_1_current <= now <= jan_15_next) or  # Dec 1 current year to Jan 15 next year
+        (dec_1_previous <= now <= jan_15_current)  # Dec 1 previous year to Jan 15 current year
+    )
+    
     return render_template('index.html', 
                          upcoming_events=upcoming_events,
-                         latest_news=latest_news)
+                         latest_news=latest_news,
+                         show_application_reminder=show_application_reminder)
 
 @app.route('/om-oss')
 def about():

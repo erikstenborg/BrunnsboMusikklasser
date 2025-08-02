@@ -17,13 +17,7 @@ pg_dump $DATABASE_URL > full_backup.sql
 psql $PRODUCTION_DATABASE_URL < production_import.sql
 ```
 
-## Method 2: Using SQL Export (Simple Method)
-
-1. Use the provided `database_export.sql` file
-2. Copy the content
-3. Run in your production database
-
-## Method 3: Using Python Script
+## Method 2: Using Python Script
 
 Run `python3 export_database.py` to generate custom SQL export statements.
 

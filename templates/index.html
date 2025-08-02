@@ -81,7 +81,8 @@
 </section>
 {% endif %}
 
-<!-- Application Reminder -->
+<!-- Application Reminder (only visible Dec 1 - Jan 15) -->
+{% if show_application_reminder %}
 <section class="py-5 bg-gradient-gold text-white">
     <div class="container text-center">
         <div class="row">
@@ -103,6 +104,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- About Preview -->
 <section class="py-5">
