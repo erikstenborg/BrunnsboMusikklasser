@@ -37,6 +37,8 @@ class Application(db.Model):
     additional_info = db.Column(Text)
     application_year = db.Column(String(9), nullable=False)  # e.g., "2025/2026"
     status = db.Column(String(20), default='submitted')  # submitted, reviewed, accepted, rejected
+    email_confirmed = db.Column(Boolean, default=False)  # Email confirmation status
+    email_confirmed_at = db.Column(DateTime)  # When email was confirmed
     created_at = db.Column(DateTime, default=datetime.utcnow)
     
     def __repr__(self):
@@ -68,6 +70,30 @@ class Contact(db.Model):
     
     def __repr__(self):
         return f'<Contact {self.name} - {self.subject}>'
+
+class ConfirmationCode(db.Model):
+    """Model for storing email confirmation codes"""
+    __tablename__ = 'confirmation_codes'
+    
+    id = db.Column(Integer, primary_key=True)
+    code = db.Column(String(64), nullable=False, unique=True, index=True)
+    email = db.Column(String(120), nullable=False)
+    purpose = db.Column(String(50), nullable=False)  # email_verification, password_reset, user_registration
+    used = db.Column(Boolean, default=False)
+    used_at = db.Column(DateTime)
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+    expires_at = db.Column(DateTime, nullable=False)
+    
+    def is_expired(self):
+        """Check if the confirmation code is expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    def is_valid(self):
+        """Check if the confirmation code is valid (not used and not expired)"""
+        return not self.used and not self.is_expired()
+    
+    def __repr__(self):
+        return f'<ConfirmationCode {self.code[:8]}... - {self.email}>'
 
 class AdminUser(UserMixin, db.Model):
     """Model for admin users who can manage events"""

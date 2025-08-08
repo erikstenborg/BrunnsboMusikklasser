@@ -3,8 +3,9 @@ from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
-from models import Event, Application, NewsPost, Contact, AdminUser
+from models import Event, Application, NewsPost, Contact, AdminUser, ConfirmationCode
 from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm
+from utils import create_confirmation_code, verify_confirmation_code
 from datetime import datetime, timedelta
 import logging
 
@@ -111,8 +112,16 @@ def application():
             db.session.add(new_application)
             db.session.commit()
             
-            # Send confirmation email
+            # Generate confirmation code
+            confirmation = create_confirmation_code(
+                email=form.parent_email.data,
+                purpose='email_verification',
+                expires_in_hours=24
+            )
+            
+            # Send confirmation email with verification link
             try:
+                confirmation_url = url_for('confirm_email', code=confirmation.code, _external=True)
                 msg = Message(
                     subject='Bekräftelse av ansökan till Brunnsbo Musikklasser',
                     recipients=[form.parent_email.data] if form.parent_email.data else [],
@@ -120,6 +129,11 @@ def application():
 Tack för din ansökan till Brunnsbo Musikklasser!
 
 Vi har mottagit ansökan för {form.student_name.data} till årskurs {form.grade_applying_for.data} för läsåret {application_year}.
+
+För att bekräfta din e-postadress, klicka på länken nedan:
+{confirmation_url}
+
+Denna länk är giltig i 24 timmar. Efter bekräftelse kommer din ansökan att behandlas.
 
 Ansökan följs av provsjungningar där eleverna prövas individuellt avseende musikalitet, gehör, sångröst, rytmsinne och tonsäkerhet.
 
@@ -137,7 +151,7 @@ Telefon: 031-366 86 50
             except Exception as e:
                 logging.error(f"Failed to send confirmation email: {str(e)}")
             
-            flash('Din ansökan har skickats! Du kommer att få en bekräftelse via e-post.', 'success')
+            flash('Din ansökan har skickats! Kontrollera din e-post och klicka på bekräftelselänken för att slutföra processen.', 'success')
             return redirect(url_for('application'))
             
         except Exception as e:
@@ -149,6 +163,39 @@ Telefon: 031-366 86 50
                          form=form,
                          show_application_reminder=show_application_reminder,
                          school_year=school_year)
+
+@app.route('/confirm-email/<code>')
+def confirm_email(code):
+    """Handle email confirmation for applications"""
+    try:
+        confirmation = verify_confirmation_code(code)
+        
+        if not confirmation:
+            flash('Ogiltig eller utgången bekräftelselänk.', 'error')
+            return redirect(url_for('index'))
+        
+        # Find application by email and mark as confirmed
+        application = Application.query.filter_by(
+            parent_email=confirmation.email,
+            email_confirmed=False
+        ).order_by(Application.created_at.desc()).first()
+        
+        if application:
+            application.email_confirmed = True
+            application.email_confirmed_at = datetime.utcnow()
+            db.session.commit()
+            
+            flash('Tack! Din e-postadress är nu bekräftad och ansökan kommer att behandlas.', 'success')
+            logging.info(f"Email confirmed for application: {application.student_name} ({confirmation.email})")
+        else:
+            flash('Ingen ansökan hittades för denna e-postadress.', 'warning')
+        
+        return redirect(url_for('index'))
+        
+    except Exception as e:
+        logging.error(f"Error confirming email: {str(e)}")
+        flash('Ett fel uppstod vid bekräftelse av e-post.', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/kontakt', methods=['GET', 'POST'])
 def contact():
