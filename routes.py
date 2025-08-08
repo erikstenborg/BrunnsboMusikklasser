@@ -344,7 +344,8 @@ def inject_current_year():
     return {
         'current_year': datetime.now().year,
         'moment': lambda: datetime,
-        'behold_feed_id': os.environ.get('BEHOLD_FEED_ID', '')
+        'behold_feed_id': os.environ.get('BEHOLD_FEED_ID', ''),
+        'current_user': current_user
     }
 
 @app.route('/evenemang')
