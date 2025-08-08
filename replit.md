@@ -6,6 +6,14 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 
 ## Recent Changes
 
+**2025-08-08**:
+- Implemented conditional admin navigation system with responsive design
+- Added admin dropdown menu for desktop with all admin functions (manage events, manage applications, administrators, change password, logout)
+- Added direct admin links for mobile devices to prevent dropdown conflicts
+- Added login option to main navigation when not authenticated as admin
+- Cleaned up redundant navigation links from individual admin pages for better user experience
+- Enhanced template context processor to make current_user available across all templates
+
 **2025-08-02**:
 - Added date-conditional application reminder (visible only December 1st - January 15th) to both front page and application page
 - Implemented dynamic school year calculation based on current date (second half of year shows next school year, first half shows current school year)
