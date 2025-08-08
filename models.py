@@ -36,9 +36,10 @@ class Application(db.Model):
     has_transportation = db.Column(Boolean, default=False)
     additional_info = db.Column(Text)
     application_year = db.Column(String(9), nullable=False)  # e.g., "2025/2026"
-    status = db.Column(String(20), default='submitted')  # submitted, reviewed, accepted, rejected
+    status = db.Column(String(30), default='applied')  # applied, email_confirmed, application_withdrawn, invited_for_audition, rejected, offered, accepted
     email_confirmed = db.Column(Boolean, default=False)  # Email confirmation status
     email_confirmed_at = db.Column(DateTime)  # When email was confirmed
+    admin_notes = db.Column(Text)  # Admin notes for the application
     created_at = db.Column(DateTime, default=datetime.utcnow)
     
     def __repr__(self):

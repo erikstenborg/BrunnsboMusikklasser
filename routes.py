@@ -4,7 +4,7 @@ from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
 from models import Event, Application, NewsPost, Contact, AdminUser, ConfirmationCode
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm
 from utils import create_confirmation_code, verify_confirmation_code
 from datetime import datetime, timedelta
 import logging
@@ -183,6 +183,7 @@ def confirm_email(code):
         if application:
             application.email_confirmed = True
             application.email_confirmed_at = datetime.utcnow()
+            application.status = 'email_confirmed'
             db.session.commit()
             
             flash('Tack! Din e-postadress är nu bekräftad och ansökan kommer att behandlas.', 'success')
@@ -196,6 +197,87 @@ def confirm_email(code):
         logging.error(f"Error confirming email: {str(e)}")
         flash('Ett fel uppstod vid bekräftelse av e-post.', 'error')
         return redirect(url_for('index'))
+
+@app.route('/admin/applications')
+@login_required
+def admin_applications():
+    """Admin page to view and manage applications"""
+    page = request.args.get('page', 1, type=int)
+    status_filter = request.args.get('status', 'all')
+    year_filter = request.args.get('year', 'all')
+    
+    # Build query with filters
+    query = Application.query
+    
+    if status_filter != 'all':
+        query = query.filter(Application.status == status_filter)
+    
+    if year_filter != 'all':
+        query = query.filter(Application.application_year == year_filter)
+    
+    # Get applications with pagination
+    applications = query.order_by(Application.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    
+    # Get unique years and status options for filters
+    available_years = db.session.query(Application.application_year.distinct()).all()
+    available_years = [year[0] for year in available_years]
+    
+    status_options = [
+        ('applied', 'Ansökt'),
+        ('email_confirmed', 'E-post bekräftad'),
+        ('application_withdrawn', 'Ansökan återkallad'),
+        ('invited_for_audition', 'Inbjuden till provsjungning'),
+        ('rejected', 'Avvisad'),
+        ('offered', 'Erbjuden plats'),
+        ('accepted', 'Antagen')
+    ]
+    
+    return render_template('admin_applications.html', 
+                         applications=applications,
+                         status_filter=status_filter,
+                         year_filter=year_filter,
+                         available_years=available_years,
+                         status_options=status_options)
+
+@app.route('/admin/applications/<int:application_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_application(application_id):
+    """Edit specific application"""
+    application = Application.query.get_or_404(application_id)
+    form = EditApplicationForm()
+    
+    if form.validate_on_submit():
+        # Update application
+        application.status = form.status.data
+        application.email_confirmed = form.email_confirmed.data
+        application.admin_notes = form.admin_notes.data
+        application.application_year = form.application_year.data
+        
+        # If status changed to email_confirmed, update timestamp
+        if form.status.data == 'email_confirmed' and not application.email_confirmed_at:
+            application.email_confirmed_at = datetime.utcnow()
+        
+        try:
+            db.session.commit()
+            flash('Ansökan har uppdaterats!', 'success')
+            logging.info(f"Application {application_id} updated by admin {current_user.username}")
+            return redirect(url_for('admin_applications'))
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error updating application: {str(e)}")
+            flash('Ett fel uppstod när ansökan skulle uppdateras.', 'error')
+    
+    # Pre-populate form with existing data
+    form.status.data = application.status
+    form.email_confirmed.data = application.email_confirmed
+    form.admin_notes.data = application.admin_notes
+    form.application_year.data = application.application_year
+    
+    return render_template('admin_edit_application.html', 
+                         form=form,
+                         application=application)
 
 @app.route('/kontakt', methods=['GET', 'POST'])
 def contact():

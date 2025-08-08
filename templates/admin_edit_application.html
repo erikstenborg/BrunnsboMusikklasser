@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Redigera ansökan - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Redigera ansökan - {{ application.student_name }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Application Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Elevens information</h5>
+                            <p><strong>Namn:</strong> {{ application.student_name }}</p>
+                            <p><strong>Personnummer:</strong> {{ application.student_personnummer }}</p>
+                            <p><strong>Årskurs som söks:</strong> {{ application.grade_applying_for }}</p>
+                            <p><strong>Nuvarande skola:</strong> {{ application.current_school or "Ej angivet" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Vårdnadshavares information</h5>
+                            <p><strong>Namn:</strong> {{ application.parent_name }}</p>
+                            <p><strong>E-post:</strong> {{ application.parent_email }}</p>
+                            <p><strong>Telefon:</strong> {{ application.parent_phone }}</p>
+                            <p><strong>Adress:</strong> {{ application.address }}, {{ application.postal_code }} {{ application.city }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Musikerfarenhet</h5>
+                            <p>{{ application.musical_experience or "Ingen angiven" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Motivation</h5>
+                            <p>{{ application.motivation or "Ingen angiven" }}</p>
+                        </div>
+                    </div>
+
+                    {% if application.additional_info %}
+                    <div class="mb-4">
+                        <h5>Övrig information</h5>
+                        <p>{{ application.additional_info }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <h5>Transport</h5>
+                            <p>{{ "Har transport" if application.has_transportation else "Har ej transport" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Ansökan inkom</h5>
+                            <p>{{ application.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>E-post bekräftad</h5>
+                            <p>
+                                {% if application.email_confirmed %}
+                                    <i class="fas fa-check-circle text-success"></i> Ja
+                                    {% if application.email_confirmed_at %}
+                                        <br><small>{{ application.email_confirmed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <i class="fas fa-times-circle text-danger"></i> Nej
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Edit Form -->
+                    <h5>Redigera ansökan</h5>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.status.label(class="form-label") }}
+                                {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.status.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.application_year.label(class="form-label") }}
+                                {{ form.application_year(class="form-control" + (" is-invalid" if form.application_year.errors else "")) }}
+                                {% if form.application_year.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.application_year.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.email_confirmed(class="form-check-input") }}
+                                {{ form.email_confirmed.label(class="form-check-label") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.admin_notes.label(class="form-label") }}
+                            {{ form.admin_notes(class="form-control" + (" is-invalid" if form.admin_notes.errors else ""), rows="4", placeholder="Administratörens anteckningar om ansökan...") }}
+                            {% if form.admin_notes.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.admin_notes.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin_applications') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Tillbaka
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Spara ändringar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

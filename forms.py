@@ -186,3 +186,34 @@ class EventForm(FlaskForm):
     ])
     
     is_active = BooleanField('Aktivt event', default=True)
+
+class EditApplicationForm(FlaskForm):
+    """Form for editing application details and status"""
+    
+    # Application status selection
+    status = SelectField('Status', choices=[
+        ('applied', 'Ansökt'),
+        ('email_confirmed', 'E-post bekräftad'),
+        ('application_withdrawn', 'Ansökan återkallad'),
+        ('invited_for_audition', 'Inbjuden till provsjungning'),
+        ('rejected', 'Avvisad'),
+        ('offered', 'Erbjuden plats'),
+        ('accepted', 'Antagen')
+    ], validators=[
+        DataRequired(message='Status är obligatorisk')
+    ])
+    
+    # Email confirmation status
+    email_confirmed = BooleanField('E-post bekräftad')
+    
+    # Admin notes (optional)
+    admin_notes = TextAreaField('Administratörens anteckningar', validators=[
+        Optional(),
+        Length(max=500, message='Anteckningar får vara max 500 tecken')
+    ])
+    
+    # Application year (editable for admin)
+    application_year = StringField('Ansökningsår', validators=[
+        DataRequired(message='Ansökningsår är obligatoriskt'),
+        Length(max=9, message='Format: YYYY/YYYY')
+    ])
