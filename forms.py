@@ -163,7 +163,7 @@ class CreateAdminForm(FlaskForm):
 class EventForm(FlaskForm):
     """Form for creating and editing events"""
     
-    title = StringField('Eventtitel', validators=[
+    title = StringField('Titel', validators=[
         DataRequired(message='Titel är obligatorisk'),
         Length(min=5, max=200, message='Titeln måste vara mellan 5 och 200 tecken')
     ])
@@ -185,7 +185,7 @@ class EventForm(FlaskForm):
         URL(message='Ange en giltig URL')
     ])
     
-    is_active = BooleanField('Aktivt event', default=True)
+    is_active = BooleanField('Aktivt evenemang', default=True)
 
 class EditApplicationForm(FlaskForm):
     """Form for editing application details and status"""

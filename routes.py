@@ -417,15 +417,15 @@ def admin_event_new():
             db.session.add(new_event)
             db.session.commit()
             
-            flash('Eventet har skapats!', 'success')
+            flash('Evenemanget har skapats!', 'success')
             return redirect(url_for('admin_events'))
             
         except Exception as e:
             db.session.rollback()
             logging.error(f"Error creating event: {str(e)}")
-            flash('Ett fel uppstod när eventet skulle skapas.', 'error')
+            flash('Ett fel uppstod när evenemanget skulle skapas.', 'error')
     
-    return render_template('admin_event_form.html', form=form, title='Skapa nytt event')
+    return render_template('admin_event_form.html', form=form, title='Skapa nytt evenemang')
 
 @app.route('/admin/change-password', methods=['GET', 'POST'])
 @login_required
@@ -506,15 +506,15 @@ def admin_event_edit(event_id):
             
             db.session.commit()
             
-            flash('Eventet har uppdaterats!', 'success')
+            flash('Evenemanget har uppdaterats!', 'success')
             return redirect(url_for('admin_events'))
             
         except Exception as e:
             db.session.rollback()
             logging.error(f"Error updating event: {str(e)}")
-            flash('Ett fel uppstod när eventet skulle uppdateras.', 'error')
+            flash('Ett fel uppstod när evenemanget skulle uppdateras.', 'error')
     
-    return render_template('admin_event_form.html', form=form, event=event, title='Redigera event')
+    return render_template('admin_event_form.html', form=form, event=event, title='Redigera evenemang')
 
 @app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
 @login_required
@@ -525,10 +525,10 @@ def admin_event_delete(event_id):
     try:
         db.session.delete(event)
         db.session.commit()
-        flash('Eventet har tagits bort!', 'success')
+        flash('Evenemanget har tagits bort!', 'success')
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error deleting event: {str(e)}")
-        flash('Ett fel uppstod när eventet skulle tas bort.', 'error')
+        flash('Ett fel uppstod när evenemanget skulle tas bort.', 'error')
     
     return redirect(url_for('admin_events'))

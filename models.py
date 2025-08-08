@@ -16,7 +16,7 @@ class Event(db.Model):
     created_at = db.Column(DateTime, default=datetime.utcnow)
     
     def __repr__(self):
-        return f'<Event {self.title}>'
+        return f'<Evenemang {self.title}>'
 
 class Application(db.Model):
     """Model for storing student applications"""
