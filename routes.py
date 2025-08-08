@@ -183,7 +183,6 @@ def confirm_email(code):
         if application:
             application.email_confirmed = True
             application.email_confirmed_at = datetime.utcnow()
-            application.status = 'email_confirmed'
             db.session.commit()
             
             flash('Tack! Din e-postadress är nu bekräftad och ansökan kommer att behandlas.', 'success')
@@ -226,7 +225,6 @@ def admin_applications():
     
     status_options = [
         ('applied', 'Ansökt'),
-        ('email_confirmed', 'E-post bekräftad'),
         ('application_withdrawn', 'Ansökan återkallad'),
         ('invited_for_audition', 'Inbjuden till provsjungning'),
         ('rejected', 'Avvisad'),

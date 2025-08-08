@@ -193,7 +193,6 @@ class EditApplicationForm(FlaskForm):
     # Application status selection
     status = SelectField('Status', choices=[
         ('applied', 'Ansökt'),
-        ('email_confirmed', 'E-post bekräftad'),
         ('application_withdrawn', 'Ansökan återkallad'),
         ('invited_for_audition', 'Inbjuden till provsjungning'),
         ('rejected', 'Avvisad'),
