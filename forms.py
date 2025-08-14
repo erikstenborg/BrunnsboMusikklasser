@@ -109,9 +109,9 @@ class ContactForm(FlaskForm):
 class LoginForm(FlaskForm):
     """Form for admin login"""
     
-    username = StringField('Användarnamn', validators=[
-        DataRequired(message='Användarnamn är obligatoriskt'),
-        Length(min=3, max=64)
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
     ])
     
     password = PasswordField('Lösenord', validators=[
@@ -226,24 +226,19 @@ class EditApplicationForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     """Form for creating new users with role assignment"""
     
-    username = StringField('Användarnamn', validators=[
-        DataRequired(message='Användarnamn är obligatoriskt'),
-        Length(min=3, max=64, message='Användarnamn måste vara mellan 3 och 64 tecken')
+    first_name = StringField('Förnamn', validators=[
+        DataRequired(message='Förnamn är obligatoriskt'),
+        Length(min=2, max=50, message='Förnamnet måste vara mellan 2 och 50 tecken')
+    ])
+    
+    last_name = StringField('Efternamn', validators=[
+        DataRequired(message='Efternamn är obligatoriskt'),
+        Length(min=2, max=50, message='Efternamnet måste vara mellan 2 och 50 tecken')
     ])
     
     email = EmailField('E-postadress', validators=[
         DataRequired(message='E-postadress är obligatorisk'),
         Email(message='Ange en giltig e-postadress')
-    ])
-    
-    first_name = StringField('Förnamn', validators=[
-        Optional(),
-        Length(max=100, message='Förnamnet får vara max 100 tecken')
-    ])
-    
-    last_name = StringField('Efternamn', validators=[
-        Optional(),
-        Length(max=100, message='Efternamnet får vara max 100 tecken')
     ])
     
     password = PasswordField('Lösenord', validators=[
@@ -311,9 +306,14 @@ class ResetPasswordForm(FlaskForm):
 class RegisterForm(FlaskForm):
     """Form for user registration with email verification"""
     
-    username = StringField('Användarnamn', validators=[
-        DataRequired(message='Användarnamn är obligatoriskt'),
-        Length(min=3, max=50, message='Användarnamnet måste vara mellan 3 och 50 tecken')
+    first_name = StringField('Förnamn', validators=[
+        DataRequired(message='Förnamn är obligatoriskt'),
+        Length(min=2, max=50, message='Förnamnet måste vara mellan 2 och 50 tecken')
+    ])
+    
+    last_name = StringField('Efternamn', validators=[
+        DataRequired(message='Efternamn är obligatoriskt'),
+        Length(min=2, max=50, message='Efternamnet måste vara mellan 2 och 50 tecken')
     ])
     
     email = EmailField('E-postadress', validators=[

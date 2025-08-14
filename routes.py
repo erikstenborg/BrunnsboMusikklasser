@@ -371,7 +371,7 @@ def admin_login():
     form = LoginForm()
     
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         
         if user and user.check_password(form.password.data) and user.active:
             login_user(user)
@@ -383,7 +383,7 @@ def admin_login():
                 next_page = url_for('admin_events')
             return redirect(next_page)
         else:
-            flash('Felaktigt användarnamn eller lösenord.', 'error')
+            flash('Felaktig e-postadress eller lösenord.', 'error')
     
     return render_template('admin_login.html', form=form)
 
@@ -537,7 +537,7 @@ def forgot_password():
         
         if user:
             # Create confirmation code
-            confirmation_code = create_confirmation_code(user.email)
+            confirmation_code = create_confirmation_code(user.email, 'password_reset')
             
             try:
                 # Send reset email
@@ -576,7 +576,7 @@ def reset_password():
     
     if form.validate_on_submit():
         # Verify confirmation code
-        if verify_confirmation_code(form.email.data, form.confirmation_code.data):
+        if verify_confirmation_code(form.email.data, form.confirmation_code.data, 'password_reset'):
             user = User.query.filter_by(email=form.email.data).first()
             
             if user:
@@ -599,25 +599,20 @@ def register():
     form = RegisterForm()
     
     if form.validate_on_submit():
-        # Check if username or email already exists
-        existing_user = User.query.filter(
-            (User.username == form.username.data) | 
-            (User.email == form.email.data)
-        ).first()
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=form.email.data).first()
         
         if existing_user:
-            if existing_user.username == form.username.data:
-                flash('Användarnamnet är redan taget.', 'error')
-            if existing_user.email == form.email.data:
-                flash('E-postadressen är redan registrerad.', 'error')
+            flash('E-postadressen är redan registrerad.', 'error')
         else:
             try:
                 # Create confirmation code for email verification
-                confirmation_code = create_confirmation_code(form.email.data)
+                confirmation_code = create_confirmation_code(form.email.data, 'user_registration')
                 
                 # Store registration data in session temporarily
                 session['pending_registration'] = {
-                    'username': form.username.data,
+                    'first_name': form.first_name.data,
+                    'last_name': form.last_name.data,
                     'email': form.email.data,
                     'password': form.password.data,
                     'confirmation_code': confirmation_code
@@ -662,12 +657,13 @@ def verify_email():
         pending = session['pending_registration']
         
         if (form.email.data == pending['email'] and 
-            verify_confirmation_code(form.email.data, form.confirmation_code.data)):
+            verify_confirmation_code(form.email.data, form.confirmation_code.data, 'user_registration')):
             
             try:
                 # Create the user account
                 new_user = User()
-                new_user.username = pending['username']
+                new_user.first_name = pending['first_name']
+                new_user.last_name = pending['last_name']
                 new_user.email = pending['email']
                 new_user.set_password(pending['password'])
                 new_user.active = True
@@ -745,28 +741,24 @@ def admin_create_user():
     
     if form.validate_on_submit():
         
-        # Check if username or email already exists
-        existing_user = User.query.filter(
-            (User.username == form.username.data) | 
-            (User.email == form.email.data)
-        ).first()
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=form.email.data).first()
         
         if existing_user:
-            flash('Användarnamn eller e-postadress finns redan.', 'error')
+            flash('E-postadress finns redan.', 'error')
         else:
             try:
                 new_user = User()
-                new_user.username = form.username.data
-                new_user.email = form.email.data
                 new_user.first_name = form.first_name.data
                 new_user.last_name = form.last_name.data
+                new_user.email = form.email.data
                 new_user.set_password(form.password.data)
                 new_user.active = form.active.data
                 
                 db.session.add(new_user)
                 db.session.commit()
                 
-                flash(f'Administratörsanvändare "{form.username.data}" har skapats!', 'success')
+                flash(f'Användare "{form.first_name.data} {form.last_name.data}" har skapats!', 'success')
                 return redirect(url_for('admin_users'))
                 
             except Exception as e:

@@ -19,14 +19,23 @@
                         {{ form.hidden_tag() }}
                         
                         <div class="mb-3">
-                            {{ form.username.label(class="form-label") }}
-                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
-                            {% if form.username.errors %}
+                            {{ form.first_name.label(class="form-label") }}
+                            {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                            {% if form.first_name.errors %}
                                 <div class="invalid-feedback">
-                                    {{ form.username.errors[0] }}
+                                    {{ form.first_name.errors[0] }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">3-50 tecken, används för inloggning.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.last_name.label(class="form-label") }}
+                            {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.last_name.errors[0] }}
+                                </div>
+                            {% endif %}
                         </div>
                         
                         <div class="mb-3">

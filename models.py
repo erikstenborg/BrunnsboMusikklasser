@@ -114,10 +114,9 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(Integer, primary_key=True)
-    username = db.Column(String(64), unique=True, nullable=False)
+    first_name = db.Column(String(50), nullable=False)
+    last_name = db.Column(String(50), nullable=False)
     email = db.Column(String(120), unique=True, nullable=False)
-    first_name = db.Column(String(100))
-    last_name = db.Column(String(100))
     password_hash = db.Column(String(256), nullable=False)
     active = db.Column(Boolean, default=True)
     created_at = db.Column(DateTime, default=datetime.utcnow)
@@ -158,8 +157,18 @@ class User(UserMixin, db.Model):
         """Check if user is a parent"""
         return self.has_role('parent')
     
+    @property
+    def full_name(self):
+        """Get the user's full name"""
+        return f"{self.first_name} {self.last_name}"
+    
+    @property 
+    def username(self):
+        """Backwards compatibility property that returns full name"""
+        return self.full_name
+    
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.email} - {self.full_name}>'
 
 class Group(db.Model):
     """Model for user groups/roles"""
