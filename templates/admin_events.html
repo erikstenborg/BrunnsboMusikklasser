@@ -24,7 +24,7 @@
                         <th>Plats</th>
                         <th>Status</th>
                         <th>Skapad</th>
-                        <th>Åtgärder</th>
+                        <th width="140px">Åtgärder</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,10 +55,13 @@
                         <td>{{ event.created_at.strftime('%Y-%m-%d') }}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('admin_event_edit', event_id=event.id) }}" class="btn btn-outline-primary">
+                                <a href="{{ url_for('admin_event_tasks', event_id=event.id) }}" class="btn btn-outline-success" title="Hantera uppgifter">
+                                    <i class="fas fa-tasks"></i>
+                                </a>
+                                <a href="{{ url_for('admin_event_edit', event_id=event.id) }}" class="btn btn-outline-primary" title="Redigera evenemang">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete({{ event.id }}, '{{ event.title }}')">
+                                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete({{ event.id }}, '{{ event.title }}')" title="Ta bort evenemang">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>

@@ -523,7 +523,7 @@ def admin_create_task(event_id):
             db.session.commit()
             
             flash('Uppgift skapad!', 'success')
-            return redirect(url_for('admin_events'))
+            return redirect(url_for('admin_event_tasks', event_id=event_id))
             
         except Exception as e:
             db.session.rollback()
