@@ -13,6 +13,7 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **Template Cleanup**: Renamed admin_login.html to login.html and removed debug links for cleaner user experience
 - **Session Management**: Implemented dynamic session duration based on user preference with comprehensive logging
 - **Facebook Widget Optimization**: Completely removed special resize handling and continuous monitoring to eliminate WINCH signal spam in server logs
+- **WINCH Signal Investigation**: Determined that remaining WINCH signals originate from Replit workspace environment (window resizing) rather than application code
 - **Swedish Date Format Implementation**: Updated datetime input fields with Swedish locale attributes and format guidance (YYYY-MM-DD TT:MM)
 - **Browser Locale Compatibility**: Datetime inputs now respect browser's locale settings while maintaining proper data format validation
 - **Enhanced User Experience**: Added 5-minute step intervals and Swedish format hints for better datetime input usability  
