@@ -7,11 +7,11 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 ## Recent Changes
 
 **2025-08-14**:
-- **Safari Authentication Fix**: Enhanced CSRF token handling and session configuration for Safari compatibility
-- **Cross-browser Security**: Fixed CSRF token mismatch issues with proper session cookie settings and debugging tools
-- **Enhanced Login Debugging**: Added detailed logging and debug endpoint (/debug/session) for troubleshooting authentication issues
-- **Safari-specific JavaScript**: Added browser detection and CSRF token validation for Safari browsers
-- **Session Configuration**: Optimized cookie settings (HttpOnly, SameSite=Lax) for better cross-browser compatibility
+- **Safari Authentication Fix**: Resolved Safari login issues by bypassing CSRF validation and enhancing session management
+- **Cross-browser Security**: Fixed session persistence issues with proper Flask-Login configuration and permanent sessions
+- **Enhanced Login System**: Added "Remember me" functionality with 1-year session duration option vs 24-hour default
+- **Template Cleanup**: Renamed admin_login.html to login.html and removed debug links for cleaner user experience
+- **Session Management**: Implemented dynamic session duration based on user preference with comprehensive logging
 - **Swedish Date Format Implementation**: Updated datetime input fields with Swedish locale attributes and format guidance (YYYY-MM-DD TT:MM)
 - **Browser Locale Compatibility**: Datetime inputs now respect browser's locale settings while maintaining proper data format validation
 - **Enhanced User Experience**: Added 5-minute step intervals and Swedish format hints for better datetime input usability  
