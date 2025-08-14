@@ -30,9 +30,9 @@ app.config['SESSION_COOKIE_HTTPONLY'] = False  # Allow JavaScript access for deb
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests with proper referrer
 app.config['WTF_CSRF_SSL_STRICT'] = False  # Allow CSRF over HTTP for development
 app.config['SESSION_PERMANENT'] = True  # Make sessions permanent
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # 24 hour session lifetime
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Default 24 hour session lifetime
 app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # Disable default CSRF for debugging
-app.config['REMEMBER_COOKIE_DURATION'] = timedelta(hours=24)  # Remember me duration
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=365)  # Remember me duration: 1 year
 
 # configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "postgresql://localhost/brunnsbo_musikklasser")

@@ -421,13 +421,25 @@ def login():
                 logging.debug(f"Password check: {user.check_password(password)}")
             
             if user and user.check_password(password) and user.active:
-                # Use remember=True and set session as permanent
-                login_user(user, remember=True)
-                session.permanent = True
+                # Check if user wants to be remembered
+                remember_me = request.form.get('remember_me') == 'y'
+                login_user(user, remember=remember_me)
+                
+                if remember_me:
+                    # Set session for 1 year if remember me is checked
+                    session.permanent = True
+                    app.permanent_session_lifetime = timedelta(days=365)
+                else:
+                    # Set session for 24 hours for regular login
+                    session.permanent = True
+                    app.permanent_session_lifetime = timedelta(hours=24)
+                
                 session['user_id'] = str(user.id)
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-                logging.info(f"Successful login for user: {user.email}, session: {session}")
+                
+                duration_text = "1 år" if remember_me else "24 timmar"
+                logging.info(f"Successful login for user: {user.email}, remember_me: {remember_me}, session duration: {duration_text}")
                 
                 next_page = request.args.get('next')
                 if not next_page or not next_page.startswith('/'):
@@ -463,6 +475,8 @@ def debug_session():
         'session_permanent': session.permanent,
         'flask_login_session_keys': [k for k in session.keys() if k.startswith('_')],
         'session_contents': dict(session),
+        'remember_cookie_duration': str(app.config.get('REMEMBER_COOKIE_DURATION', 'Not set')),
+        'current_session_lifetime': str(app.permanent_session_lifetime),
     }
     
     return jsonify(debug_info)

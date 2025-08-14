@@ -28,7 +28,7 @@
                             {% endif %}
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-3">
                             {{ form.password.label(class="form-label") }}
                             {{ form.password(class="form-control") }}
                             {% if form.password.errors %}
@@ -38,6 +38,18 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.remember_me(class="form-check-input", id="remember_me") }}
+                                <label class="form-check-label" for="remember_me">
+                                    {{ form.remember_me.label.text }}
+                                </label>
+                                <div class="form-text text-muted small">
+                                    Håller dig inloggad i upp till ett år istället för 24 timmar
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="d-grid">

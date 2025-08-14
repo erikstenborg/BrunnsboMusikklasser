@@ -117,6 +117,8 @@ class LoginForm(FlaskForm):
     password = PasswordField('Lösenord', validators=[
         DataRequired(message='Lösenord är obligatoriskt')
     ])
+    
+    remember_me = BooleanField('Kom ihåg mig (1 år)')
 
 class ChangePasswordForm(FlaskForm):
     """Form for changing admin password"""
