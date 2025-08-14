@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Hantera uppgifter för {{ event.title }} - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5">
+                    <i class="fas fa-tasks me-3"></i>Hantera uppgifter
+                </h1>
+                <div>
+                    <a href="{{ url_for('admin_create_task', event_id=event.id) }}" class="btn btn-success me-2">
+                        <i class="fas fa-plus me-2"></i>Ny uppgift
+                    </a>
+                    <a href="{{ url_for('admin_events') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Tillbaka
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>{{ event.title }}
+                    </h5>
+                    <small>{{ event.event_date.strftime('%d %B %Y kl. %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    {% if event.location %}<p><strong>Plats:</strong> {{ event.location }}</p>{% endif %}
+                    {% if event.description %}<p><strong>Beskrivning:</strong> {{ event.description }}</p>{% endif %}
+                </div>
+            </div>
+            
+            {% if tasks %}
+                <div class="row">
+                    {% for task in tasks %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 {% if task.completed %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-header {% if task.completed %}bg-success text-white{% else %}bg-warning text-dark{% endif %}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">
+                                            {% if task.completed %}
+                                                <i class="fas fa-check-circle me-2"></i>
+                                            {% else %}
+                                                <i class="fas fa-clock me-2"></i>
+                                            {% endif %}
+                                            {{ task.title }}
+                                        </h6>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm {% if task.completed %}btn-outline-light{% else %}btn-outline-dark{% endif %} dropdown-toggle" 
+                                                    type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="{{ url_for('admin_edit_task', task_id=task.id) }}">
+                                                    <i class="fas fa-edit me-2"></i>Redigera
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form method="POST" action="{{ url_for('admin_delete_task', task_id=task.id) }}" class="d-inline">
+                                                        <button type="submit" class="dropdown-item text-danger border-0 bg-transparent"
+                                                                onclick="return confirm('Är du säker på att du vill ta bort denna uppgift?')">
+                                                            <i class="fas fa-trash me-2"></i>Ta bort
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    {% if task.description %}
+                                        <p class="card-text">{{ task.description }}</p>
+                                    {% endif %}
+                                    
+                                    {% if task.assigned_to %}
+                                        <div class="alert alert-info py-2">
+                                            <small><i class="fas fa-user me-1"></i>Tilldelad till {{ task.assigned_to.first_name }} {{ task.assigned_to.last_name }}</small>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-secondary py-2">
+                                            <small><i class="fas fa-users me-1"></i>Allmän uppgift</small>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if task.completed %}
+                                        <div class="text-success">
+                                            <small>
+                                                <i class="fas fa-check me-1"></i>Slutförd {{ task.completed_at.strftime('%d/%m %Y %H:%M') }}
+                                                {% if task.completed_by %}
+                                                    av {{ task.completed_by.first_name }} {{ task.completed_by.last_name }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-muted">
+                                            <small><i class="fas fa-hourglass-half me-1"></i>Väntar på slutförande</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <small class="text-muted">
+                                        Skapad: {{ task.created_at.strftime('%d/%m %Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success me-2">{{ tasks|selectattr('completed')|list|length }} slutförda</span>
+                            <span class="badge bg-warning">{{ tasks|rejectattr('completed')|list|length }} väntande</span>
+                        </div>
+                        <a href="{{ url_for('admin_create_task', event_id=event.id) }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Lägg till uppgift
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tasks fa-4x text-muted mb-3"></i>
+                    <h3 class="text-muted">Inga uppgifter</h3>
+                    <p class="text-muted">Det finns inga uppgifter kopplade till detta evenemang.</p>
+                    <a href="{{ url_for('admin_create_task', event_id=event.id) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Skapa första uppgiften
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -363,13 +363,25 @@ def inject_current_year():
 
 @app.route('/evenemang')
 def events():
-    """Page showing all upcoming events"""
+    """Page showing all upcoming events with parent/admin info when logged in"""
     upcoming_events = Event.query.filter(
         Event.event_date > datetime.utcnow(),
         Event.is_active == True
     ).order_by(Event.event_date.asc()).all()
     
-    return render_template('evenemang.html', events=upcoming_events)
+    # Check if user has parent access or admin access for enhanced event information
+    show_parent_info = False
+    show_admin_info = False
+    
+    if current_user.is_authenticated:
+        user_groups = [group.name for group in current_user.groups]
+        show_parent_info = 'parent' in user_groups or 'admin' in user_groups
+        show_admin_info = 'admin' in user_groups or 'event_manager' in user_groups
+    
+    return render_template('evenemang.html', 
+                         events=upcoming_events,
+                         show_parent_info=show_parent_info,
+                         show_admin_info=show_admin_info)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -454,17 +466,7 @@ def user_profile():
     """User profile page for all authenticated users"""
     return render_template('user_profile.html')
 
-# Parent-specific routes
-@app.route('/events/parent-info')
-@parent_access_required
-def events_parent_info():
-    """Parent-specific view of events with additional information"""
-    upcoming_events = Event.query.filter(
-        Event.event_date > datetime.utcnow(),
-        Event.is_active == True
-    ).order_by(Event.event_date.asc()).all()
-    
-    return render_template('events_parent_info.html', events=upcoming_events)
+# Remove the separate parent info route since we integrated it into the main events page
 
 @app.route('/events/<int:event_id>/tasks')
 @parent_access_required
@@ -503,7 +505,7 @@ def admin_create_task(event_id):
     if parent_group:
         choices = [('', 'Ingen tilldelning')]
         choices.extend([
-            (str(user.id), f"{user.username} ({user.email})") 
+            (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
             for user in parent_group.users if user.active
         ])
         form.assigned_to_user_id.choices = choices
@@ -538,6 +540,67 @@ def admin_event_tasks(event_id):
     tasks = EventTask.query.filter_by(event_id=event_id).all()
     
     return render_template('admin_event_tasks.html', event=event, tasks=tasks)
+
+@app.route('/admin/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
+@event_manager_required
+def admin_edit_task(task_id):
+    """Edit an existing task"""
+    task = EventTask.query.get_or_404(task_id)
+    event = task.event
+    form = EventTaskForm(obj=task)
+    
+    # Populate user choices for assignment (parents only)
+    parent_group = Group.query.filter_by(name='parent').first()
+    if parent_group:
+        choices = [('', 'Ingen tilldelning')]
+        choices.extend([
+            (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
+            for user in parent_group.users if user.active
+        ])
+        form.assigned_to_user_id.choices = choices
+        
+        # Set current assignment if exists
+        if task.assigned_to_user_id:
+            form.assigned_to_user_id.data = str(task.assigned_to_user_id)
+    
+    if form.validate_on_submit():
+        try:
+            task.title = form.title.data
+            task.description = form.description.data
+            if form.assigned_to_user_id.data:
+                task.assigned_to_user_id = form.assigned_to_user_id.data
+            else:
+                task.assigned_to_user_id = None
+            
+            db.session.commit()
+            
+            flash('Uppgift uppdaterad!', 'success')
+            return redirect(url_for('admin_event_tasks', event_id=event.id))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error updating task: {str(e)}")
+            flash('Ett fel uppstod när uppgiften skulle uppdateras.', 'error')
+    
+    return render_template('admin_task_form.html', form=form, event=event, task=task, title='Redigera uppgift')
+
+@app.route('/admin/tasks/<int:task_id>/delete', methods=['POST'])
+@event_manager_required
+def admin_delete_task(task_id):
+    """Delete a task"""
+    task = EventTask.query.get_or_404(task_id)
+    event_id = task.event_id
+    
+    try:
+        db.session.delete(task)
+        db.session.commit()
+        flash('Uppgift borttagen!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error deleting task: {str(e)}")
+        flash('Ett fel uppstod när uppgiften skulle tas bort.', 'error')
+    
+    return redirect(url_for('admin_event_tasks', event_id=event_id))
 
 # Password reset routes
 @app.route('/forgot-password', methods=['GET', 'POST'])

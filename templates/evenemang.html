@@ -41,6 +41,38 @@
                                 <p class="card-text">{{ event.description }}</p>
                                 {% endif %}
                                 
+                                {% if event.ticket_info %}
+                                <div class="alert alert-info py-2 mb-3">
+                                    <i class="fas fa-ticket-alt me-2"></i>
+                                    <strong>Biljettinfo:</strong> {{ event.ticket_info }}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Parent/Admin specific information -->
+                                {% if show_parent_info and event.tasks %}
+                                <div class="alert alert-success py-2 mb-3">
+                                    <i class="fas fa-tasks me-2"></i>
+                                    <strong>Uppgifter:</strong> {{ event.tasks|length }} uppgifter tillgängliga
+                                    <a href="{{ url_for('event_tasks', event_id=event.id) }}" class="btn btn-sm btn-outline-success ms-2">
+                                        Visa uppgifter
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                {% if show_admin_info %}
+                                <div class="mt-3 p-2 bg-light rounded">
+                                    <small class="text-muted">
+                                        <i class="fas fa-cog me-1"></i>
+                                        <strong>Admin:</strong>
+                                        <a href="{{ url_for('admin_edit_event', event_id=event.id) }}" class="btn btn-sm btn-outline-primary ms-1">Redigera</a>
+                                        <a href="{{ url_for('admin_create_task', event_id=event.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Ny uppgift</a>
+                                        {% if event.tasks %}
+                                            <a href="{{ url_for('admin_event_tasks', event_id=event.id) }}" class="btn btn-sm btn-outline-info ms-1">Hantera uppgifter ({{ event.tasks|length }})</a>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                                
                                 {% if event.ticket_url %}
                                 <div class="mt-auto">
                                     <a href="{{ event.ticket_url }}" class="btn btn-gold" target="_blank">
