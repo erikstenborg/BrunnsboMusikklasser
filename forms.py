@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, BooleanField, EmailField, TelField, PasswordField, DateTimeLocalField
-from wtforms.validators import DataRequired, Email, Length, Regexp, URL, Optional, EqualTo
+from wtforms import StringField, TextAreaField, SelectField, BooleanField, EmailField, TelField, PasswordField, DateTimeLocalField, IntegerField
+from wtforms.validators import DataRequired, Email, Length, Regexp, URL, Optional, EqualTo, NumberRange
 
 class ApplicationForm(FlaskForm):
     """Form for student applications to music classes"""
@@ -271,6 +271,17 @@ class EventTaskForm(FlaskForm):
                                     choices=[], 
                                     coerce=lambda x: int(x) if x else None,
                                     validators=[Optional()])
+    
+    # Due date offset fields
+    due_offset_days = IntegerField('Förfaller (dagar före/efter evenemanget)', validators=[
+        Optional(),
+        NumberRange(min=-365, max=365, message='Ange ett värde mellan -365 och 365 dagar')
+    ], description='Negativt tal = dagar före evenemanget, positivt = dagar efter')
+    
+    due_offset_hours = IntegerField('Ytterligare timmar', validators=[
+        Optional(),
+        NumberRange(min=-24, max=24, message='Ange ett värde mellan -24 och 24 timmar')
+    ], default=0)
 
 class ForgotPasswordForm(FlaskForm):
     """Form for requesting password reset"""

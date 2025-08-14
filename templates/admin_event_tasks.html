@@ -85,6 +85,26 @@
                                         </div>
                                     {% endif %}
                                     
+                                    {% if task.due_date %}
+                                        <div class="alert {% if task.is_overdue %}alert-danger{% elif task.days_until_due is not none and task.days_until_due <= 3 %}alert-warning{% else %}alert-light{% endif %} py-2">
+                                            <small>
+                                                <i class="fas fa-clock me-1"></i>
+                                                Förfaller: {{ task.due_date.strftime('%d %B %Y kl. %H:%M') }}
+                                                {% if task.is_overdue %}
+                                                    <span class="text-danger fw-bold">(FÖRSENAD)</span>
+                                                {% elif task.days_until_due is not none %}
+                                                    {% if task.days_until_due == 0 %}
+                                                        <span class="text-warning fw-bold">(idag)</span>
+                                                    {% elif task.days_until_due == 1 %}
+                                                        <span class="text-info">(imorgon)</span>
+                                                    {% elif task.days_until_due <= 3 %}
+                                                        <span class="text-warning">({{ task.days_until_due }} dagar kvar)</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                    
                                     <!-- Task management controls for event managers -->
                                     <div class="mt-3">
                                         {% if not task.completed_at %}

@@ -199,10 +199,39 @@ class EventTask(db.Model):
     completed_by_user_id = db.Column(Integer, ForeignKey('users.id'))
     created_at = db.Column(DateTime, default=datetime.utcnow)
     
+    # Due date fields - offset from event date
+    due_offset_days = db.Column(Integer)  # Days before (-) or after (+) event
+    due_offset_hours = db.Column(Integer, default=0)  # Additional hours offset
+    
     # Relationships
     event = relationship('Event', back_populates='tasks')
     assigned_to = relationship('User', foreign_keys=[assigned_to_user_id])
     completed_by = relationship('User', foreign_keys=[completed_by_user_id])
+    
+    @property
+    def due_date(self):
+        """Calculate due date based on event date and offset"""
+        if self.due_offset_days is None or not self.event:
+            return None
+        
+        from datetime import timedelta
+        offset = timedelta(days=self.due_offset_days, hours=self.due_offset_hours)
+        return self.event.event_date + offset
+    
+    @property
+    def is_overdue(self):
+        """Check if task is overdue"""
+        if self.completed or not self.due_date:
+            return False
+        return datetime.utcnow() > self.due_date
+    
+    @property
+    def days_until_due(self):
+        """Calculate days until due (negative if overdue)"""
+        if not self.due_date:
+            return None
+        delta = self.due_date - datetime.utcnow()
+        return delta.days
     
     def __repr__(self):
         return f'<EventTask {self.title}>'

@@ -518,6 +518,10 @@ def admin_create_task(event_id):
             task.description = form.description.data
             if form.assigned_to_user_id.data:
                 task.assigned_to_user_id = form.assigned_to_user_id.data
+            # Set due date offset if provided
+            if form.due_offset_days.data is not None:
+                task.due_offset_days = form.due_offset_days.data
+                task.due_offset_hours = form.due_offset_hours.data or 0
             
             db.session.add(task)
             db.session.commit()
@@ -566,6 +570,10 @@ def admin_edit_task(task_id):
         # Set current assignment if exists
         if task.assigned_to_user_id:
             form.assigned_to_user_id.data = str(task.assigned_to_user_id)
+        
+        # Pre-populate due date offset fields
+        form.due_offset_days.data = task.due_offset_days
+        form.due_offset_hours.data = task.due_offset_hours
     
     if form.validate_on_submit():
         try:
@@ -575,6 +583,9 @@ def admin_edit_task(task_id):
                 task.assigned_to_user_id = form.assigned_to_user_id.data
             else:
                 task.assigned_to_user_id = None
+            # Update due date offset
+            task.due_offset_days = form.due_offset_days.data
+            task.due_offset_hours = form.due_offset_hours.data or 0
             
             db.session.commit()
             
