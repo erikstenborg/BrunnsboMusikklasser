@@ -809,16 +809,25 @@ def register():
                 # Create confirmation code for email verification
                 confirmation_code = create_confirmation_code(form.email.data, 'user_registration')
                 
-                # Store registration data in session temporarily
+                # Create user account immediately but mark as inactive until email verified
+                new_user = User()
+                new_user.first_name = form.first_name.data
+                new_user.last_name = form.last_name.data
+                new_user.email = form.email.data
+                new_user.set_password(form.password.data)
+                new_user.active = False  # Inactive until email verified
+                # Note: User model doesn't have email_verified field, using active status instead
+                
+                db.session.add(new_user)
+                db.session.commit()
+                
+                # Store minimal data in session for verification process
                 session['pending_registration'] = {
-                    'first_name': form.first_name.data,
-                    'last_name': form.last_name.data,
                     'email': form.email.data,
-                    'password': form.password.data,
-                    'confirmation_code': confirmation_code.code  # Store only the string, not the object.code  # Store only the string, not the object
+                    'user_id': new_user.id
                 }
                 
-                # Send verification email
+                # Send verification email  
                 msg = Message(
                     'Bekräfta din registrering - Brunnsbo Musikklasser',
                     recipients=[form.email.data]
@@ -852,19 +861,26 @@ def verify_email():
     email_param = request.args.get('email')
     code_param = request.args.get('code')
     
-    # If direct link but no session, try to proceed with link parameters
-    if email_param and code_param and 'pending_registration' not in session:
-        # Create a temporary session for direct link access
-        session['pending_registration'] = {
-            'email': email_param
-        }
-        flash('Använd bekräftelsekoden från e-postmeddelandet för att slutföra registreringen.', 'info')
-    elif 'pending_registration' not in session:
+    # Handle direct links - find user by email parameter or session
+    form = VerifyEmailForm()
+    
+    if email_param and code_param:
+        # Direct link - check if user exists and is inactive
+        user = User.query.filter_by(email=email_param, active=False).first()
+        if user:
+            form.email.data = email_param
+            session['pending_registration'] = {
+                'email': email_param,
+                'user_id': user.id
+            }
+        else:
+            flash('Ogiltig registreringslänk eller användare hittades inte.', 'error')
+            return redirect(url_for('register'))
+    elif 'pending_registration' in session:
+        form.email.data = session['pending_registration']['email']
+    else:
         flash('Ingen väntande registrering hittades. Vänligen registrera dig igen.', 'error')
         return redirect(url_for('register'))
-    
-    form = VerifyEmailForm()
-    form.email.data = session['pending_registration']['email']
     
     # Pre-populate code from URL parameters
     if code_param and not form.confirmation_code.data:
@@ -876,41 +892,30 @@ def verify_email():
         
         if confirmation:
             try:
-                # Get user data from session or create basic user from confirmation
-                pending = session.get('pending_registration', {})
+                # Find the user account that was created during registration
+                user = User.query.filter_by(email=form.email.data, active=False).first()
                 
-                # Create the user account
-                new_user = User()
-                new_user.first_name = pending.get('first_name', 'Användare')  # Fallback for direct link
-                new_user.last_name = pending.get('last_name', 'Namn')        # Fallback for direct link
-                new_user.email = form.email.data
-                
-                # Set password from session or require password reset for direct link users
-                if 'password' in pending:
-                    new_user.set_password(pending['password'])
+                if user:
+                    # Activate the user account and mark email as verified
+                    user.active = True
+                    # Note: User model uses active status for email verification
+                    
+                    db.session.commit()
+                    
+                    # Clear the pending registration
+                    session.pop('pending_registration', None)
+                    
+                    flash('Registrering slutförd! Du kan nu logga in. En administratör kommer att tilldela dig behörigheter inom kort.', 'success')
+                    return redirect(url_for('login'))
                 else:
-                    # For direct link users, generate a temporary password and require reset
-                    temp_password = generate_confirmation_code(16)
-                    new_user.set_password(temp_password)
-                    flash('Registrering slutförd! Ett tillfälligt lösenord har skapats. Du kommer att behöva återställa ditt lösenord vid första inloggningen.', 'warning')
-                
-                new_user.active = True
-                new_user.email_verified = True
-                new_user.email_verified_at = datetime.utcnow()
-                
-                db.session.add(new_user)
-                db.session.commit()
-                
-                # Clear the pending registration
-                session.pop('pending_registration', None)
-                
-                flash('Registrering slutförd! Du kan nu logga in. En administratör kommer att tilldela dig behörigheter inom kort.', 'success')
-                return redirect(url_for('login'))
+                    # Handle case where user account doesn't exist (shouldn't happen)
+                    flash('Användarkonot hittades inte. Vänligen registrera dig igen.', 'error')
+                    return redirect(url_for('register'))
                 
             except Exception as e:
                 db.session.rollback()
-                logging.error(f"Error creating user account: {str(e)}")
-                flash('Ett fel uppstod vid skapandet av kontot.', 'error')
+                logging.error(f"Error activating user account: {str(e)}")
+                flash('Ett fel uppstod vid aktivering av kontot.', 'error')
         else:
             flash('Ogiltig eller utgången bekräftelsekod.', 'error')
     
