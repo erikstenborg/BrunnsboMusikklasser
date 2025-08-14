@@ -453,7 +453,7 @@ def login():
         
             logging.info("CSRF validation would have succeeded - login already processed above")
     
-    return render_template('admin_login.html', form=form)
+    return render_template('login.html', form=form)
 
 @app.route('/debug/session')
 def debug_session():
