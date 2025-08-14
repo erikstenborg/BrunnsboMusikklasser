@@ -7,9 +7,9 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 ## Recent Changes
 
 **2025-08-14**:
-- **Swedish Date Format Implementation**: Updated datetime input fields to use Swedish/European format (YYYY-MM-DD HH:MM in 24-hour format)
-- **Locale Configuration**: Added Swedish locale meta tag and explicit format guidance for datetime fields
-- **Enhanced User Experience**: Added JavaScript to ensure proper datetime formatting and 5-minute step intervals for better usability
+- **Swedish Date Format Implementation**: Updated datetime input fields with Swedish locale attributes and format guidance (YYYY-MM-DD TT:MM)
+- **Browser Locale Compatibility**: Datetime inputs now respect browser's locale settings while maintaining proper data format validation
+- **Enhanced User Experience**: Added 5-minute step intervals and Swedish format hints for better datetime input usability  
 - **Event Management UI Improvements**: Removed description display from admin events table for more compact row display
 
 **2025-08-14** (Earlier):
