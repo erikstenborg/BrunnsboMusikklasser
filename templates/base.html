@@ -98,8 +98,8 @@
                                             <i class="fas fa-file-alt me-2"></i>Hantera ansökningar
                                         </a></li>
                                     {% endif %}
-                                    {% if group.name == 'parent' %}
-                                        <li><a class="dropdown-item" href="{{ url_for('parent_tasks') }}">
+                                    {% if group.name in ['parent', 'event_manager', 'admin'] %}
+                                        <li><a class="dropdown-item" href="{{ url_for('user_tasks') }}">
                                             <i class="fas fa-tasks me-2"></i>Mina uppgifter
                                         </a></li>
                                     {% endif %}
@@ -148,9 +148,9 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if group.name == 'parent' %}
+                            {% if group.name in ['parent', 'event_manager', 'admin'] %}
                                 <li class="nav-item d-lg-none">
-                                    <a class="nav-link" href="{{ url_for('parent_tasks') }}">
+                                    <a class="nav-link" href="{{ url_for('user_tasks') }}">
                                         <i class="fas fa-tasks me-1"></i>Mina uppgifter
                                     </a>
                                 </li>

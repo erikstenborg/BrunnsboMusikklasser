@@ -10,6 +10,7 @@ from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
     parent_access_required, authenticated_required, requires_any_role
 )
+from user_utils import get_assignable_users, can_manage_tasks, can_access_tasks, get_user_choices_for_forms
 from datetime import datetime, timedelta
 import logging
 
@@ -469,7 +470,7 @@ def user_profile():
 # Remove the separate parent info route since we integrated it into the main events page
 
 @app.route('/events/<int:event_id>/tasks')
-@parent_access_required
+@requires_any_role(['parent', 'event_manager', 'admin'])
 def event_tasks(event_id):
     """View and manage tasks for a specific event"""
     event = Event.query.get_or_404(event_id)
@@ -478,7 +479,7 @@ def event_tasks(event_id):
     return render_template('event_tasks.html', event=event, tasks=tasks)
 
 @app.route('/events/<int:event_id>/tasks/<int:task_id>/complete', methods=['POST'])
-@parent_access_required
+@requires_any_role(['parent', 'event_manager', 'admin'])
 def complete_task(event_id, task_id):
     """Mark a task as completed"""
     task = EventTask.query.get_or_404(task_id)
@@ -494,34 +495,14 @@ def complete_task(event_id, task_id):
 
 # Task management routes for event managers
 @app.route('/admin/events/<int:event_id>/tasks/new', methods=['GET', 'POST'])
-@event_manager_required
+@requires_any_role(['event_manager', 'admin'])
 def admin_create_task(event_id):
     """Create new task for an event"""
     event = Event.query.get_or_404(event_id)
     form = EventTaskForm()
     
-    # Populate user choices for assignment (parent, event_manager, or admin users)
-    assignable_users = []
-    for group_name in ['parent', 'event_manager', 'admin']:
-        group = Group.query.filter_by(name=group_name).first()
-        if group:
-            assignable_users.extend([user for user in group.users if user.active])
-    
-    # Remove duplicates (users might have multiple roles)
-    seen_users = set()
-    unique_users = []
-    for user in assignable_users:
-        if user.id not in seen_users:
-            unique_users.append(user)
-            seen_users.add(user.id)
-    
-    # Create choices list
-    choices = [('', 'Ingen tilldelning')]
-    choices.extend([
-        (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
-        for user in sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
-    ])
-    form.assigned_to_user_id.choices = choices
+    # Populate user choices for assignment
+    form.assigned_to_user_id.choices = get_user_choices_for_forms()
     
     if form.validate_on_submit():
         try:
@@ -550,61 +531,27 @@ def admin_create_task(event_id):
     return render_template('admin_task_form.html', form=form, event=event, title='Skapa uppgift')
 
 @app.route('/admin/events/<int:event_id>/tasks')
-@event_manager_required
+@requires_any_role(['event_manager', 'admin'])
 def admin_event_tasks(event_id):
     """Manage tasks for a specific event"""
     event = Event.query.get_or_404(event_id)
     tasks = EventTask.query.filter_by(event_id=event_id).all()
     
-    # Get all assignable users for reassignment dropdown (parent, event_manager, admin)
-    assignable_users = []
-    for group_name in ['parent', 'event_manager', 'admin']:
-        group = Group.query.filter_by(name=group_name).first()
-        if group:
-            assignable_users.extend([user for user in group.users if user.active])
-    
-    # Remove duplicates and sort
-    seen_users = set()
-    unique_users = []
-    for user in assignable_users:
-        if user.id not in seen_users:
-            unique_users.append(user)
-            seen_users.add(user.id)
-    
-    assignable_users = sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
+    # Get all assignable users for reassignment dropdown
+    assignable_users = get_assignable_users()
     
     return render_template('admin_event_tasks.html', event=event, tasks=tasks, assignable_users=assignable_users)
 
 @app.route('/admin/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
-@event_manager_required
+@requires_any_role(['event_manager', 'admin'])
 def admin_edit_task(task_id):
     """Edit an existing task"""
     task = EventTask.query.get_or_404(task_id)
     event = task.event
     form = EventTaskForm(obj=task)
     
-    # Populate user choices for assignment (parent, event_manager, or admin users)
-    assignable_users = []
-    for group_name in ['parent', 'event_manager', 'admin']:
-        group = Group.query.filter_by(name=group_name).first()
-        if group:
-            assignable_users.extend([user for user in group.users if user.active])
-    
-    # Remove duplicates (users might have multiple roles)
-    seen_users = set()
-    unique_users = []
-    for user in assignable_users:
-        if user.id not in seen_users:
-            unique_users.append(user)
-            seen_users.add(user.id)
-    
-    # Create choices list
-    choices = [('', 'Ingen tilldelning')]
-    choices.extend([
-        (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
-        for user in sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
-    ])
-    form.assigned_to_user_id.choices = choices
+    # Populate user choices for assignment
+    form.assigned_to_user_id.choices = get_user_choices_for_forms()
     
     # Set current assignment if exists
     if task.assigned_to_user_id:
@@ -639,7 +586,7 @@ def admin_edit_task(task_id):
     return render_template('admin_task_form.html', form=form, event=event, task=task, title='Redigera uppgift')
 
 @app.route('/admin/tasks/<int:task_id>/delete', methods=['POST'])
-@event_manager_required
+@requires_any_role(['event_manager', 'admin'])
 def admin_delete_task(task_id):
     """Delete a task"""
     task = EventTask.query.get_or_404(task_id)
@@ -656,30 +603,30 @@ def admin_delete_task(task_id):
     
     return redirect(url_for('admin_event_tasks', event_id=event_id))
 
-@app.route('/parent/tasks')
-@parent_access_required
-def parent_tasks():
+@app.route('/user/tasks')
+@requires_any_role(['parent', 'event_manager', 'admin'])
+def user_tasks():
     """Personal task management page for parents"""
     # Get all tasks assigned to the current user
     tasks = EventTask.query.filter_by(assigned_to_user_id=current_user.id).all()
     
     return render_template('parent_tasks.html', tasks=tasks)
 
-@app.route('/parent/tasks/<int:task_id>/complete', methods=['POST'])
-@parent_access_required
-def complete_parent_task(task_id):
+@app.route('/user/tasks/<int:task_id>/complete', methods=['POST'])
+@requires_any_role(['parent', 'event_manager', 'admin'])
+def complete_user_task(task_id):
     """Allow parents to complete their assigned tasks"""
     task = EventTask.query.get_or_404(task_id)
     
     # Verify the task is assigned to the current user
     if task.assigned_to_user_id != current_user.id:
         flash('Du kan endast slutföra uppgifter som är tilldelade till dig.', 'error')
-        return redirect(url_for('parent_tasks'))
+        return redirect(url_for('user_tasks'))
     
     # Check if already completed
     if task.completed_at:
         flash('Denna uppgift är redan slutförd.', 'info')
-        return redirect(url_for('parent_tasks'))
+        return redirect(url_for('user_tasks'))
     
     try:
         task.completed_at = datetime.utcnow()
@@ -692,10 +639,10 @@ def complete_parent_task(task_id):
         logging.error(f"Error completing task: {str(e)}")
         flash('Ett fel uppstod när uppgiften skulle slutföras.', 'error')
     
-    return redirect(url_for('parent_tasks'))
+    return redirect(url_for('user_tasks'))
 
 @app.route('/admin/tasks/<int:task_id>/reassign', methods=['POST'])
-@event_manager_required  
+@requires_any_role(['event_manager', 'admin'])
 def admin_reassign_task(task_id):
     """Reassign a task to a different user"""
     task = EventTask.query.get_or_404(task_id)
@@ -705,15 +652,15 @@ def admin_reassign_task(task_id):
         flash('Ingen användare vald för omtilldelning.', 'error')
         return redirect(url_for('admin_event_tasks', event_id=task.event_id))
     
-    # Verify the new assignee is a parent
+    # Verify the new assignee exists and can be assigned tasks
     new_assignee = User.query.get(new_assignee_id)
     if not new_assignee:
         flash('Användaren kunde inte hittas.', 'error')
         return redirect(url_for('admin_event_tasks', event_id=task.event_id))
     
-    parent_group = Group.query.filter_by(name='parent').first()
-    if not parent_group or new_assignee not in parent_group.users:
-        flash('Uppgifter kan endast tilldelas föräldrar.', 'error')
+    # Check if the new assignee can access tasks (parent, event_manager, or admin)
+    if not can_access_tasks(new_assignee):
+        flash('Uppgifter kan endast tilldelas föräldrar, eventansvariga eller administratörer.', 'error')
         return redirect(url_for('admin_event_tasks', event_id=task.event_id))
     
     try:
@@ -738,7 +685,7 @@ def admin_reassign_task(task_id):
     return redirect(url_for('admin_event_tasks', event_id=task.event_id))
 
 @app.route('/admin/tasks/<int:task_id>/toggle-complete', methods=['POST'])
-@event_manager_required
+@requires_any_role(['event_manager', 'admin'])
 def admin_toggle_task_completion(task_id):
     """Toggle task completion status for event managers"""
     task = EventTask.query.get_or_404(task_id)

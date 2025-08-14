@@ -27,6 +27,11 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **JSON Serialization Fix**: Fixed server error by storing only confirmation code strings in session instead of ConfirmationCode objects
 - **32-Character Confirmation Codes**: Updated email verification forms and templates to properly handle 32-character alphanumeric codes
 - **Pre-filled Email Links**: Added convenient direct links in confirmation emails that auto-populate forms with correct email and code
+- **Expanded Task Assignment System**: Tasks can now be assigned to users with parent, event_manager, or admin roles (previously parent-only)
+- **Centralized User Utility Functions**: Created user_utils.py with reusable role-checking functions (can_manage_tasks, can_access_tasks, get_assignable_users)
+- **Searchable User Selection**: Implemented JavaScript-powered searchable dropdown for user assignment to handle hundreds of users efficiently
+- **Universal Task Menu Access**: Made task menu ("Mina uppgifter") visible to users with parent, event_manager, or admin roles
+- **Refactored Route Permissions**: Updated all task-related routes to use consistent role-based access control with requires_any_role decorator
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design

@@ -49,13 +49,22 @@
                         
                         <div class="mb-4">
                             {{ form.assigned_to_user_id.label(class="form-label") }}
-                            {{ form.assigned_to_user_id(class="form-select" + (" is-invalid" if form.assigned_to_user_id.errors else "")) }}
+                            <select name="assigned_to_user_id" id="assigned_to_user_id" 
+                                    class="form-select searchable-select{{ ' is-invalid' if form.assigned_to_user_id.errors else '' }}"
+                                    data-placeholder="Sök efter användare...">
+                                {% for value, label in form.assigned_to_user_id.choices %}
+                                    <option value="{{ value }}" 
+                                            {% if value == form.assigned_to_user_id.data %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
                             {% if form.assigned_to_user_id.errors %}
                                 <div class="invalid-feedback">
                                     {{ form.assigned_to_user_id.errors[0] }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Välj en användare som ska utföra uppgiften, eller lämna blank för allmän uppgift.</div>
+                            <div class="form-text">Välj en användare som ska utföra uppgiften, eller lämna blank för allmän uppgift. Du kan skriva för att söka.</div>
                         </div>
                         
                         <!-- Due date offset section -->
@@ -173,6 +182,153 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial calculation
     updateDueDatePreview();
+    
+    // Initialize searchable select dropdown
+    initializeSearchableSelect();
 });
+
+// Initialize searchable dropdown functionality
+function initializeSearchableSelect() {
+    const selectElement = document.querySelector('.searchable-select');
+    if (!selectElement) return;
+    
+    // Create wrapper div
+    const wrapper = document.createElement('div');
+    wrapper.className = 'searchable-select-wrapper position-relative';
+    selectElement.parentNode.insertBefore(wrapper, selectElement);
+    wrapper.appendChild(selectElement);
+    
+    // Create search input
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'form-control searchable-input';
+    searchInput.placeholder = selectElement.dataset.placeholder || 'Sök...';
+    searchInput.style.display = 'none';
+    wrapper.appendChild(searchInput);
+    
+    // Create dropdown list
+    const dropdown = document.createElement('div');
+    dropdown.className = 'searchable-dropdown position-absolute w-100 bg-white border rounded shadow-sm';
+    dropdown.style.zIndex = '1050';
+    dropdown.style.maxHeight = '200px';
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.display = 'none';
+    wrapper.appendChild(dropdown);
+    
+    // Store original options
+    const originalOptions = Array.from(selectElement.options).map(option => ({
+        value: option.value,
+        text: option.text,
+        selected: option.selected
+    }));
+    
+    // Show selected value or placeholder in input
+    function updateInputDisplay() {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            searchInput.value = selectedOption.text;
+        } else {
+            searchInput.value = '';
+        }
+    }
+    
+    // Filter and display options
+    function filterOptions(query) {
+        dropdown.innerHTML = '';
+        const filteredOptions = originalOptions.filter(option => 
+            option.text.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        filteredOptions.forEach(option => {
+            const item = document.createElement('div');
+            item.className = 'p-2 searchable-item';
+            item.textContent = option.text;
+            item.style.cursor = 'pointer';
+            
+            if (option.selected) {
+                item.classList.add('bg-primary', 'text-white');
+            }
+            
+            item.addEventListener('mouseenter', () => {
+                if (!item.classList.contains('bg-primary')) {
+                    item.classList.add('bg-light');
+                }
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                if (!item.classList.contains('bg-primary')) {
+                    item.classList.remove('bg-light');
+                }
+            });
+            
+            item.addEventListener('click', () => {
+                selectElement.value = option.value;
+                updateInputDisplay();
+                dropdown.style.display = 'none';
+                selectElement.style.display = 'block';
+                searchInput.style.display = 'none';
+            });
+            
+            dropdown.appendChild(item);
+        });
+    }
+    
+    // Initialize display
+    selectElement.style.display = 'block';
+    updateInputDisplay();
+    
+    // Handle select click - switch to search mode
+    selectElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectElement.style.display = 'none';
+        searchInput.style.display = 'block';
+        searchInput.focus();
+        filterOptions('');
+        dropdown.style.display = 'block';
+    });
+    
+    // Handle search input
+    searchInput.addEventListener('input', (e) => {
+        filterOptions(e.target.value);
+        dropdown.style.display = 'block';
+    });
+    
+    // Handle focus loss
+    searchInput.addEventListener('blur', (e) => {
+        // Delay to allow click on dropdown items
+        setTimeout(() => {
+            if (!wrapper.contains(document.activeElement)) {
+                dropdown.style.display = 'none';
+                selectElement.style.display = 'block';
+                searchInput.style.display = 'none';
+                updateInputDisplay();
+            }
+        }, 200);
+    });
+    
+    // Handle escape key
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+            selectElement.style.display = 'block';
+            searchInput.style.display = 'none';
+            updateInputDisplay();
+        }
+    });
+}
 </script>
+
+<style>
+.searchable-select-wrapper {
+    position: relative;
+}
+
+.searchable-dropdown {
+    z-index: 1050;
+}
+
+.searchable-item:hover {
+    background-color: #f8f9fa !important;
+}
+</style>
 {% endblock %}
