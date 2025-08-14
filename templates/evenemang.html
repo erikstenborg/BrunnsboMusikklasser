@@ -73,7 +73,7 @@
                                     <small class="text-muted">
                                         <i class="fas fa-cog me-1"></i>
                                         <strong>Admin:</strong>
-                                        <a href="{{ url_for('admin_edit_event', event_id=event.id) }}" class="btn btn-sm btn-outline-primary ms-1">Redigera</a>
+                                        <a href="{{ url_for('admin_event_edit', event_id=event.id) }}" class="btn btn-sm btn-outline-primary ms-1">Redigera</a>
                                         <a href="{{ url_for('admin_create_task', event_id=event.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Ny uppgift</a>
                                         {% if event.tasks %}
                                             <a href="{{ url_for('admin_event_tasks', event_id=event.id) }}" class="btn btn-sm btn-outline-info ms-1">Hantera uppgifter ({{ event.tasks|length }})</a>
