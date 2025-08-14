@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Login - Brunnsbo Musikklasser{% endblock %}
+{% block title %}Logga in - Brunnsbo Musikklasser{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -9,7 +9,7 @@
             <div class="card shadow">
                 <div class="card-header bg-dark text-center">
                     <h4 class="text-gold mb-0">
-                        <i class="fas fa-user-shield me-2"></i>Admin Login
+                        <i class="fas fa-user me-2"></i>Logga in
                     </h4>
                 </div>
                 <div class="card-body">
@@ -44,6 +44,12 @@
                             <button type="submit" class="btn btn-gold">
                                 <i class="fas fa-sign-in-alt me-2"></i>Logga in
                             </button>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('forgot_password') }}" class="text-decoration-none">
+                                <i class="fas fa-key me-1"></i>Glömt ditt lösenord?
+                            </a>
                         </div>
                     </form>
                 </div>

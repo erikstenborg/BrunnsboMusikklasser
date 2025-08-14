@@ -6,6 +6,20 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 
 ## Recent Changes
 
+**2025-08-14**:
+- Implemented comprehensive Role-Based Access Control (RBAC) system replacing simple admin authentication
+- Created users, groups, and user_groups tables with many-to-many relationships for flexible role assignment
+- Added four role types: Admin (full access), applications_manager (handle applications), event_manager (manage events), parent (access parent-specific features)
+- Updated navigation to show username and role-based menu items instead of generic admin dropdown
+- Added user profile page showing roles and permissions for all authenticated users
+- Created user management interface with role assignment functionality for administrators
+- Added password reset functionality with email verification using existing confirmation code system
+- Enhanced Event model with info_to_parents field for parent-specific information
+- Added EventTask model for parent-manageable tasks connected to events
+- Updated login page with "Glömt ditt lösenord?" (Forgot password) link
+- Successfully migrated existing admin_users data to new users table with Admin roles assigned
+- All existing authentication flows preserved while adding new RBAC capabilities
+
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
 - Added admin dropdown menu for desktop with all admin functions (manage events, manage applications, administrators, change password, logout)

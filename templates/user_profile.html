@@ -95,14 +95,17 @@
                         <a href="{{ url_for('admin_change_password') }}" class="btn btn-outline-primary">
                             <i class="fas fa-key me-1"></i>Ändra lösenord
                         </a>
+                        {% set has_parent_role = false %}
                         {% for group in current_user.groups %}
                             {% if group.name == 'parent' %}
-                                <a href="{{ url_for('events_parent_info') }}" class="btn btn-outline-info">
-                                    <i class="fas fa-calendar me-1"></i>Förälder-information
-                                </a>
-                                {% break %}
+                                {% set has_parent_role = true %}
                             {% endif %}
                         {% endfor %}
+                        {% if has_parent_role %}
+                            <a href="{{ url_for('events_parent_info') }}" class="btn btn-outline-info">
+                                <i class="fas fa-calendar me-1"></i>Förälder-information
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

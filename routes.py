@@ -4,7 +4,7 @@ from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
 from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm
 from utils import create_confirmation_code, verify_confirmation_code
 from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
@@ -488,10 +488,12 @@ def admin_create_task(event_id):
     # Populate user choices for assignment (parents only)
     parent_group = Group.query.filter_by(name='parent').first()
     if parent_group:
-        form.assigned_to_user_id.choices = [('', 'Ingen tilldelning')] + [
+        choices = [('', 'Ingen tilldelning')]
+        choices.extend([
             (str(user.id), f"{user.username} ({user.email})") 
             for user in parent_group.users if user.active
-        ]
+        ])
+        form.assigned_to_user_id.choices = choices
     
     if form.validate_on_submit():
         try:
@@ -523,6 +525,72 @@ def admin_event_tasks(event_id):
     tasks = EventTask.query.filter_by(event_id=event_id).all()
     
     return render_template('admin_event_tasks.html', event=event, tasks=tasks)
+
+# Password reset routes
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Request password reset via email"""
+    form = ForgotPasswordForm()
+    
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        
+        if user:
+            # Create confirmation code
+            confirmation_code = create_confirmation_code(user.email)
+            
+            try:
+                # Send reset email
+                msg = Message(
+                    'Återställ ditt lösenord - Brunnsbo Musikklasser',
+                    recipients=[user.email]
+                )
+                msg.html = f"""
+                <h2>Återställ ditt lösenord</h2>
+                <p>Du har begärt att återställa ditt lösenord för ditt konto hos Brunnsbo Musikklasser.</p>
+                <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
+                <p>Använd denna kod för att återställa ditt lösenord. Koden är giltig i 1 timme.</p>
+                <p>Om du inte begärde denna återställning kan du ignorera detta meddelande.</p>
+                <hr>
+                <p><em>Brunnsbo Musikklasser</em></p>
+                """
+                
+                mail.send(msg)
+                flash('En bekräftelsekod har skickats till din e-postadress.', 'info')
+                return redirect(url_for('reset_password'))
+                
+            except Exception as e:
+                logging.error(f"Error sending password reset email: {str(e)}")
+                flash('Ett fel uppstod vid skickning av e-post. Försök igen.', 'error')
+        else:
+            # Don't reveal if email exists or not for security
+            flash('En bekräftelsekod har skickats till din e-postadress om kontot finns.', 'info')
+            return redirect(url_for('reset_password'))
+    
+    return render_template('forgot_password.html', form=form)
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    """Reset password with confirmation code"""
+    form = ResetPasswordForm()
+    
+    if form.validate_on_submit():
+        # Verify confirmation code
+        if verify_confirmation_code(form.email.data, form.confirmation_code.data):
+            user = User.query.filter_by(email=form.email.data).first()
+            
+            if user:
+                user.set_password(form.new_password.data)
+                db.session.commit()
+                
+                flash('Ditt lösenord har återställts. Du kan nu logga in.', 'success')
+                return redirect(url_for('admin_login'))
+            else:
+                flash('Användaren hittades inte.', 'error')
+        else:
+            flash('Ogiltig eller utgången bekräftelsekod.', 'error')
+    
+    return render_template('reset_password.html', form=form)
 
 @app.route('/admin/events/new', methods=['GET', 'POST'])
 @event_manager_required

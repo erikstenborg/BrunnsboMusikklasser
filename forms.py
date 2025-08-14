@@ -276,3 +276,34 @@ class EventTaskForm(FlaskForm):
                                     choices=[], 
                                     coerce=lambda x: int(x) if x else None,
                                     validators=[Optional()])
+
+class ForgotPasswordForm(FlaskForm):
+    """Form for requesting password reset"""
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+
+class ResetPasswordForm(FlaskForm):
+    """Form for resetting password with confirmation code"""
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+    
+    confirmation_code = StringField('Bekräftelsekod', validators=[
+        DataRequired(message='Bekräftelsekod är obligatorisk'),
+        Length(min=6, max=6, message='Bekräftelsekoden måste vara 6 tecken')
+    ])
+    
+    new_password = PasswordField('Nytt lösenord', validators=[
+        DataRequired(message='Nytt lösenord är obligatoriskt'),
+        Length(min=8, message='Lösenordet måste vara minst 8 tecken långt')
+    ])
+    
+    confirm_password = PasswordField('Bekräfta nytt lösenord', validators=[
+        DataRequired(message='Bekräfta det nya lösenordet'),
+        EqualTo('new_password', message='Lösenorden matchar inte')
+    ])
