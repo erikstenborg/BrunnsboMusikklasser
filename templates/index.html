@@ -250,9 +250,12 @@
             });
         }, 5000);
         
-        // Force Facebook container width on window resize
+        // Debounced Facebook container width on window resize (to reduce WINCH signals)
+        let resizeTimeout;
         window.addEventListener('resize', function() {
-            setTimeout(function() {
+            // Clear previous timeout to debounce resize events
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
                 const fbElements = document.querySelectorAll('.facebook-embed .fb-page');
                 const fbSpans = document.querySelectorAll('.facebook-embed .fb-page > span');
                 const fbIframes = document.querySelectorAll('.facebook-embed iframe');
@@ -274,18 +277,8 @@
                     iframe.style.maxWidth = '100%';
                     iframe.style.minWidth = '100%';
                 });
-            }, 1000);
+            }, 500); // Increased debounce delay to reduce signal frequency
         });
-        
-        // Continuous monitoring to force Facebook width
-        setInterval(function() {
-            const fbElements = document.querySelectorAll('.facebook-embed .fb-page, .facebook-embed iframe, .facebook-embed span');
-            fbElements.forEach(function(element) {
-                element.style.width = '100%';
-                element.style.maxWidth = '100%';
-                element.style.minWidth = '100%';
-            });
-        }, 3000);
     });
     
     function initBeholdInstagramFeed() {
