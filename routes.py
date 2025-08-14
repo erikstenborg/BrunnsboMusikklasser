@@ -539,7 +539,11 @@ def admin_event_tasks(event_id):
     event = Event.query.get_or_404(event_id)
     tasks = EventTask.query.filter_by(event_id=event_id).all()
     
-    return render_template('admin_event_tasks.html', event=event, tasks=tasks)
+    # Get all parent users for reassignment dropdown
+    parent_group = Group.query.filter_by(name='parent').first()
+    parent_users = parent_group.users if parent_group else []
+    
+    return render_template('admin_event_tasks.html', event=event, tasks=tasks, parent_users=parent_users)
 
 @app.route('/admin/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
 @event_manager_required
@@ -601,6 +605,114 @@ def admin_delete_task(task_id):
         flash('Ett fel uppstod när uppgiften skulle tas bort.', 'error')
     
     return redirect(url_for('admin_event_tasks', event_id=event_id))
+
+@app.route('/parent/tasks')
+@parent_access_required
+def parent_tasks():
+    """Personal task management page for parents"""
+    # Get all tasks assigned to the current user
+    tasks = EventTask.query.filter_by(assigned_to_user_id=current_user.id).all()
+    
+    return render_template('parent_tasks.html', tasks=tasks)
+
+@app.route('/parent/tasks/<int:task_id>/complete', methods=['POST'])
+@parent_access_required
+def complete_parent_task(task_id):
+    """Allow parents to complete their assigned tasks"""
+    task = EventTask.query.get_or_404(task_id)
+    
+    # Verify the task is assigned to the current user
+    if task.assigned_to_user_id != current_user.id:
+        flash('Du kan endast slutföra uppgifter som är tilldelade till dig.', 'error')
+        return redirect(url_for('parent_tasks'))
+    
+    # Check if already completed
+    if task.completed_at:
+        flash('Denna uppgift är redan slutförd.', 'info')
+        return redirect(url_for('parent_tasks'))
+    
+    try:
+        task.completed_at = datetime.utcnow()
+        task.completed_by_id = current_user.id
+        db.session.commit()
+        
+        flash(f'Uppgift "{task.title}" markerad som slutförd!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error completing task: {str(e)}")
+        flash('Ett fel uppstod när uppgiften skulle slutföras.', 'error')
+    
+    return redirect(url_for('parent_tasks'))
+
+@app.route('/admin/tasks/<int:task_id>/reassign', methods=['POST'])
+@event_manager_required  
+def admin_reassign_task(task_id):
+    """Reassign a task to a different user"""
+    task = EventTask.query.get_or_404(task_id)
+    new_assignee_id = request.form.get('new_assignee')
+    
+    if not new_assignee_id:
+        flash('Ingen användare vald för omtilldelning.', 'error')
+        return redirect(url_for('admin_event_tasks', event_id=task.event_id))
+    
+    # Verify the new assignee is a parent
+    new_assignee = User.query.get(new_assignee_id)
+    if not new_assignee:
+        flash('Användaren kunde inte hittas.', 'error')
+        return redirect(url_for('admin_event_tasks', event_id=task.event_id))
+    
+    parent_group = Group.query.filter_by(name='parent').first()
+    if not parent_group or new_assignee not in parent_group.users:
+        flash('Uppgifter kan endast tilldelas föräldrar.', 'error')
+        return redirect(url_for('admin_event_tasks', event_id=task.event_id))
+    
+    try:
+        old_assignee = task.assigned_to_user.first_name + ' ' + task.assigned_to_user.last_name if task.assigned_to_user else 'Ingen'
+        task.assigned_to_user_id = new_assignee_id
+        
+        # Reset completion status if task was completed
+        if task.completed_at:
+            task.completed_at = None
+            task.completed_by_id = None
+        
+        db.session.commit()
+        
+        new_assignee_name = new_assignee.first_name + ' ' + new_assignee.last_name
+        flash(f'Uppgift "{task.title}" omtilldelad från {old_assignee} till {new_assignee_name}.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error reassigning task: {str(e)}")
+        flash('Ett fel uppstod när uppgiften skulle omtilldelas.', 'error')
+    
+    return redirect(url_for('admin_event_tasks', event_id=task.event_id))
+
+@app.route('/admin/tasks/<int:task_id>/toggle-complete', methods=['POST'])
+@event_manager_required
+def admin_toggle_task_completion(task_id):
+    """Toggle task completion status for event managers"""
+    task = EventTask.query.get_or_404(task_id)
+    
+    try:
+        if task.completed_at:
+            # Mark as incomplete
+            task.completed_at = None
+            task.completed_by_id = None
+            flash(f'Uppgift "{task.title}" markerad som ofullständig.', 'info')
+        else:
+            # Mark as complete
+            task.completed_at = datetime.utcnow()
+            task.completed_by_id = current_user.id
+            flash(f'Uppgift "{task.title}" markerad som slutförd.', 'success')
+        
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error toggling task completion: {str(e)}")
+        flash('Ett fel uppstod när uppgiftens status skulle ändras.', 'error')
+    
+    return redirect(url_for('admin_event_tasks', event_id=task.event_id))
 
 # Password reset routes
 @app.route('/forgot-password', methods=['GET', 'POST'])
