@@ -29,9 +29,10 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Allow HTTP for development
 app.config['SESSION_COOKIE_HTTPONLY'] = False  # Allow JavaScript access for debugging
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests with proper referrer
 app.config['WTF_CSRF_SSL_STRICT'] = False  # Allow CSRF over HTTP for development
-app.config['SESSION_PERMANENT'] = False  # Don't make sessions permanent by default
+app.config['SESSION_PERMANENT'] = True  # Make sessions permanent
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # 24 hour session lifetime
 app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # Disable default CSRF for debugging
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(hours=24)  # Remember me duration
 
 # configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "postgresql://localhost/brunnsbo_musikklasser")
@@ -64,7 +65,15 @@ with app.app_context():
     # Set up user loader for Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
-        return models.User.query.get(int(user_id))
+        try:
+            user = models.User.query.get(int(user_id))
+            logging.debug(f"Loading user {user_id}: {user is not None}")
+            if user:
+                logging.debug(f"User {user_id} active: {user.active}")
+            return user
+        except Exception as e:
+            logging.error(f"Error loading user {user_id}: {e}")
+            return None
     
     # Create all tables
     db.create_all()

@@ -421,10 +421,13 @@ def login():
                 logging.debug(f"Password check: {user.check_password(password)}")
             
             if user and user.check_password(password) and user.active:
-                login_user(user)
+                # Use remember=True and set session as permanent
+                login_user(user, remember=True)
+                session.permanent = True
+                session['user_id'] = str(user.id)
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-                logging.info(f"Successful login for user: {user.email}")
+                logging.info(f"Successful login for user: {user.email}, session: {session}")
                 
                 next_page = request.args.get('next')
                 if not next_page or not next_page.startswith('/'):
@@ -451,11 +454,15 @@ def debug_session():
         'user_agent': request.headers.get('User-Agent', 'Unknown'),
         'remote_addr': request.remote_addr,
         'is_authenticated': current_user.is_authenticated,
+        'current_user_id': getattr(current_user, 'id', 'None'),
         'csrf_token_in_session': 'csrf_token' in session,
+        'user_id_in_session': session.get('user_id', 'None'),
         'session_cookie_secure': app.config.get('SESSION_COOKIE_SECURE'),
         'wtf_csrf_time_limit': app.config.get('WTF_CSRF_TIME_LIMIT'),
         'cookies_received': dict(request.cookies),
-        'session_id': session.get('_id', 'None'),
+        'session_permanent': session.permanent,
+        'flask_login_session_keys': [k for k in session.keys() if k.startswith('_')],
+        'session_contents': dict(session),
     }
     
     return jsonify(debug_info)
