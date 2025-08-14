@@ -217,68 +217,7 @@
         
         // Facebook SDK will handle the fb-page elements automatically
         
-        // Force Facebook widget to be responsive after loading
-        setTimeout(function() {
-            const fbElements = document.querySelectorAll('.fb-page');
-            
-            fbElements.forEach(function(element) {
-                const iframe = element.querySelector('iframe');
-                if (iframe) {
-                    // Force the iframe to be responsive
-                    iframe.style.width = '100%';
-                    iframe.style.maxWidth = '100%';
-                    
-                    // Also update the parent span if it exists
-                    const parentSpan = iframe.parentElement;
-                    if (parentSpan && parentSpan.tagName === 'SPAN') {
-                        parentSpan.style.width = '100%';
-                        parentSpan.style.maxWidth = '100%';
-                    }
-                } else {
-                    console.log('Facebook widget may not have loaded properly');
-                }
-            });
-        }, 3000);
-        
-        // Additional check after more time has passed
-        setTimeout(function() {
-            const fbIframes = document.querySelectorAll('.facebook-embed iframe');
-            fbIframes.forEach(function(iframe) {
-                iframe.style.width = '100%';
-                iframe.style.maxWidth = '100%';
-                iframe.style.minWidth = '100%';
-            });
-        }, 5000);
-        
-        // Debounced Facebook container width on window resize (to reduce WINCH signals)
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            // Clear previous timeout to debounce resize events
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                const fbElements = document.querySelectorAll('.facebook-embed .fb-page');
-                const fbSpans = document.querySelectorAll('.facebook-embed .fb-page > span');
-                const fbIframes = document.querySelectorAll('.facebook-embed iframe');
-                
-                fbElements.forEach(function(element) {
-                    element.style.width = '100%';
-                    element.style.maxWidth = '100%';
-                    element.style.minWidth = '100%';
-                });
-                
-                fbSpans.forEach(function(span) {
-                    span.style.width = '100%';
-                    span.style.maxWidth = '100%';
-                    span.style.minWidth = '100%';
-                });
-                
-                fbIframes.forEach(function(iframe) {
-                    iframe.style.width = '100%';
-                    iframe.style.maxWidth = '100%';
-                    iframe.style.minWidth = '100%';
-                });
-            }, 500); // Increased debounce delay to reduce signal frequency
-        });
+        // Facebook SDK will handle responsiveness automatically
     });
     
     function initBeholdInstagramFeed() {
