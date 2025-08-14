@@ -22,6 +22,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "brunnsbo-musikklasser-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+# CSRF and Session Configuration for Safari compatibility
+app.config['WTF_CSRF_TIME_LIMIT'] = None  # No time limit for CSRF tokens
+app.config['SESSION_COOKIE_SECURE'] = False  # Allow HTTP for development (change to True for production)
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS attacks
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests with proper referrer
+app.config['WTF_CSRF_SSL_STRICT'] = False  # Allow CSRF over HTTP for development
+
 # configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "postgresql://localhost/brunnsbo_musikklasser")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -57,6 +64,9 @@ with app.app_context():
     
     # Create all tables
     db.create_all()
+
+# Enable debug mode for development
+app.debug = True
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

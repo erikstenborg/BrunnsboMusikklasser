@@ -397,22 +397,58 @@ def login():
     
     form = LoginForm()
     
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+    if request.method == 'POST':
+        # Log CSRF token for debugging
+        logging.debug(f"Login attempt from {request.remote_addr}")
+        logging.debug(f"Form CSRF token: {form.csrf_token.data}")
+        logging.debug(f"Session CSRF token: {session.get('csrf_token', 'Not found')}")
+        logging.debug(f"Form validation errors: {form.errors}")
         
-        if user and user.check_password(form.password.data) and user.active:
-            login_user(user)
-            user.last_login = datetime.utcnow()
-            db.session.commit()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
             
-            next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
-                next_page = url_for('index')  # Default to homepage instead of admin page
-            return redirect(next_page)
+            if user and user.check_password(form.password.data) and user.active:
+                login_user(user)
+                user.last_login = datetime.utcnow()
+                db.session.commit()
+                logging.info(f"Successful login for user: {user.email}")
+                
+                next_page = request.args.get('next')
+                if not next_page or not next_page.startswith('/'):
+                    next_page = url_for('index')  # Default to homepage instead of admin page
+                return redirect(next_page)
+            else:
+                logging.warning(f"Failed login attempt for email: {form.email.data}")
+                flash('Felaktig e-postadress eller lösenord.', 'error')
         else:
-            flash('Felaktig e-postadress eller lösenord.', 'error')
+            # Log form validation errors for debugging
+            logging.warning(f"Form validation failed: {form.errors}")
+            if 'csrf_token' in form.errors:
+                flash('Säkerhetstoken är felaktig. Försök igen.', 'error')
+                logging.error("CSRF token validation failed")
+            else:
+                flash('Felaktig e-postadress eller lösenord.', 'error')
     
     return render_template('admin_login.html', form=form)
+
+@app.route('/debug/session')
+def debug_session():
+    """Debug endpoint to check session and CSRF status"""
+    if not app.debug:
+        return "Debug endpoint only available in debug mode", 403
+    
+    debug_info = {
+        'session_keys': list(session.keys()),
+        'user_agent': request.headers.get('User-Agent', 'Unknown'),
+        'remote_addr': request.remote_addr,
+        'is_authenticated': current_user.is_authenticated,
+        'csrf_token_in_session': 'csrf_token' in session,
+        'session_cookie_name': app.session_cookie_name,
+        'session_cookie_secure': app.config.get('SESSION_COOKIE_SECURE'),
+        'wtf_csrf_time_limit': app.config.get('WTF_CSRF_TIME_LIMIT'),
+    }
+    
+    return jsonify(debug_info)
 
 @app.route('/admin/logout')
 @authenticated_required
