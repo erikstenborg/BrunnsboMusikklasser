@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Skapa konto - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-header bg-success text-center text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Skapa nytt konto
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Skapa ett konto för att få tillgång till våra tjänster. Du behöver bekräfta din e-postadress.</p>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.username.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">3-50 tecken, används för inloggning.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.email.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Vi skickar en bekräftelsekod till denna adress.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.password.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Minst 8 tecken.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.confirm_password.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-envelope me-2"></i>Skicka bekräftelsekod
+                            </button>
+                            <a href="{{ url_for('admin_login') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Tillbaka till inloggning
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Information:</strong> Efter registrering kan du logga in, men du behöver vänta på att en administratör tilldelar dig behörigheter för att få tillgång till systemets funktioner.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

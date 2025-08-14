@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Bekräfta e-post - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-center text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope-check me-2"></i>Bekräfta e-post
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Vi har skickat en bekräftelsekod till din e-postadress. Ange koden nedan för att slutföra registreringen.</p>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control", readonly=true) }}
+                            <div class="form-text">E-postadress som används för registrering.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.confirmation_code.label(class="form-label") }}
+                            {{ form.confirmation_code(class="form-control" + (" is-invalid" if form.confirmation_code.errors else ""), placeholder="123456", maxlength="6") }}
+                            {% if form.confirmation_code.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.confirmation_code.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Ange den 6-siffriga koden från e-postmeddelandet.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Slutför registrering
+                            </button>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Tillbaka till registrering
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Fick du ingen kod? <a href="{{ url_for('register') }}">Registrera igen</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

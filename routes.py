@@ -1,10 +1,10 @@
 import os
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, session, jsonify
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
 from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm, RegisterForm, VerifyEmailForm
 from utils import create_confirmation_code, verify_confirmation_code
 from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
@@ -591,6 +591,104 @@ def reset_password():
             flash('Ogiltig eller utgången bekräftelsekod.', 'error')
     
     return render_template('reset_password.html', form=form)
+
+# Registration routes
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """User registration with email verification"""
+    form = RegisterForm()
+    
+    if form.validate_on_submit():
+        # Check if username or email already exists
+        existing_user = User.query.filter(
+            (User.username == form.username.data) | 
+            (User.email == form.email.data)
+        ).first()
+        
+        if existing_user:
+            if existing_user.username == form.username.data:
+                flash('Användarnamnet är redan taget.', 'error')
+            if existing_user.email == form.email.data:
+                flash('E-postadressen är redan registrerad.', 'error')
+        else:
+            try:
+                # Create confirmation code for email verification
+                confirmation_code = create_confirmation_code(form.email.data)
+                
+                # Store registration data in session temporarily
+                session['pending_registration'] = {
+                    'username': form.username.data,
+                    'email': form.email.data,
+                    'password': form.password.data,
+                    'confirmation_code': confirmation_code
+                }
+                
+                # Send verification email
+                msg = Message(
+                    'Bekräfta din registrering - Brunnsbo Musikklasser',
+                    recipients=[form.email.data]
+                )
+                msg.html = f"""
+                <h2>Välkommen till Brunnsbo Musikklasser!</h2>
+                <p>Tack för att du vill registrera ett konto hos oss.</p>
+                <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
+                <p>Använd denna kod för att slutföra din registrering. Koden är giltig i 1 timme.</p>
+                <p>Efter verifiering kan du logga in, men du behöver vänta på att en administratör tilldelar dig behörigheter.</p>
+                <hr>
+                <p><em>Brunnsbo Musikklasser</em></p>
+                """
+                
+                mail.send(msg)
+                flash('En bekräftelsekod har skickats till din e-postadress.', 'info')
+                return redirect(url_for('verify_email'))
+                
+            except Exception as e:
+                logging.error(f"Error sending registration email: {str(e)}")
+                flash('Ett fel uppstod vid registreringen. Försök igen.', 'error')
+    
+    return render_template('register.html', form=form)
+
+@app.route('/verify-email', methods=['GET', 'POST'])
+def verify_email():
+    """Verify email and complete registration"""
+    if 'pending_registration' not in session:
+        flash('Ingen väntande registrering hittades.', 'error')
+        return redirect(url_for('register'))
+    
+    form = VerifyEmailForm()
+    form.email.data = session['pending_registration']['email']
+    
+    if form.validate_on_submit():
+        pending = session['pending_registration']
+        
+        if (form.email.data == pending['email'] and 
+            verify_confirmation_code(form.email.data, form.confirmation_code.data)):
+            
+            try:
+                # Create the user account
+                new_user = User()
+                new_user.username = pending['username']
+                new_user.email = pending['email']
+                new_user.set_password(pending['password'])
+                new_user.active = True
+                
+                db.session.add(new_user)
+                db.session.commit()
+                
+                # Clear the pending registration
+                session.pop('pending_registration', None)
+                
+                flash('Registrering slutförd! Du kan nu logga in. En administratör kommer att tilldela dig behörigheter inom kort.', 'success')
+                return redirect(url_for('admin_login'))
+                
+            except Exception as e:
+                db.session.rollback()
+                logging.error(f"Error creating user account: {str(e)}")
+                flash('Ett fel uppstod vid skapandet av kontot.', 'error')
+        else:
+            flash('Ogiltig eller utgången bekräftelsekod.', 'error')
+    
+    return render_template('verify_email.html', form=form)
 
 @app.route('/admin/events/new', methods=['GET', 'POST'])
 @event_manager_required

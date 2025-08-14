@@ -307,3 +307,39 @@ class ResetPasswordForm(FlaskForm):
         DataRequired(message='Bekräfta det nya lösenordet'),
         EqualTo('new_password', message='Lösenorden matchar inte')
     ])
+
+class RegisterForm(FlaskForm):
+    """Form for user registration with email verification"""
+    
+    username = StringField('Användarnamn', validators=[
+        DataRequired(message='Användarnamn är obligatoriskt'),
+        Length(min=3, max=50, message='Användarnamnet måste vara mellan 3 och 50 tecken')
+    ])
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+    
+    password = PasswordField('Lösenord', validators=[
+        DataRequired(message='Lösenord är obligatoriskt'),
+        Length(min=8, message='Lösenordet måste vara minst 8 tecken långt')
+    ])
+    
+    confirm_password = PasswordField('Bekräfta lösenord', validators=[
+        DataRequired(message='Bekräfta lösenordet'),
+        EqualTo('password', message='Lösenorden matchar inte')
+    ])
+
+class VerifyEmailForm(FlaskForm):
+    """Form for verifying email with confirmation code"""
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+    
+    confirmation_code = StringField('Bekräftelsekod', validators=[
+        DataRequired(message='Bekräftelsekod är obligatorisk'),
+        Length(min=6, max=6, message='Bekräftelsekoden måste vara 6 tecken')
+    ])
