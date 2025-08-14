@@ -9,16 +9,6 @@
             <div class="text-center mb-5">
                 <h1 class="display-4 text-gold mb-3">Kommande Evenemang</h1>
                 <p class="lead text-muted">Missa inte våra kommande konserter och evenemang</p>
-                
-                <!-- Debug info (remove in production) -->
-                {% if current_user.is_authenticated %}
-                    <div class="alert alert-info">
-                        <small>Debug: Inloggad som {{ current_user.first_name }} {{ current_user.last_name }} 
-                        | Grupper: {% for group in current_user.groups %}{{ group.name }}{% if not loop.last %}, {% endif %}{% endfor %}
-                        | show_parent_info: {{ show_parent_info }}
-                        | show_admin_info: {{ show_admin_info }}</small>
-                    </div>
-                {% endif %}
             </div>
 
             {% if events %}

@@ -20,6 +20,8 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **Unified Confirmation Codes**: Standardized both password reset and email verification to use 32-character alphanumeric codes for better copy/paste usability
 - **Integrated Parent Info**: Merged parent-specific event information into main events page instead of separate page for cleaner user experience
 - **Enhanced Task Management**: Complete task creation, editing, and deletion system for event managers with proper user assignment functionality
+- **Case-Sensitive Group Fix**: Fixed group name case sensitivity issue (Admin vs admin) ensuring proper role-based access control
+- **Parent Info Integration Complete**: Successfully integrated parent-specific information and tasks into main events page with role-based display
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
