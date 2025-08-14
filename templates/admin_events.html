@@ -32,9 +32,6 @@
                     <tr>
                         <td>
                             <strong>{{ event.title }}</strong>
-                            {% if event.description %}
-                                <br><small class="text-muted">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</small>
-                            {% endif %}
                         </td>
                         <td>
                             {{ event.event_date.strftime('%Y-%m-%d %H:%M') }}
