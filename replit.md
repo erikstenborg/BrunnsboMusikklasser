@@ -7,18 +7,16 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 ## Recent Changes
 
 **2025-08-14**:
-- Implemented comprehensive Role-Based Access Control (RBAC) system replacing simple admin authentication
-- Created users, groups, and user_groups tables with many-to-many relationships for flexible role assignment
-- Added four role types: Admin (full access), applications_manager (handle applications), event_manager (manage events), parent (access parent-specific features)
-- Updated navigation to show username and role-based menu items instead of generic admin dropdown
-- Added user profile page showing roles and permissions for all authenticated users
-- Created user management interface with role assignment functionality for administrators
-- Added password reset functionality with email verification using existing confirmation code system
-- Enhanced Event model with info_to_parents field for parent-specific information
-- Added EventTask model for parent-manageable tasks connected to events
-- Updated login page with "Glömt ditt lösenord?" (Forgot password) link
-- Successfully migrated existing admin_users data to new users table with Admin roles assigned
-- All existing authentication flows preserved while adding new RBAC capabilities
+- **Email-based Authentication System**: Converted login system from username/password to email/password authentication
+- **User Model Restructuring**: Replaced username field with separate first_name and last_name fields (Förnamn/Efternamn)
+- **Database Cleanup**: Removed obsolete username column from users table and dropped admin_users table completely
+- **User Registration Enhancement**: Updated registration forms to collect first and last names separately
+- **Data Migration**: Successfully migrated existing user data to new field structure with proper names
+- **Template Updates**: Modified all login and registration templates to use email-based authentication
+- **Outdated File Removal**: Cleaned up obsolete setup_admin.py, create_production_admin.py, and setup_rbac_system.py files
+- **RBAC System**: Maintained comprehensive Role-Based Access Control with Admin, applications_manager, event_manager, and parent roles
+- **Password Reset**: Email-based password reset functionality with verification codes
+- **User Registration**: New users can register with email verification but receive no permissions until admin assigns roles
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
