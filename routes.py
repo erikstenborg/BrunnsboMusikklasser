@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
 from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode
 from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm, RegisterForm, VerifyEmailForm
-from utils import create_confirmation_code, verify_confirmation_code
+from utils import create_confirmation_code, verify_confirmation_code, generate_confirmation_code
 from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
     parent_access_required, authenticated_required, requires_any_role
@@ -848,33 +848,55 @@ def register():
 @app.route('/verify-email', methods=['GET', 'POST'])
 def verify_email():
     """Verify email and complete registration"""
-    if 'pending_registration' not in session:
-        flash('Ingen väntande registrering hittades.', 'error')
+    # Check if coming from direct link with parameters
+    email_param = request.args.get('email')
+    code_param = request.args.get('code')
+    
+    # If direct link but no session, try to proceed with link parameters
+    if email_param and code_param and 'pending_registration' not in session:
+        # Create a temporary session for direct link access
+        session['pending_registration'] = {
+            'email': email_param
+        }
+        flash('Använd bekräftelsekoden från e-postmeddelandet för att slutföra registreringen.', 'info')
+    elif 'pending_registration' not in session:
+        flash('Ingen väntande registrering hittades. Vänligen registrera dig igen.', 'error')
         return redirect(url_for('register'))
     
     form = VerifyEmailForm()
     form.email.data = session['pending_registration']['email']
     
-    # Pre-populate fields from URL parameters for convenience
-    email_param = request.args.get('email')
-    code_param = request.args.get('code')
-    if email_param and email_param == form.email.data and not form.confirmation_code.data:
+    # Pre-populate code from URL parameters
+    if code_param and not form.confirmation_code.data:
         form.confirmation_code.data = code_param
     
     if form.validate_on_submit():
-        pending = session['pending_registration']
+        # Verify the confirmation code first
+        confirmation = verify_confirmation_code(form.email.data, form.confirmation_code.data, 'user_registration')
         
-        if (form.email.data == pending['email'] and 
-            verify_confirmation_code(form.email.data, form.confirmation_code.data, 'user_registration')):
-            
+        if confirmation:
             try:
+                # Get user data from session or create basic user from confirmation
+                pending = session.get('pending_registration', {})
+                
                 # Create the user account
                 new_user = User()
-                new_user.first_name = pending['first_name']
-                new_user.last_name = pending['last_name']
-                new_user.email = pending['email']
-                new_user.set_password(pending['password'])
+                new_user.first_name = pending.get('first_name', 'Användare')  # Fallback for direct link
+                new_user.last_name = pending.get('last_name', 'Namn')        # Fallback for direct link
+                new_user.email = form.email.data
+                
+                # Set password from session or require password reset for direct link users
+                if 'password' in pending:
+                    new_user.set_password(pending['password'])
+                else:
+                    # For direct link users, generate a temporary password and require reset
+                    temp_password = generate_confirmation_code(16)
+                    new_user.set_password(temp_password)
+                    flash('Registrering slutförd! Ett tillfälligt lösenord har skapats. Du kommer att behöva återställa ditt lösenord vid första inloggningen.', 'warning')
+                
                 new_user.active = True
+                new_user.email_verified = True
+                new_user.email_verified_at = datetime.utcnow()
                 
                 db.session.add(new_user)
                 db.session.commit()
