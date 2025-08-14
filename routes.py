@@ -555,7 +555,7 @@ def forgot_password():
                     'Återställ ditt lösenord - Brunnsbo Musikklasser',
                     recipients=[user.email]
                 )
-                reset_url = url_for('reset_password', _external=True)
+                reset_url = url_for('reset_password', email=user.email, _external=True)
                 msg.html = f"""
                 <h2>Återställ ditt lösenord</h2>
                 <p>Du har begärt att återställa ditt lösenord för ditt konto hos Brunnsbo Musikklasser.</p>
@@ -570,7 +570,7 @@ def forgot_password():
                 
                 mail.send(msg)
                 flash('En bekräftelsekod har skickats till din e-postadress.', 'info')
-                return redirect(url_for('reset_password'))
+                return redirect(url_for('reset_password', email=user.email))
                 
             except Exception as e:
                 logging.error(f"Error sending password reset email: {str(e)}")
@@ -578,7 +578,7 @@ def forgot_password():
         else:
             # Don't reveal if email exists or not for security
             flash('En bekräftelsekod har skickats till din e-postadress om kontot finns.', 'info')
-            return redirect(url_for('reset_password'))
+            return redirect(url_for('reset_password', email=form.email.data))
     
     return render_template('forgot_password.html', form=form)
 
@@ -586,6 +586,11 @@ def forgot_password():
 def reset_password():
     """Reset password with confirmation code"""
     form = ResetPasswordForm()
+    
+    # Pre-populate email if provided as parameter
+    email_param = request.args.get('email')
+    if email_param and not form.email.data:
+        form.email.data = email_param
     
     if form.validate_on_submit():
         # Verify confirmation code
