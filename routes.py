@@ -500,15 +500,28 @@ def admin_create_task(event_id):
     event = Event.query.get_or_404(event_id)
     form = EventTaskForm()
     
-    # Populate user choices for assignment (parents only)
-    parent_group = Group.query.filter_by(name='parent').first()
-    if parent_group:
-        choices = [('', 'Ingen tilldelning')]
-        choices.extend([
-            (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
-            for user in parent_group.users if user.active
-        ])
-        form.assigned_to_user_id.choices = choices
+    # Populate user choices for assignment (parent, event_manager, or admin users)
+    assignable_users = []
+    for group_name in ['parent', 'event_manager', 'admin']:
+        group = Group.query.filter_by(name=group_name).first()
+        if group:
+            assignable_users.extend([user for user in group.users if user.active])
+    
+    # Remove duplicates (users might have multiple roles)
+    seen_users = set()
+    unique_users = []
+    for user in assignable_users:
+        if user.id not in seen_users:
+            unique_users.append(user)
+            seen_users.add(user.id)
+    
+    # Create choices list
+    choices = [('', 'Ingen tilldelning')]
+    choices.extend([
+        (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
+        for user in sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
+    ])
+    form.assigned_to_user_id.choices = choices
     
     if form.validate_on_submit():
         try:
@@ -543,11 +556,24 @@ def admin_event_tasks(event_id):
     event = Event.query.get_or_404(event_id)
     tasks = EventTask.query.filter_by(event_id=event_id).all()
     
-    # Get all parent users for reassignment dropdown
-    parent_group = Group.query.filter_by(name='parent').first()
-    parent_users = parent_group.users if parent_group else []
+    # Get all assignable users for reassignment dropdown (parent, event_manager, admin)
+    assignable_users = []
+    for group_name in ['parent', 'event_manager', 'admin']:
+        group = Group.query.filter_by(name=group_name).first()
+        if group:
+            assignable_users.extend([user for user in group.users if user.active])
     
-    return render_template('admin_event_tasks.html', event=event, tasks=tasks, parent_users=parent_users)
+    # Remove duplicates and sort
+    seen_users = set()
+    unique_users = []
+    for user in assignable_users:
+        if user.id not in seen_users:
+            unique_users.append(user)
+            seen_users.add(user.id)
+    
+    assignable_users = sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
+    
+    return render_template('admin_event_tasks.html', event=event, tasks=tasks, assignable_users=assignable_users)
 
 @app.route('/admin/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
 @event_manager_required
@@ -557,23 +583,36 @@ def admin_edit_task(task_id):
     event = task.event
     form = EventTaskForm(obj=task)
     
-    # Populate user choices for assignment (parents only)
-    parent_group = Group.query.filter_by(name='parent').first()
-    if parent_group:
-        choices = [('', 'Ingen tilldelning')]
-        choices.extend([
-            (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
-            for user in parent_group.users if user.active
-        ])
-        form.assigned_to_user_id.choices = choices
-        
-        # Set current assignment if exists
-        if task.assigned_to_user_id:
-            form.assigned_to_user_id.data = str(task.assigned_to_user_id)
-        
-        # Pre-populate due date offset fields
-        form.due_offset_days.data = task.due_offset_days
-        form.due_offset_hours.data = task.due_offset_hours
+    # Populate user choices for assignment (parent, event_manager, or admin users)
+    assignable_users = []
+    for group_name in ['parent', 'event_manager', 'admin']:
+        group = Group.query.filter_by(name=group_name).first()
+        if group:
+            assignable_users.extend([user for user in group.users if user.active])
+    
+    # Remove duplicates (users might have multiple roles)
+    seen_users = set()
+    unique_users = []
+    for user in assignable_users:
+        if user.id not in seen_users:
+            unique_users.append(user)
+            seen_users.add(user.id)
+    
+    # Create choices list
+    choices = [('', 'Ingen tilldelning')]
+    choices.extend([
+        (str(user.id), f"{user.first_name} {user.last_name} ({user.email})") 
+        for user in sorted(unique_users, key=lambda u: (u.first_name, u.last_name))
+    ])
+    form.assigned_to_user_id.choices = choices
+    
+    # Set current assignment if exists
+    if task.assigned_to_user_id:
+        form.assigned_to_user_id.data = str(task.assigned_to_user_id)
+    
+    # Pre-populate due date offset fields
+    form.due_offset_days.data = task.due_offset_days
+    form.due_offset_hours.data = task.due_offset_hours
     
     if form.validate_on_submit():
         try:
