@@ -559,7 +559,7 @@ def forgot_password():
                 msg.html = f"""
                 <h2>Återställ ditt lösenord</h2>
                 <p>Du har begärt att återställa ditt lösenord för ditt konto hos Brunnsbo Musikklasser.</p>
-                <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
+                <p><strong>Din 6-siffriga bekräftelsekod är: {confirmation_code}</strong></p>
                 <p>Använd denna kod på återställningssidan för att återställa ditt lösenord. Koden är giltig i 1 timme.</p>
                 <p><a href="{reset_url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Återställ lösenord</a></p>
                 <p>Om länken inte fungerar, kopiera och klistra in denna adress i din webbläsare: {reset_url}</p>
