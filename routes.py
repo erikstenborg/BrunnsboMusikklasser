@@ -403,6 +403,8 @@ def login():
         logging.debug(f"Form CSRF token: {form.csrf_token.data}")
         logging.debug(f"Session CSRF token: {session.get('csrf_token', 'Not found')}")
         logging.debug(f"Form validation errors: {form.errors}")
+        logging.debug(f"User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        logging.debug(f"Cookies: {dict(request.cookies)}")
         
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data).first()

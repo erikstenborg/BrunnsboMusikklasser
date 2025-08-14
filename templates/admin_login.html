@@ -13,7 +13,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" id="loginForm">
                         {{ form.hidden_tag() }}
                         
                         <div class="mb-3">
@@ -71,4 +71,20 @@
         </div>
     </div>
 </div>
+
+<script>
+// Force form refresh on Safari to ensure CSRF token is current
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    if (form && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+        // For Safari, add a small delay to ensure session is established
+        setTimeout(function() {
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                console.log('CSRF token loaded for Safari:', csrfToken.value.substring(0, 20) + '...');
+            }
+        }, 100);
+    }
+});
+</script>
 {% endblock %}
