@@ -555,7 +555,7 @@ def forgot_password():
                     'Återställ ditt lösenord - Brunnsbo Musikklasser',
                     recipients=[user.email]
                 )
-                reset_url = url_for('reset_password', email=user.email, _external=True)
+                reset_url = url_for('reset_password', email=user.email, code=confirmation_code, _external=True)
                 msg.html = f"""
                 <h2>Återställ ditt lösenord</h2>
                 <p>Du har begärt att återställa ditt lösenord för ditt konto hos Brunnsbo Musikklasser.</p>
@@ -587,10 +587,13 @@ def reset_password():
     """Reset password with confirmation code"""
     form = ResetPasswordForm()
     
-    # Pre-populate email if provided as parameter
+    # Pre-populate email and code if provided as parameters
     email_param = request.args.get('email')
+    code_param = request.args.get('code')
     if email_param and not form.email.data:
         form.email.data = email_param
+    if code_param and not form.confirmation_code.data:
+        form.confirmation_code.data = code_param
     
     if form.validate_on_submit():
         # Verify confirmation code
