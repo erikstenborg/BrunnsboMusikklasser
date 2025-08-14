@@ -38,7 +38,6 @@
                             <div class="col-md-4 mb-3">
                                 {{ form.event_date.label(class="form-label") }}
                                 {{ form.event_date(class="form-control", step="300") }}
-                                <div class="form-text">Format: ÅÅÅÅ-MM-DD TT:MM</div>
                                 {% if form.event_date.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in form.event_date.errors %}
@@ -149,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add Swedish locale attributes
         datetimeInput.setAttribute('lang', 'sv-SE');
-        datetimeInput.setAttribute('title', 'Format: ÅÅÅÅ-MM-DD TT:MM');
         
         // Force browser to use Swedish locale for this input
         try {
