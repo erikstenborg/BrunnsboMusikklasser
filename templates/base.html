@@ -170,7 +170,7 @@
                     {% else %}
                         <!-- Login Link for Non-Admin Users -->
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'admin_login' %}active{% endif %}" href="{{ url_for('admin_login') }}">
+                            <a class="nav-link {% if request.endpoint == 'login' %}active{% endif %}" href="{{ url_for('login') }}">
                                 <i class="fas fa-sign-in-alt me-1"></i>Logga in
                             </a>
                         </li>

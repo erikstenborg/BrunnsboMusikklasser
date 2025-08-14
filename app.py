@@ -42,7 +42,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 db.init_app(app)
 mail.init_app(app)
 login_manager.init_app(app)
-login_manager.login_view = 'admin_login'
+login_manager.login_view = 'login'
 login_manager.login_message = 'Du måste logga in för att komma åt denna sida.'
 
 with app.app_context():

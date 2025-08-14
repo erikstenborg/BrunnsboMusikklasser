@@ -362,8 +362,8 @@ def events():
     
     return render_template('evenemang.html', events=upcoming_events)
 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     """Admin login page"""
     if current_user.is_authenticated:
         return redirect(url_for('admin_events'))
@@ -584,7 +584,7 @@ def reset_password():
                 db.session.commit()
                 
                 flash('Ditt lösenord har återställts. Du kan nu logga in.', 'success')
-                return redirect(url_for('admin_login'))
+                return redirect(url_for('login'))
             else:
                 flash('Användaren hittades inte.', 'error')
         else:
@@ -675,7 +675,7 @@ def verify_email():
                 session.pop('pending_registration', None)
                 
                 flash('Registrering slutförd! Du kan nu logga in. En administratör kommer att tilldela dig behörigheter inom kort.', 'success')
-                return redirect(url_for('admin_login'))
+                return redirect(url_for('login'))
                 
             except Exception as e:
                 db.session.rollback()

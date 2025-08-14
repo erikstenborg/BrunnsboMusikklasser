@@ -16,7 +16,7 @@ def requires_role(role_name):
         @login_required
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
-                return redirect(url_for('admin_login'))
+                return redirect(url_for('login'))
             
             if not current_user.has_role(role_name):
                 flash(f'Du saknar behörighet för denna sida. Krävs: {role_name}', 'error')
@@ -36,7 +36,7 @@ def requires_any_role(*role_names):
         @login_required
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
-                return redirect(url_for('admin_login'))
+                return redirect(url_for('login'))
             
             if not any(current_user.has_role(role) for role in role_names):
                 roles_str = ', '.join(role_names)
