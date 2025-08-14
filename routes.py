@@ -172,7 +172,16 @@ Telefon: 031-366 86 50
 def confirm_email(code):
     """Handle email confirmation for applications"""
     try:
-        confirmation = verify_confirmation_code(code)
+        # Find the confirmation by code only for email confirmation
+        from models import ConfirmationCode
+        confirmation = ConfirmationCode.query.filter_by(code=code, used=False).first()
+        
+        if confirmation and not confirmation.is_expired():
+            confirmation.used = True
+            confirmation.used_at = datetime.utcnow()
+            db.session.commit()
+        else:
+            confirmation = None
         
         if not confirmation:
             flash('Ogiltig eller utgången bekräftelselänk.', 'error')
@@ -537,7 +546,8 @@ def forgot_password():
         
         if user:
             # Create confirmation code
-            confirmation_code = create_confirmation_code(user.email, 'password_reset')
+            confirmation_obj = create_confirmation_code(user.email, 'password_reset', 1)  # 1 hour expiry
+            confirmation_code = confirmation_obj.code
             
             try:
                 # Send reset email
@@ -545,11 +555,14 @@ def forgot_password():
                     'Återställ ditt lösenord - Brunnsbo Musikklasser',
                     recipients=[user.email]
                 )
+                reset_url = url_for('reset_password', _external=True)
                 msg.html = f"""
                 <h2>Återställ ditt lösenord</h2>
                 <p>Du har begärt att återställa ditt lösenord för ditt konto hos Brunnsbo Musikklasser.</p>
                 <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
-                <p>Använd denna kod för att återställa ditt lösenord. Koden är giltig i 1 timme.</p>
+                <p>Använd denna kod på återställningssidan för att återställa ditt lösenord. Koden är giltig i 1 timme.</p>
+                <p><a href="{reset_url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Återställ lösenord</a></p>
+                <p>Om länken inte fungerar, kopiera och klistra in denna adress i din webbläsare: {reset_url}</p>
                 <p>Om du inte begärde denna återställning kan du ignorera detta meddelande.</p>
                 <hr>
                 <p><em>Brunnsbo Musikklasser</em></p>

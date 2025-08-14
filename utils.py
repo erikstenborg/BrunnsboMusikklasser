@@ -50,22 +50,31 @@ def create_confirmation_code(email, purpose='email_verification', expires_in_hou
     
     return confirmation
 
-def verify_confirmation_code(code):
+def verify_confirmation_code(email, code, purpose=None):
     """
     Verify a confirmation code and mark it as used if valid.
     
     Args:
+        email (str): Email address associated with the code
         code (str): The confirmation code to verify
+        purpose (str, optional): Purpose of the confirmation code
         
     Returns:
         ConfirmationCode or None: The confirmation object if valid, None otherwise
     """
     from models import ConfirmationCode
     
-    confirmation = ConfirmationCode.query.filter_by(
-        code=code,
-        used=False
-    ).first()
+    # Build query filters
+    filters = {
+        'email': email,
+        'code': code,
+        'used': False
+    }
+    
+    if purpose:
+        filters['purpose'] = purpose
+    
+    confirmation = ConfirmationCode.query.filter_by(**filters).first()
     
     if not confirmation:
         return None
