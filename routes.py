@@ -741,7 +741,7 @@ def forgot_password():
                 <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
                 <p>Använd denna kod på återställningssidan för att återställa ditt lösenord. Koden är giltig i 1 timme.</p>
                 <p><a href="{reset_url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Återställ lösenord</a></p>
-                <p>Om länken inte fungerar, kopiera och klistra in denna adress i din webbläsare: {reset_url}</p>
+                <p>Om länken inte fungerar, kopiera och klistra in koden ovan direkt i återställningsformuläret.</p>
                 <p>Om du inte begärde denna återställning kan du ignorera detta meddelande.</p>
                 <hr>
                 <p><em>Brunnsbo Musikklasser</em></p>
@@ -828,6 +828,8 @@ def register():
                 <p>Tack för att du vill registrera ett konto hos oss.</p>
                 <p><strong>Din bekräftelsekod är: {confirmation_code.code}</strong></p>
                 <p>Använd denna kod för att slutföra din registrering. Koden är giltig i 1 timme.</p>
+                <p><a href="{url_for('verify_email', email=form.email.data, code=confirmation_code.code, _external=True)}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Slutför registrering</a></p>
+                <p>Om länken inte fungerar, kopiera och klistra in koden ovan i registreringsformuläret.</p>
                 <p>Efter verifiering kan du logga in, men du behöver vänta på att en administratör tilldelar dig behörigheter.</p>
                 <hr>
                 <p><em>Brunnsbo Musikklasser</em></p>
@@ -852,6 +854,12 @@ def verify_email():
     
     form = VerifyEmailForm()
     form.email.data = session['pending_registration']['email']
+    
+    # Pre-populate fields from URL parameters for convenience
+    email_param = request.args.get('email')
+    code_param = request.args.get('code')
+    if email_param and email_param == form.email.data and not form.confirmation_code.data:
+        form.confirmation_code.data = code_param
     
     if form.validate_on_submit():
         pending = session['pending_registration']
