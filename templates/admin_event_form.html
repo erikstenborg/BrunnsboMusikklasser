@@ -141,18 +141,36 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Ensure datetime-local input respects Swedish locale
+    // Force Swedish date format for datetime-local input
     const datetimeInput = document.querySelector('input[type="datetime-local"]');
     if (datetimeInput) {
         // Set step to 5 minutes (300 seconds) for better UX
         datetimeInput.step = 300;
         
-        // Add placeholder text in Swedish format
+        // Add Swedish locale attributes
+        datetimeInput.setAttribute('lang', 'sv-SE');
         datetimeInput.setAttribute('title', 'Format: ÅÅÅÅ-MM-DD TT:MM');
         
-        // Ensure the input shows in Swedish locale if possible
+        // Force browser to use Swedish locale for this input
+        try {
+            // Set the locale on the input element
+            if (datetimeInput.setCustomValidity) {
+                datetimeInput.addEventListener('input', function() {
+                    // Validate Swedish format
+                    const value = this.value;
+                    if (value && !value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+                        this.setCustomValidity('Använd formatet ÅÅÅÅ-MM-DD TT:MM');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        } catch (e) {
+            console.log('Browser does not support custom validation');
+        }
+        
+        // Ensure existing values are in correct format
         if (datetimeInput.value) {
-            // Parse existing value and ensure it's in correct format
             const date = new Date(datetimeInput.value);
             if (!isNaN(date.getTime())) {
                 // Format to ensure YYYY-MM-DDTHH:MM format

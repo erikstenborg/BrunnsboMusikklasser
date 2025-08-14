@@ -285,6 +285,12 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     
+    <!-- Swedish Locale Configuration -->
+    <script>
+    // Set Swedish locale for the entire page
+    document.documentElement.setAttribute('lang', 'sv-SE');
+    </script>
+    
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -174,7 +174,8 @@ class EventForm(FlaskForm):
     
     event_date = DateTimeLocalField('Datum och tid', validators=[
         DataRequired(message='Datum och tid är obligatoriskt')
-    ], format='%Y-%m-%dT%H:%M')
+    ], format='%Y-%m-%dT%H:%M', 
+    render_kw={'lang': 'sv-SE', 'data-locale': 'sv-SE'})
     
     location = StringField('Plats', validators=[
         Length(max=200, message='Platsen får vara max 200 tecken')
