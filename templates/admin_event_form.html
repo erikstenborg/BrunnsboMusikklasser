@@ -74,6 +74,19 @@
                             </div>
                             
                             <div class="col-md-6 mb-3">
+                                {{ form.coordinator_id.label(class="form-label") }}
+                                {{ form.coordinator_id(class="form-select") }}
+                                {% if form.coordinator_id.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.coordinator_id.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Koordinatorn visas för föräldrar och andra berörda personer.</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
                                 {{ form.ticket_url.label(class="form-label") }}
                                 {{ form.ticket_url(class="form-control") }}
                                 {% if form.ticket_url.errors %}

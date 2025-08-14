@@ -192,6 +192,9 @@ class EventForm(FlaskForm):
         Optional(),
         Length(max=2000, message='Information till föräldrar får vara max 2000 tecken')
     ])
+    
+    # Event coordinator
+    coordinator_id = SelectField('Evenemangskoordinator (valfritt)', coerce=int, validators=[Optional()])
 
 class EditApplicationForm(FlaskForm):
     """Form for editing application details and status"""

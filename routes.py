@@ -375,9 +375,10 @@ def events():
     show_admin_info = False
     
     if current_user.is_authenticated:
-        user_groups = [group.name for group in current_user.groups]
-        show_parent_info = 'parent' in user_groups or 'Admin' in user_groups
-        show_admin_info = 'Admin' in user_groups or 'event_manager' in user_groups
+        # Use same role check as task management
+        from user_utils import can_access_tasks, can_manage_tasks
+        show_parent_info = can_access_tasks(current_user)  # parent, event_manager, or admin
+        show_admin_info = can_manage_tasks(current_user)   # event_manager or admin
     
     return render_template('evenemang.html', 
                          events=upcoming_events,
@@ -924,6 +925,10 @@ def admin_event_new():
     """Create new event"""
     form = EventForm()
     
+    # Populate coordinator choices
+    from user_utils import get_event_manager_choices
+    form.coordinator_id.choices = get_event_manager_choices()
+    
     if form.validate_on_submit():
         try:
             new_event = Event()
@@ -934,6 +939,8 @@ def admin_event_new():
             new_event.ticket_url = form.ticket_url.data
             new_event.is_active = form.is_active.data
             new_event.info_to_parents = form.info_to_parents.data
+            if form.coordinator_id.data and form.coordinator_id.data != 0:
+                new_event.coordinator_id = form.coordinator_id.data
             
             db.session.add(new_event)
             db.session.commit()
@@ -1014,6 +1021,14 @@ def admin_event_edit(event_id):
     event = Event.query.get_or_404(event_id)
     form = EventForm(obj=event)
     
+    # Populate coordinator choices
+    from user_utils import get_event_manager_choices
+    form.coordinator_id.choices = get_event_manager_choices()
+    
+    # Set current coordinator if exists
+    if event.coordinator_id:
+        form.coordinator_id.data = event.coordinator_id
+    
     if form.validate_on_submit():
         try:
             event.title = form.title.data
@@ -1023,6 +1038,10 @@ def admin_event_edit(event_id):
             event.ticket_url = form.ticket_url.data
             event.is_active = form.is_active.data
             event.info_to_parents = form.info_to_parents.data
+            if form.coordinator_id.data and form.coordinator_id.data != 0:
+                event.coordinator_id = form.coordinator_id.data
+            else:
+                event.coordinator_id = None
             
             db.session.commit()
             

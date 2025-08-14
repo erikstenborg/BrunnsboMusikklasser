@@ -25,6 +25,10 @@ class Event(db.Model):
     # Parent-specific fields
     info_to_parents = db.Column(Text)  # Information visible only to parents
     
+    # Event coordinator (visible to parents, event_managers, and admins)
+    coordinator_id = db.Column(Integer, ForeignKey('users.id'), nullable=True)
+    coordinator = relationship('User', foreign_keys=[coordinator_id])
+    
     # Relationship with tasks
     tasks = relationship('EventTask', back_populates='event', cascade='all, delete-orphan')
     

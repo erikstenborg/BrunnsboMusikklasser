@@ -54,3 +54,31 @@ def get_user_choices_for_forms():
         for user in users
     ])
     return choices
+
+def get_event_manager_choices():
+    """
+    Get event managers for coordinator selection
+    Returns list of (id, display_name) tuples for event coordinators
+    """
+    coordinators = []
+    for group_name in ['event_manager', 'admin']:
+        group = Group.query.filter_by(name=group_name).first()
+        if group:
+            coordinators.extend([user for user in group.users if user.active])
+    
+    # Remove duplicates
+    seen_users = set()
+    unique_coordinators = []
+    for user in coordinators:
+        if user.id not in seen_users:
+            unique_coordinators.append(user)
+            seen_users.add(user.id)
+    
+    unique_coordinators = sorted(unique_coordinators, key=lambda u: (u.first_name, u.last_name))
+    
+    choices = [(0, 'Ingen koordinator vald')]
+    choices.extend([
+        (user.id, f"{user.first_name} {user.last_name}") 
+        for user in unique_coordinators
+    ])
+    return choices

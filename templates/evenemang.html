@@ -48,6 +48,14 @@
                                 </div>
                                 {% endif %}
                                 
+                                <!-- Coordinator information -->
+                                {% if show_parent_info and event.coordinator %}
+                                <div class="alert alert-primary py-2 mb-3">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    <strong>Evenemangskoordinator:</strong> {{ event.coordinator.first_name }} {{ event.coordinator.last_name }}
+                                </div>
+                                {% endif %}
+                                
                                 <!-- Parent-specific information -->
                                 {% if show_parent_info and event.info_to_parents %}
                                 <div class="alert alert-warning py-2 mb-3">
