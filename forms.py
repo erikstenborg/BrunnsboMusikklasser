@@ -186,6 +186,12 @@ class EventForm(FlaskForm):
     ])
     
     is_active = BooleanField('Aktivt evenemang', default=True)
+    
+    # Parent-specific information
+    info_to_parents = TextAreaField('Information till föräldrar (visas endast för föräldrar)', validators=[
+        Optional(),
+        Length(max=2000, message='Information till föräldrar får vara max 2000 tecken')
+    ])
 
 class EditApplicationForm(FlaskForm):
     """Form for editing application details and status"""
@@ -216,3 +222,57 @@ class EditApplicationForm(FlaskForm):
         DataRequired(message='Ansökningsår är obligatoriskt'),
         Length(max=9, message='Format: YYYY/YYYY')
     ])
+
+class CreateUserForm(FlaskForm):
+    """Form for creating new users with role assignment"""
+    
+    username = StringField('Användarnamn', validators=[
+        DataRequired(message='Användarnamn är obligatoriskt'),
+        Length(min=3, max=64, message='Användarnamn måste vara mellan 3 och 64 tecken')
+    ])
+    
+    email = EmailField('E-postadress', validators=[
+        DataRequired(message='E-postadress är obligatorisk'),
+        Email(message='Ange en giltig e-postadress')
+    ])
+    
+    first_name = StringField('Förnamn', validators=[
+        Optional(),
+        Length(max=100, message='Förnamnet får vara max 100 tecken')
+    ])
+    
+    last_name = StringField('Efternamn', validators=[
+        Optional(),
+        Length(max=100, message='Efternamnet får vara max 100 tecken')
+    ])
+    
+    password = PasswordField('Lösenord', validators=[
+        DataRequired(message='Lösenord är obligatoriskt'),
+        Length(min=8, message='Lösenordet måste vara minst 8 tecken långt')
+    ])
+    
+    confirm_password = PasswordField('Bekräfta lösenord', validators=[
+        DataRequired(message='Bekräfta lösenordet'),
+        EqualTo('password', message='Lösenorden matchar inte')
+    ])
+    
+    active = BooleanField('Aktiv användare', default=True)
+
+class EventTaskForm(FlaskForm):
+    """Form for creating and editing event tasks"""
+    
+    title = StringField('Uppgiftstitel', validators=[
+        DataRequired(message='Titel är obligatorisk'),
+        Length(min=3, max=200, message='Titeln måste vara mellan 3 och 200 tecken')
+    ])
+    
+    description = TextAreaField('Beskrivning', validators=[
+        Optional(),
+        Length(max=500, message='Beskrivningen får vara max 500 tecken')
+    ])
+    
+    # Optional: assign to specific user
+    assigned_to_user_id = SelectField('Tilldela till användare (valfritt)', 
+                                    choices=[], 
+                                    coerce=lambda x: int(x) if x else None,
+                                    validators=[Optional()])

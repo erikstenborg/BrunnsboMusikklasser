@@ -3,9 +3,13 @@ from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
-from models import Event, Application, NewsPost, Contact, AdminUser, ConfirmationCode
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm
+from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm
 from utils import create_confirmation_code, verify_confirmation_code
+from permissions import (
+    admin_required, applications_manager_required, event_manager_required, 
+    parent_access_required, authenticated_required, requires_any_role
+)
 from datetime import datetime, timedelta
 import logging
 
@@ -198,7 +202,7 @@ def confirm_email(code):
         return redirect(url_for('index'))
 
 @app.route('/admin/applications')
-@login_required
+@applications_manager_required
 def admin_applications():
     """Admin page to view and manage applications"""
     page = request.args.get('page', 1, type=int)
@@ -240,7 +244,7 @@ def admin_applications():
                          status_options=status_options)
 
 @app.route('/admin/applications/<int:application_id>', methods=['GET', 'POST'])
-@login_required
+@applications_manager_required
 def admin_edit_application(application_id):
     """Edit specific application"""
     application = Application.query.get_or_404(application_id)
@@ -367,7 +371,7 @@ def admin_login():
     form = LoginForm()
     
     if form.validate_on_submit():
-        user = AdminUser.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(username=form.username.data).first()
         
         if user and user.check_password(form.password.data) and user.active:
             login_user(user)
@@ -384,7 +388,7 @@ def admin_login():
     return render_template('admin_login.html', form=form)
 
 @app.route('/admin/logout')
-@login_required
+@authenticated_required
 def admin_logout():
     """Admin logout"""
     logout_user()
@@ -392,14 +396,136 @@ def admin_logout():
     return redirect(url_for('index'))
 
 @app.route('/admin/events')
-@login_required
+@event_manager_required
 def admin_events():
     """Admin page for managing events"""
     events = Event.query.order_by(Event.event_date.desc()).all()
     return render_template('admin_events.html', events=events)
 
+# User management routes
+@app.route('/admin/users/<int:user_id>/roles', methods=['GET', 'POST'])
+@admin_required
+def admin_user_roles(user_id):
+    """Manage user roles"""
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'POST':
+        # Get selected roles from form
+        selected_roles = request.form.getlist('roles')
+        
+        # Clear current roles
+        user.groups.clear()
+        
+        # Add selected roles
+        for role_name in selected_roles:
+            group = Group.query.filter_by(name=role_name).first()
+            if group:
+                user.groups.append(group)
+        
+        db.session.commit()
+        flash(f'Roller uppdaterade för {user.username}', 'success')
+        return redirect(url_for('admin_users'))
+    
+    # Get all available groups
+    all_groups = Group.query.all()
+    user_groups = [group.name for group in user.groups]
+    
+    return render_template('admin_user_roles.html', 
+                         user=user, 
+                         all_groups=all_groups,
+                         user_groups=user_groups)
+
+@app.route('/profile')
+@authenticated_required
+def user_profile():
+    """User profile page for all authenticated users"""
+    return render_template('user_profile.html')
+
+# Parent-specific routes
+@app.route('/events/parent-info')
+@parent_access_required
+def events_parent_info():
+    """Parent-specific view of events with additional information"""
+    upcoming_events = Event.query.filter(
+        Event.event_date > datetime.utcnow(),
+        Event.is_active == True
+    ).order_by(Event.event_date.asc()).all()
+    
+    return render_template('events_parent_info.html', events=upcoming_events)
+
+@app.route('/events/<int:event_id>/tasks')
+@parent_access_required
+def event_tasks(event_id):
+    """View and manage tasks for a specific event"""
+    event = Event.query.get_or_404(event_id)
+    tasks = EventTask.query.filter_by(event_id=event_id).all()
+    
+    return render_template('event_tasks.html', event=event, tasks=tasks)
+
+@app.route('/events/<int:event_id>/tasks/<int:task_id>/complete', methods=['POST'])
+@parent_access_required
+def complete_task(event_id, task_id):
+    """Mark a task as completed"""
+    task = EventTask.query.get_or_404(task_id)
+    
+    if not task.completed:
+        task.completed = True
+        task.completed_at = datetime.utcnow()
+        task.completed_by_user_id = current_user.id
+        db.session.commit()
+        flash('Uppgift markerad som slutförd!', 'success')
+    
+    return redirect(url_for('event_tasks', event_id=event_id))
+
+# Task management routes for event managers
+@app.route('/admin/events/<int:event_id>/tasks/new', methods=['GET', 'POST'])
+@event_manager_required
+def admin_create_task(event_id):
+    """Create new task for an event"""
+    event = Event.query.get_or_404(event_id)
+    form = EventTaskForm()
+    
+    # Populate user choices for assignment (parents only)
+    parent_group = Group.query.filter_by(name='parent').first()
+    if parent_group:
+        form.assigned_to_user_id.choices = [('', 'Ingen tilldelning')] + [
+            (str(user.id), f"{user.username} ({user.email})") 
+            for user in parent_group.users if user.active
+        ]
+    
+    if form.validate_on_submit():
+        try:
+            task = EventTask()
+            task.event_id = event_id
+            task.title = form.title.data
+            task.description = form.description.data
+            if form.assigned_to_user_id.data:
+                task.assigned_to_user_id = form.assigned_to_user_id.data
+            
+            db.session.add(task)
+            db.session.commit()
+            
+            flash('Uppgift skapad!', 'success')
+            return redirect(url_for('admin_events'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error creating task: {str(e)}")
+            flash('Ett fel uppstod när uppgiften skulle skapas.', 'error')
+    
+    return render_template('admin_task_form.html', form=form, event=event, title='Skapa uppgift')
+
+@app.route('/admin/events/<int:event_id>/tasks')
+@event_manager_required
+def admin_event_tasks(event_id):
+    """Manage tasks for a specific event"""
+    event = Event.query.get_or_404(event_id)
+    tasks = EventTask.query.filter_by(event_id=event_id).all()
+    
+    return render_template('admin_event_tasks.html', event=event, tasks=tasks)
+
 @app.route('/admin/events/new', methods=['GET', 'POST'])
-@login_required
+@event_manager_required
 def admin_event_new():
     """Create new event"""
     form = EventForm()
@@ -413,6 +539,7 @@ def admin_event_new():
             new_event.location = form.location.data
             new_event.ticket_url = form.ticket_url.data
             new_event.is_active = form.is_active.data
+            new_event.info_to_parents = form.info_to_parents.data
             
             db.session.add(new_event)
             db.session.commit()
@@ -428,7 +555,7 @@ def admin_event_new():
     return render_template('admin_event_form.html', form=form, title='Skapa nytt evenemang')
 
 @app.route('/admin/change-password', methods=['GET', 'POST'])
-@login_required
+@authenticated_required
 def admin_change_password():
     """Change admin password"""
     form = ChangePasswordForm()
@@ -445,26 +572,28 @@ def admin_change_password():
     return render_template('admin_change_password.html', form=form)
 
 @app.route('/admin/create-user', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def admin_create_user():
-    """Create new admin user"""
-    form = CreateAdminForm()
+    """Create new user"""
+    form = CreateUserForm()
     
     if form.validate_on_submit():
         
         # Check if username or email already exists
-        existing_user = AdminUser.query.filter(
-            (AdminUser.username == form.username.data) | 
-            (AdminUser.email == form.email.data)
+        existing_user = User.query.filter(
+            (User.username == form.username.data) | 
+            (User.email == form.email.data)
         ).first()
         
         if existing_user:
             flash('Användarnamn eller e-postadress finns redan.', 'error')
         else:
             try:
-                new_user = AdminUser()
+                new_user = User()
                 new_user.username = form.username.data
                 new_user.email = form.email.data
+                new_user.first_name = form.first_name.data
+                new_user.last_name = form.last_name.data
                 new_user.set_password(form.password.data)
                 new_user.active = form.active.data
                 
@@ -482,14 +611,14 @@ def admin_create_user():
     return render_template('admin_create_user.html', form=form)
 
 @app.route('/admin/users')
-@login_required
+@admin_required
 def admin_users():
     """List all admin users"""
-    users = AdminUser.query.all()
+    users = User.query.all()
     return render_template('admin_users.html', users=users)
 
 @app.route('/admin/events/edit/<int:event_id>', methods=['GET', 'POST'])
-@login_required
+@event_manager_required
 def admin_event_edit(event_id):
     """Edit existing event"""
     event = Event.query.get_or_404(event_id)
@@ -503,6 +632,7 @@ def admin_event_edit(event_id):
             event.location = form.location.data
             event.ticket_url = form.ticket_url.data
             event.is_active = form.is_active.data
+            event.info_to_parents = form.info_to_parents.data
             
             db.session.commit()
             
@@ -517,7 +647,7 @@ def admin_event_edit(event_id):
     return render_template('admin_event_form.html', form=form, event=event, title='Redigera evenemang')
 
 @app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
-@login_required
+@event_manager_required
 def admin_event_delete(event_id):
     """Delete event"""
     event = Event.query.get_or_404(event_id)

@@ -53,7 +53,7 @@ with app.app_context():
     # Set up user loader for Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
-        return models.AdminUser.query.get(int(user_id))
+        return models.User.query.get(int(user_id))
     
     # Create all tables
     db.create_all()

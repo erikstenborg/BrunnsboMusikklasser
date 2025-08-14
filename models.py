@@ -1,8 +1,15 @@
 from app import db
 from datetime import datetime
-from sqlalchemy import String, Text, DateTime, Boolean, Integer
+from sqlalchemy import String, Text, DateTime, Boolean, Integer, Table, ForeignKey
+from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+
+# Association table for many-to-many relationship between users and groups
+user_groups = Table('user_groups', db.metadata,
+    db.Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    db.Column('group_id', Integer, ForeignKey('groups.id'), primary_key=True)
+)
 
 class Event(db.Model):
     """Model for storing upcoming events and concerts"""
@@ -14,6 +21,12 @@ class Event(db.Model):
     ticket_url = db.Column(String(500))
     is_active = db.Column(Boolean, default=True)
     created_at = db.Column(DateTime, default=datetime.utcnow)
+    
+    # Parent-specific fields
+    info_to_parents = db.Column(Text)  # Information visible only to parents
+    
+    # Relationship with tasks
+    tasks = relationship('EventTask', back_populates='event', cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Evenemang {self.title}>'
@@ -96,17 +109,22 @@ class ConfirmationCode(db.Model):
     def __repr__(self):
         return f'<ConfirmationCode {self.code[:8]}... - {self.email}>'
 
-class AdminUser(UserMixin, db.Model):
-    """Model for admin users who can manage events"""
-    __tablename__ = 'admin_users'
+class User(UserMixin, db.Model):
+    """Model for all users in the system"""
+    __tablename__ = 'users'
     
     id = db.Column(Integer, primary_key=True)
     username = db.Column(String(64), unique=True, nullable=False)
     email = db.Column(String(120), unique=True, nullable=False)
+    first_name = db.Column(String(100))
+    last_name = db.Column(String(100))
     password_hash = db.Column(String(256), nullable=False)
     active = db.Column(Boolean, default=True)
     created_at = db.Column(DateTime, default=datetime.utcnow)
     last_login = db.Column(DateTime)
+    
+    # Many-to-many relationship with groups
+    groups = relationship('Group', secondary=user_groups, back_populates='users')
     
     def set_password(self, password):
         """Set password hash"""
@@ -116,5 +134,66 @@ class AdminUser(UserMixin, db.Model):
         """Check if provided password matches hash"""
         return check_password_hash(self.password_hash, password)
     
+    def has_role(self, role_name):
+        """Check if user has a specific role"""
+        return any(group.name == role_name for group in self.groups)
+    
+    def get_roles(self):
+        """Get list of role names for this user"""
+        return [group.name for group in self.groups]
+    
+    def is_admin(self):
+        """Check if user is an admin"""
+        return self.has_role('Admin')
+    
+    def is_applications_manager(self):
+        """Check if user can manage applications"""
+        return self.has_role('applications_manager')
+    
+    def is_event_manager(self):
+        """Check if user can manage events"""
+        return self.has_role('event_manager')
+    
+    def is_parent(self):
+        """Check if user is a parent"""
+        return self.has_role('parent')
+    
     def __repr__(self):
-        return f'<AdminUser {self.username}>'
+        return f'<User {self.username}>'
+
+class Group(db.Model):
+    """Model for user groups/roles"""
+    __tablename__ = 'groups'
+    
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String(64), unique=True, nullable=False)
+    description = db.Column(String(200))
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+    
+    # Many-to-many relationship with users
+    users = relationship('User', secondary=user_groups, back_populates='groups')
+    
+    def __repr__(self):
+        return f'<Group {self.name}>'
+
+class EventTask(db.Model):
+    """Model for tasks associated with events that parents can manage"""
+    __tablename__ = 'event_tasks'
+    
+    id = db.Column(Integer, primary_key=True)
+    event_id = db.Column(Integer, ForeignKey('event.id'), nullable=False)
+    title = db.Column(String(200), nullable=False)
+    description = db.Column(Text)
+    assigned_to_user_id = db.Column(Integer, ForeignKey('users.id'))
+    completed = db.Column(Boolean, default=False)
+    completed_at = db.Column(DateTime)
+    completed_by_user_id = db.Column(Integer, ForeignKey('users.id'))
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    event = relationship('Event', back_populates='tasks')
+    assigned_to = relationship('User', foreign_keys=[assigned_to_user_id])
+    completed_by = relationship('User', foreign_keys=[completed_by_user_id])
+    
+    def __repr__(self):
+        return f'<EventTask {self.title}>'
