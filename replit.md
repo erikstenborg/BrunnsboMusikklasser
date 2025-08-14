@@ -32,6 +32,9 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **Searchable User Selection**: Implemented JavaScript-powered searchable dropdown for user assignment to handle hundreds of users efficiently
 - **Universal Task Menu Access**: Made task menu ("Mina uppgifter") visible to users with parent, event_manager, or admin roles
 - **Refactored Route Permissions**: Updated all task-related routes to use consistent role-based access control with requires_any_role decorator
+- **Event Coordinator System**: Added coordinator_id field to events with relationship to User model for assigning event coordinators from event_manager or admin roles
+- **Enhanced Event Management**: Event coordinators are visible to parents, event managers, and admins; form includes searchable coordinator selection dropdown
+- **Updated Task Contact Information**: Changed all task-related contact text from "Kontakta skolan" to "Kontakta koordinator av evenemanget" for better event organization
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
