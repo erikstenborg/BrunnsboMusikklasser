@@ -42,11 +42,8 @@ def create_confirmation_code(email, purpose='email_verification', expires_in_hou
     # Remove any existing codes for this email and purpose
     ConfirmationCode.query.filter_by(email=email, purpose=purpose, used=False).delete()
     
-    # Create new confirmation code - use 6-digit numeric for password reset
-    if purpose == 'password_reset':
-        code = generate_confirmation_code(length=6, numeric_only=True)
-    else:
-        code = generate_confirmation_code()
+    # Create new confirmation code - use 32-character alphanumeric for all purposes
+    code = generate_confirmation_code()
     
     confirmation = ConfirmationCode(
         code=code,

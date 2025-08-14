@@ -290,7 +290,7 @@ class ResetPasswordForm(FlaskForm):
     
     confirmation_code = StringField('Bekräftelsekod', validators=[
         DataRequired(message='Bekräftelsekod är obligatorisk'),
-        Length(min=6, max=6, message='Bekräftelsekoden måste vara 6 tecken')
+        Length(min=32, max=32, message='Bekräftelsekoden måste vara 32 tecken')
     ])
     
     new_password = PasswordField('Nytt lösenord', validators=[
@@ -341,5 +341,5 @@ class VerifyEmailForm(FlaskForm):
     
     confirmation_code = StringField('Bekräftelsekod', validators=[
         DataRequired(message='Bekräftelsekod är obligatorisk'),
-        Length(min=6, max=6, message='Bekräftelsekoden måste vara 6 tecken')
+        Length(min=32, max=32, message='Bekräftelsekoden måste vara 32 tecken')
     ])

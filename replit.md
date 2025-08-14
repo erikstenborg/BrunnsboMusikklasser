@@ -15,8 +15,9 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **Template Updates**: Modified all login and registration templates to use email-based authentication
 - **Outdated File Removal**: Cleaned up obsolete setup_admin.py, create_production_admin.py, and setup_rbac_system.py files
 - **RBAC System**: Maintained comprehensive Role-Based Access Control with Admin, applications_manager, event_manager, and parent roles
-- **Password Reset**: Email-based password reset functionality with verification codes
+- **Password Reset Enhancement**: Complete email-based password reset with 32-character confirmation codes that auto-populate from email links
 - **User Registration**: New users can register with email verification but receive no permissions until admin assigns roles
+- **Unified Confirmation Codes**: Standardized both password reset and email verification to use 32-character alphanumeric codes for better copy/paste usability
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
