@@ -375,8 +375,8 @@ def events():
     
     if current_user.is_authenticated:
         user_groups = [group.name for group in current_user.groups]
-        show_parent_info = 'parent' in user_groups or 'admin' in user_groups
-        show_admin_info = 'admin' in user_groups or 'event_manager' in user_groups
+        show_parent_info = 'parent' in user_groups or 'Admin' in user_groups
+        show_admin_info = 'Admin' in user_groups or 'event_manager' in user_groups
     
     return render_template('evenemang.html', 
                          events=upcoming_events,

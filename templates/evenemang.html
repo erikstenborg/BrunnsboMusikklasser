@@ -9,6 +9,16 @@
             <div class="text-center mb-5">
                 <h1 class="display-4 text-gold mb-3">Kommande Evenemang</h1>
                 <p class="lead text-muted">Missa inte våra kommande konserter och evenemang</p>
+                
+                <!-- Debug info (remove in production) -->
+                {% if current_user.is_authenticated %}
+                    <div class="alert alert-info">
+                        <small>Debug: Inloggad som {{ current_user.first_name }} {{ current_user.last_name }} 
+                        | Grupper: {% for group in current_user.groups %}{{ group.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+                        | show_parent_info: {{ show_parent_info }}
+                        | show_admin_info: {{ show_admin_info }}</small>
+                    </div>
+                {% endif %}
             </div>
 
             {% if events %}
@@ -48,7 +58,16 @@
                                 </div>
                                 {% endif %}
                                 
-                                <!-- Parent/Admin specific information -->
+                                <!-- Parent-specific information -->
+                                {% if show_parent_info and event.info_to_parents %}
+                                <div class="alert alert-warning py-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Information för föräldrar:</strong><br>
+                                    {{ event.info_to_parents }}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Parent/Admin specific tasks -->
                                 {% if show_parent_info and event.tasks %}
                                 <div class="alert alert-success py-2 mb-3">
                                     <i class="fas fa-tasks me-2"></i>
