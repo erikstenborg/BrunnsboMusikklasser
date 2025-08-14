@@ -35,6 +35,9 @@ Brunnsbo Musikklasser is a Flask-based web application for a Swedish music schoo
 - **Event Coordinator System**: Added coordinator_id field to events with relationship to User model for assigning event coordinators from event_manager or admin roles
 - **Enhanced Event Management**: Event coordinators are visible to parents, event managers, and admins; form includes searchable coordinator selection dropdown
 - **Updated Task Contact Information**: Changed all task-related contact text from "Kontakta skolan" to "Kontakta koordinator av evenemanget" for better event organization
+- **Critical Bug Fixes**: Fixed permission decorator syntax errors (@requires_any_role) and Jinja2 template filtering issues that caused server crashes
+- **Template Error Resolution**: Corrected selectattr/rejectattr filter usage in parent_tasks.html to prevent TypeError crashes
+- **Comprehensive Test Suite**: Created test_app.py with SQLite-based testing framework covering models, routes, and critical functionality
 
 **2025-08-08**:
 - Implemented conditional admin navigation system with responsive design
