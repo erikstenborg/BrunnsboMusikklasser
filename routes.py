@@ -470,7 +470,7 @@ def user_profile():
 # Remove the separate parent info route since we integrated it into the main events page
 
 @app.route('/events/<int:event_id>/tasks')
-@requires_any_role(['parent', 'event_manager', 'admin'])
+@requires_any_role('parent', 'event_manager', 'admin')
 def event_tasks(event_id):
     """View and manage tasks for a specific event"""
     event = Event.query.get_or_404(event_id)
@@ -479,7 +479,7 @@ def event_tasks(event_id):
     return render_template('event_tasks.html', event=event, tasks=tasks)
 
 @app.route('/events/<int:event_id>/tasks/<int:task_id>/complete', methods=['POST'])
-@requires_any_role(['parent', 'event_manager', 'admin'])
+@requires_any_role('parent', 'event_manager', 'admin')
 def complete_task(event_id, task_id):
     """Mark a task as completed"""
     task = EventTask.query.get_or_404(task_id)
@@ -495,7 +495,7 @@ def complete_task(event_id, task_id):
 
 # Task management routes for event managers
 @app.route('/admin/events/<int:event_id>/tasks/new', methods=['GET', 'POST'])
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_create_task(event_id):
     """Create new task for an event"""
     event = Event.query.get_or_404(event_id)
@@ -586,7 +586,7 @@ def admin_edit_task(task_id):
     return render_template('admin_task_form.html', form=form, event=event, task=task, title='Redigera uppgift')
 
 @app.route('/admin/tasks/<int:task_id>/delete', methods=['POST'])
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_delete_task(task_id):
     """Delete a task"""
     task = EventTask.query.get_or_404(task_id)
@@ -604,7 +604,7 @@ def admin_delete_task(task_id):
     return redirect(url_for('admin_event_tasks', event_id=event_id))
 
 @app.route('/user/tasks')
-@requires_any_role(['parent', 'event_manager', 'admin'])
+@requires_any_role('parent', 'event_manager', 'admin')
 def user_tasks():
     """Personal task management page for parents"""
     # Get all tasks assigned to the current user
@@ -613,7 +613,7 @@ def user_tasks():
     return render_template('parent_tasks.html', tasks=tasks)
 
 @app.route('/user/tasks/<int:task_id>/complete', methods=['POST'])
-@requires_any_role(['parent', 'event_manager', 'admin'])
+@requires_any_role('parent', 'event_manager', 'admin')
 def complete_user_task(task_id):
     """Allow parents to complete their assigned tasks"""
     task = EventTask.query.get_or_404(task_id)
@@ -642,7 +642,7 @@ def complete_user_task(task_id):
     return redirect(url_for('user_tasks'))
 
 @app.route('/admin/tasks/<int:task_id>/reassign', methods=['POST'])
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_reassign_task(task_id):
     """Reassign a task to a different user"""
     task = EventTask.query.get_or_404(task_id)
@@ -685,7 +685,7 @@ def admin_reassign_task(task_id):
     return redirect(url_for('admin_event_tasks', event_id=task.event_id))
 
 @app.route('/admin/tasks/<int:task_id>/toggle-complete', methods=['POST'])
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_toggle_task_completion(task_id):
     """Toggle task completion status for event managers"""
     task = EventTask.query.get_or_404(task_id)
