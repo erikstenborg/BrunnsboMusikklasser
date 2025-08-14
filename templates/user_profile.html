@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Min profil - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4">
+                <i class="fas fa-user me-2"></i>Min profil
+            </h2>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Användarinformation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Användarnamn:</strong> {{ current_user.username }}</p>
+                            <p><strong>E-postadress:</strong> {{ current_user.email }}</p>
+                            {% if current_user.first_name or current_user.last_name %}
+                                <p><strong>Namn:</strong> {{ current_user.first_name or '' }} {{ current_user.last_name or '' }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Medlem sedan:</strong> {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+                            {% if current_user.last_login %}
+                                <p><strong>Senaste inloggning:</strong> {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Mina roller
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if current_user.groups %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for group in current_user.groups %}
+                                {% if group.name == 'Admin' %}
+                                    <span class="badge bg-danger">Administratör</span>
+                                {% elif group.name == 'applications_manager' %}
+                                    <span class="badge bg-info">Ansökningshanterare</span>
+                                {% elif group.name == 'event_manager' %}
+                                    <span class="badge bg-success">Eventhanterare</span>
+                                {% elif group.name == 'parent' %}
+                                    <span class="badge bg-warning">Förälder</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mt-3">
+                            <p class="mb-2"><strong>Tillgång:</strong></p>
+                            <ul class="list-unstyled">
+                                {% for group in current_user.groups %}
+                                    {% if group.name == 'Admin' %}
+                                        <li><i class="fas fa-check text-success me-2"></i>Full administrativ åtkomst</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Användarhantering</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Eventhantering</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Ansökningshantering</li>
+                                    {% elif group.name == 'applications_manager' %}
+                                        <li><i class="fas fa-check text-success me-2"></i>Visa och hantera studentansökningar</li>
+                                    {% elif group.name == 'event_manager' %}
+                                        <li><i class="fas fa-check text-success me-2"></i>Skapa och hantera evenemang</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Skapa uppgifter för evenemang</li>
+                                    {% elif group.name == 'parent' %}
+                                        <li><i class="fas fa-check text-success me-2"></i>Se förälder-specifik information</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Hantera eventuppgifter</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Du har inga roller tilldelade än.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Inställningar
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{{ url_for('admin_change_password') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-key me-1"></i>Ändra lösenord
+                        </a>
+                        {% for group in current_user.groups %}
+                            {% if group.name == 'parent' %}
+                                <a href="{{ url_for('events_parent_info') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-calendar me-1"></i>Förälder-information
+                                </a>
+                                {% break %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

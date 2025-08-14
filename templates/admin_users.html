@@ -6,10 +6,10 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>
-            <i class="fas fa-users-cog me-2"></i>Administratörer
+            <i class="fas fa-users-cog me-2"></i>Användarhantering
         </h2>
 <a href="{{ url_for('admin_create_user') }}" class="btn btn-success">
-            <i class="fas fa-user-plus me-1"></i>Skapa ny administratör
+            <i class="fas fa-user-plus me-1"></i>Skapa ny användare
         </a>
     </div>
 
@@ -21,6 +21,7 @@
                         <tr>
                             <th>Användarnamn</th>
                             <th>E-postadress</th>
+                            <th>Roller</th>
                             <th>Status</th>
                             <th>Senaste inloggning</th>
                             <th>Skapad</th>
@@ -38,6 +39,23 @@
                             </td>
                             <td>{{ user.email }}</td>
                             <td>
+                                {% if user.groups %}
+                                    {% for group in user.groups %}
+                                        {% if group.name == 'Admin' %}
+                                            <span class="badge bg-danger me-1">{{ group.name }}</span>
+                                        {% elif group.name == 'applications_manager' %}
+                                            <span class="badge bg-info me-1">Ansökan</span>
+                                        {% elif group.name == 'event_manager' %}
+                                            <span class="badge bg-success me-1">Event</span>
+                                        {% elif group.name == 'parent' %}
+                                            <span class="badge bg-warning me-1">Förälder</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">Inga roller</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 {% if user.active %}
                                     <span class="badge bg-success">Aktiv</span>
                                 {% else %}
@@ -53,6 +71,9 @@
                             </td>
                             <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
                             <td>
+                                <a href="{{ url_for('admin_user_roles', user_id=user.id) }}" class="btn btn-sm btn-outline-info me-1" title="Hantera roller">
+                                    <i class="fas fa-user-tag"></i>
+                                </a>
                                 {% if user.id == current_user.id %}
                                     <a href="{{ url_for('admin_change_password') }}" class="btn btn-sm btn-outline-primary" title="Ändra lösenord">
                                         <i class="fas fa-key"></i>

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Hantera roller för {{ user.username }} - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('admin_users') }}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h2 class="mb-0">
+                    <i class="fas fa-user-tag me-2"></i>Hantera roller för {{ user.username }}
+                </h2>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Användarinformation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Användarnamn:</strong> {{ user.username }}</p>
+                            <p><strong>E-postadress:</strong> {{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if user.first_name or user.last_name %}
+                                <p><strong>Namn:</strong> {{ user.first_name or '' }} {{ user.last_name or '' }}</p>
+                            {% endif %}
+                            <p><strong>Status:</strong> 
+                                {% if user.active %}
+                                    <span class="badge bg-success">Aktiv</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inaktiv</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Rolltilldelning
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Tillgängliga roller:</strong></label>
+                            <div class="mt-2">
+                                {% for group in all_groups %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="roles" value="{{ group.name }}" 
+                                           id="role_{{ group.name }}"
+                                           {% if group.name in user_groups %}checked{% endif %}>
+                                    <label class="form-check-label" for="role_{{ group.name }}">
+                                        {% if group.name == 'Admin' %}
+                                            <span class="badge bg-danger me-2">Admin</span>
+                                            <strong>Administratör</strong> - Full åtkomst till alla funktioner
+                                        {% elif group.name == 'applications_manager' %}
+                                            <span class="badge bg-info me-2">Ansökan</span>
+                                            <strong>Ansökningshanterare</strong> - Kan visa och hantera studentansökningar
+                                        {% elif group.name == 'event_manager' %}
+                                            <span class="badge bg-success me-2">Event</span>
+                                            <strong>Eventhanterare</strong> - Kan skapa och hantera evenemang
+                                        {% elif group.name == 'parent' %}
+                                            <span class="badge bg-warning me-2">Förälder</span>
+                                            <strong>Förälder</strong> - Kan se förälder-specifik information och uppgifter
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Avbryt
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Spara roller
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if user.groups %}
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Nuvarande roller
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for group in user.groups %}
+                            {% if group.name == 'Admin' %}
+                                <span class="badge bg-danger">{{ group.name }}</span>
+                            {% elif group.name == 'applications_manager' %}
+                                <span class="badge bg-info">Ansökningshanterare</span>
+                            {% elif group.name == 'event_manager' %}
+                                <span class="badge bg-success">Eventhanterare</span>
+                            {% elif group.name == 'parent' %}
+                                <span class="badge bg-warning">Förälder</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
