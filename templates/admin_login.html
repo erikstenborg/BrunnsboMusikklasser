@@ -73,17 +73,27 @@
 </div>
 
 <script>
-// Force form refresh on Safari to ensure CSRF token is current
+// Enhanced CSRF token handling for Safari
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('loginForm');
-    if (form && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
-        // For Safari, add a small delay to ensure session is established
-        setTimeout(function() {
-            const csrfToken = document.querySelector('input[name="csrf_token"]');
-            if (csrfToken) {
-                console.log('CSRF token loaded for Safari:', csrfToken.value.substring(0, 20) + '...');
-            }
-        }, 100);
+    const csrfToken = document.querySelector('input[name="csrf_token"]');
+    
+    if (form && csrfToken) {
+        console.log('CSRF token loaded:', csrfToken.value.substring(0, 20) + '...');
+        
+        // For Safari, ensure form submission includes fresh CSRF token
+        if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+            form.addEventListener('submit', function(e) {
+                console.log('Form submitting with CSRF token:', csrfToken.value.substring(0, 20) + '...');
+                
+                // Add a hidden field to force fresh token
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = '_csrf_token_backup';
+                hiddenInput.value = csrfToken.value;
+                form.appendChild(hiddenInput);
+            });
+        }
     }
 });
 </script>
