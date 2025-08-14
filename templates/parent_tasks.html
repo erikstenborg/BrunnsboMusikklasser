@@ -55,7 +55,7 @@
                 </div>
                 
                 <!-- Completed Tasks -->
-                {% set completed_tasks = tasks|selectattr('completed_at', 'none', false)|list %}
+                {% set completed_tasks = tasks|rejectattr('completed_at', 'none')|list %}
                 {% if completed_tasks %}
                     <div class="mb-5">
                         <h3 class="text-success mb-3">
