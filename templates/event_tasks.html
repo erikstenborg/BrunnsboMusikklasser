@@ -23,6 +23,9 @@
                     <p><strong>Datum:</strong> {{ event.event_date.strftime('%d %B %Y kl. %H:%M') }}</p>
                     {% if event.location %}<p><strong>Plats:</strong> {{ event.location }}</p>{% endif %}
                     {% if event.description %}<p><strong>Beskrivning:</strong> {{ event.description }}</p>{% endif %}
+                    {% if event.coordinator %}
+                    <p><strong>Koordinator:</strong> {{ event.coordinator.first_name }} {{ event.coordinator.last_name }}</p>
+                    {% endif %}
                 </div>
             </div>
             
