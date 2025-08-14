@@ -373,9 +373,13 @@ def events():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Admin login page"""
+    """User login page"""
     if current_user.is_authenticated:
-        return redirect(url_for('admin_events'))
+        # If already logged in, redirect to homepage unless they have a specific next page
+        next_page = request.args.get('next')
+        if next_page and next_page.startswith('/'):
+            return redirect(next_page)
+        return redirect(url_for('index'))
     
     form = LoginForm()
     
@@ -389,7 +393,7 @@ def login():
             
             next_page = request.args.get('next')
             if not next_page or not next_page.startswith('/'):
-                next_page = url_for('admin_events')
+                next_page = url_for('index')  # Default to homepage instead of admin page
             return redirect(next_page)
         else:
             flash('Felaktig e-postadress eller lösenord.', 'error')

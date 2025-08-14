@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Uppgifter för {{ event.title }} - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5">
+                    <i class="fas fa-tasks me-3"></i>Uppgifter för {{ event.title }}
+                </h1>
+                <a href="{{ url_for('events_parent_info') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Tillbaka till evenemang
+                </a>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Evenemangsinformation</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Datum:</strong> {{ event.event_date.strftime('%d %B %Y kl. %H:%M') }}</p>
+                    {% if event.location %}<p><strong>Plats:</strong> {{ event.location }}</p>{% endif %}
+                    {% if event.description %}<p><strong>Beskrivning:</strong> {{ event.description }}</p>{% endif %}
+                </div>
+            </div>
+            
+            {% if tasks %}
+                <div class="row">
+                    {% for task in tasks %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 {% if task.completed %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-header {% if task.completed %}bg-success text-white{% else %}bg-warning text-dark{% endif %}">
+                                    <h6 class="card-title mb-0">
+                                        {% if task.completed %}
+                                            <i class="fas fa-check-circle me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-clock me-2"></i>
+                                        {% endif %}
+                                        {{ task.title }}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if task.description %}
+                                        <p class="card-text">{{ task.description }}</p>
+                                    {% endif %}
+                                    
+                                    {% if task.assigned_to and task.assigned_to.id == current_user.id %}
+                                        <div class="alert alert-info py-2">
+                                            <small><i class="fas fa-user me-1"></i>Tilldelad till dig</small>
+                                        </div>
+                                    {% elif task.assigned_to %}
+                                        <div class="alert alert-secondary py-2">
+                                            <small><i class="fas fa-user me-1"></i>Tilldelad till {{ task.assigned_to.first_name }} {{ task.assigned_to.last_name }}</small>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if task.completed %}
+                                        <div class="text-success">
+                                            <small>
+                                                <i class="fas fa-check me-1"></i>Slutförd {{ task.completed_at.strftime('%d/%m %Y %H:%M') }}
+                                                {% if task.completed_by %}
+                                                    av {{ task.completed_by.first_name }} {{ task.completed_by.last_name }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('complete_task', event_id=event.id, task_id=task.id) }}" class="mt-3">
+                                            <button type="submit" class="btn btn-success btn-sm" 
+                                                    onclick="return confirm('Är du säker på att du vill markera denna uppgift som slutförd?')">
+                                                <i class="fas fa-check me-1"></i>Markera som slutförd
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <small class="text-muted">
+                                        Skapad: {{ task.created_at.strftime('%d/%m %Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tasks fa-4x text-muted mb-3"></i>
+                    <h3 class="text-muted">Inga uppgifter</h3>
+                    <p class="text-muted">Det finns inga uppgifter kopplade till detta evenemang.</p>
+                    <a href="{{ url_for('events_parent_info') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Tillbaka till evenemang
+                    </a>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4 p-3 bg-light rounded">
+                <h5><i class="fas fa-info-circle me-2"></i>Om uppgifter</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Uppgifter hjälper till att organisera evenemang</li>
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Du kan markera uppgifter som slutförda när de är klara</li>
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Kontakta skolan om du har frågor om uppgifterna</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
