@@ -815,7 +815,7 @@ def register():
                     'last_name': form.last_name.data,
                     'email': form.email.data,
                     'password': form.password.data,
-                    'confirmation_code': confirmation_code
+                    'confirmation_code': confirmation_code.code  # Store only the string, not the object.code  # Store only the string, not the object
                 }
                 
                 # Send verification email
@@ -826,7 +826,7 @@ def register():
                 msg.html = f"""
                 <h2>Välkommen till Brunnsbo Musikklasser!</h2>
                 <p>Tack för att du vill registrera ett konto hos oss.</p>
-                <p><strong>Din bekräftelsekod är: {confirmation_code}</strong></p>
+                <p><strong>Din bekräftelsekod är: {confirmation_code.code}</strong></p>
                 <p>Använd denna kod för att slutföra din registrering. Koden är giltig i 1 timme.</p>
                 <p>Efter verifiering kan du logga in, men du behöver vänta på att en administratör tilldelar dig behörigheter.</p>
                 <hr>
