@@ -38,7 +38,7 @@
                             <div class="col-md-4 mb-3">
                                 {{ form.event_date.label(class="form-label") }}
                                 {{ form.event_date(class="form-control", step="300") }}
-                                <div class="form-text">Format: ÅÅÅÅ-MM-DD TT:MM (24-timmarsformat)</div>
+                                <div class="form-text">Format: ÅÅÅÅ-MM-DD TT:MM</div>
                                 {% if form.event_date.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in form.event_date.errors %}
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         datetimeInput.step = 300;
         
         // Add placeholder text in Swedish format
-        datetimeInput.setAttribute('title', 'Format: ÅÅÅÅ-MM-DD TT:MM (24-timmarsformat)');
+        datetimeInput.setAttribute('title', 'Format: ÅÅÅÅ-MM-DD TT:MM');
         
         // Ensure the input shows in Swedish locale if possible
         if (datetimeInput.value) {
