@@ -10,7 +10,7 @@
                 <h1 class="display-5">
                     <i class="fas fa-tasks me-3"></i>Uppgifter för {{ event.title }}
                 </h1>
-                <a href="{{ url_for('events_parent_info') }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('events') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Tillbaka till evenemang
                 </a>
             </div>
@@ -88,7 +88,7 @@
                     <i class="fas fa-tasks fa-4x text-muted mb-3"></i>
                     <h3 class="text-muted">Inga uppgifter</h3>
                     <p class="text-muted">Det finns inga uppgifter kopplade till detta evenemang.</p>
-                    <a href="{{ url_for('events_parent_info') }}" class="btn btn-primary">
+                    <a href="{{ url_for('events') }}" class="btn btn-primary">
                         <i class="fas fa-arrow-left me-2"></i>Tillbaka till evenemang
                     </a>
                 </div>
