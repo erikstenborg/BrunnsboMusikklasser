@@ -532,7 +532,7 @@ def admin_create_task(event_id):
     return render_template('admin_task_form.html', form=form, event=event, title='Skapa uppgift')
 
 @app.route('/admin/events/<int:event_id>/tasks')
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_event_tasks(event_id):
     """Manage tasks for a specific event"""
     event = Event.query.get_or_404(event_id)
@@ -544,7 +544,7 @@ def admin_event_tasks(event_id):
     return render_template('admin_event_tasks.html', event=event, tasks=tasks, assignable_users=assignable_users)
 
 @app.route('/admin/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
-@requires_any_role(['event_manager', 'admin'])
+@requires_any_role('event_manager', 'admin')
 def admin_edit_task(task_id):
     """Edit an existing task"""
     task = EventTask.query.get_or_404(task_id)
