@@ -1192,6 +1192,7 @@ def donations():
             amount=amount_decimal,
             message=message,
             payer_alias=payer_phone,
+            payee_alias=app.config.get('SWISH_PAYEE_ALIAS'),
             user_id=current_user.id if current_user.is_authenticated else None
         )
         

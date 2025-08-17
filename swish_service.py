@@ -28,7 +28,7 @@ class SwishService:
         self.cert_password = current_app.config.get('SWISH_CERT_PASSWORD')
         self.ca_cert_path = current_app.config.get('SWISH_CA_CERT_PATH')
     
-    def create_payment_request(self, amount, message, payer_alias=None, reference=None, 
+    def create_payment_request(self, amount, message, payer_alias=None, payee_alias=None, reference=None, 
                              user_id=None, application_id=None, event_id=None):
         """
         Create a new Swish payment request
@@ -58,7 +58,7 @@ class SwishService:
         payment.id = payment_id
         payment.payee_payment_reference = reference
         payment.payer_alias = payer_alias
-        payment.payee_alias = self.payee_alias
+        payment.payee_alias = payee_alias or self.payee_alias
         payment.amount = amount
         payment.currency = 'SEK'
         payment.message = message[:50]  # Ensure max 50 characters
@@ -75,7 +75,7 @@ class SwishService:
         request_data = {
             "payeePaymentReference": reference,
             "callbackUrl": payment.callback_url,
-            "payeeAlias": self.payee_alias,
+            "payeeAlias": payee_alias or self.payee_alias,
             "amount": str(amount),
             "currency": "SEK",
             "message": message[:50],
