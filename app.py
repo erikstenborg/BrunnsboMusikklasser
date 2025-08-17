@@ -50,6 +50,13 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 
+# Swish m-commerce payment configuration
+app.config['SWISH_TEST_MODE'] = os.environ.get('SWISH_TEST_MODE', 'true').lower() == 'true'
+app.config['SWISH_PAYEE_ALIAS'] = os.environ.get('SWISH_PAYEE_ALIAS')
+app.config['SWISH_CERT_PATH'] = os.environ.get('SWISH_CERT_PATH')
+app.config['SWISH_CERT_PASSWORD'] = os.environ.get('SWISH_CERT_PASSWORD')
+app.config['SWISH_CA_CERT_PATH'] = os.environ.get('SWISH_CA_CERT_PATH')
+
 # initialize the app with extensions
 db.init_app(app)
 mail.init_app(app)

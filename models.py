@@ -35,6 +35,42 @@ class Event(db.Model):
     def __repr__(self):
         return f'<Evenemang {self.title}>'
 
+class SwishPayment(db.Model):
+    """Model for storing Swish payment requests and their status"""
+    id = db.Column(String(32), primary_key=True)  # Swish payment request ID
+    payee_payment_reference = db.Column(String(35), nullable=False, unique=True)  # Merchant reference
+    payer_alias = db.Column(String(15))  # Payer's phone number
+    payee_alias = db.Column(String(15), nullable=False)  # Merchant's Swish number
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
+    currency = db.Column(String(3), nullable=False, default='SEK')
+    message = db.Column(String(50))
+    callback_url = db.Column(String(500), nullable=False)
+    callback_identifier = db.Column(String(36), nullable=False)
+    
+    # Status tracking
+    status = db.Column(String(20), default='CREATED')  # CREATED, PAID, DECLINED, ERROR, CANCELLED
+    payment_reference = db.Column(String(32))  # From Swish when paid
+    error_code = db.Column(String(10))
+    error_message = db.Column(String(200))
+    
+    # Timestamps
+    date_created = db.Column(DateTime, default=datetime.utcnow)
+    date_paid = db.Column(DateTime)
+    date_cancelled = db.Column(DateTime)
+    
+    # Relationship to user/application if applicable
+    user_id = db.Column(Integer, ForeignKey('users.id'), nullable=True)
+    application_id = db.Column(Integer, ForeignKey('application.id'), nullable=True)
+    event_id = db.Column(Integer, ForeignKey('event.id'), nullable=True)
+    
+    # Relationships
+    user = relationship('User', foreign_keys=[user_id])
+    application = relationship('Application', foreign_keys=[application_id])
+    event = relationship('Event', foreign_keys=[event_id])
+    
+    def __repr__(self):
+        return f'<SwishPayment {self.payee_payment_reference} - {self.status}>'
+
 class Application(db.Model):
     """Model for storing student applications"""
     id = db.Column(Integer, primary_key=True)

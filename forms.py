@@ -73,6 +73,82 @@ class ApplicationForm(FlaskForm):
     current_school = StringField('Nuvarande skola',
                                  validators=[Length(max=100)])
 
+
+class SwishPaymentForm(FlaskForm):
+    """Form for Swish payment processing"""
+    
+    amount = StringField(
+        'Belopp (SEK)',
+        validators=[
+            DataRequired(message='Belopp är obligatoriskt'),
+            Regexp(r'^\d+(\.\d{1,2})?$', message='Ange ett giltigt belopp (t.ex. 100.50)')
+        ])
+    
+    message = StringField(
+        'Meddelande (valfritt)',
+        validators=[
+            Optional(),
+            Length(max=50, message='Meddelandet får vara max 50 tecken')
+        ])
+    
+    payer_phone = StringField(
+        'Telefonnummer (för m-commerce)',
+        validators=[
+            Optional(),
+            Regexp(r'^(\+46|46|0)?[0-9\s\-]{8,15}$', 
+                   message='Ange ett giltigt svenskt telefonnummer')
+        ],
+        description='Lämna tomt för vanlig Swish-betalning via QR-kod')
+
+
+class DonationForm(FlaskForm):
+    """Form for donations to the music school"""
+    
+    amount = SelectField(
+        'Välj belopp',
+        choices=[
+            ('50', '50 SEK'),
+            ('100', '100 SEK'),
+            ('250', '250 SEK'),
+            ('500', '500 SEK'),
+            ('1000', '1000 SEK'),
+            ('custom', 'Annat belopp')
+        ],
+        validators=[DataRequired(message='Välj ett belopp')]
+    )
+    
+    custom_amount = StringField(
+        'Annat belopp (SEK)',
+        validators=[
+            Optional(),
+            Regexp(r'^\d+(\.\d{1,2})?$', message='Ange ett giltigt belopp')
+        ])
+    
+    donor_name = StringField(
+        'Ditt namn (valfritt)',
+        validators=[
+            Optional(),
+            Length(max=50, message='Namnet får vara max 50 tecken')
+        ])
+    
+    donor_phone = StringField(
+        'Telefonnummer (för m-commerce)',
+        validators=[
+            Optional(),
+            Regexp(r'^(\+46|46|0)?[0-9\s\-]{8,15}$', 
+                   message='Ange ett giltigt svenskt telefonnummer')
+        ])
+    
+    message = StringField(
+        'Meddelande (valfritt)',
+        validators=[
+            Optional(),
+            Length(max=40, message='Meddelandet får vara max 40 tecken')
+        ],
+        default='Donation till Brunnsbo Musikklasser')
+    
+    anonymous = BooleanField('Anonym donation')
+
     grade_applying_for = SelectField(
         'Årskurs som du söker till',
         choices=[('4', 'Årskurs 4'), ('5', 'Årskurs 5'), ('6', 'Årskurs 6'),

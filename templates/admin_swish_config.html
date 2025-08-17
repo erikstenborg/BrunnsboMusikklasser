@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Swish Inställningar - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-cog"></i> Swish Konfiguration</h2>
+        <a href="{{ url_for('admin_payments') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Tillbaka till Betalningar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Aktuella Inställningar</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Testläge:</strong></td>
+                            <td>
+                                {% if config.test_mode %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-flask"></i> Aktiverat (Sandbox)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-globe"></i> Inaktiverat (Produktion)
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Swish-nummer (Payee Alias):</strong></td>
+                            <td>
+                                {% if config.payee_alias %}
+                                    <code>{{ config.payee_alias }}</code>
+                                {% else %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Ej konfigurerat
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Certifikat:</strong></td>
+                            <td>
+                                {% if config.cert_configured %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> Konfigurerat
+                                    </span>
+                                {% else %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Ej konfigurerat
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if not config.payee_alias or not config.cert_configured %}
+            <div class="alert alert-danger mt-4">
+                <h5><i class="fas fa-exclamation-triangle"></i> Konfiguration krävs</h5>
+                <p>Swish-integrationen är inte komplett konfigurerad. Följande behöver konfigureras via miljövariabler:</p>
+                <ul class="mb-0">
+                    {% if not config.payee_alias %}
+                        <li><strong>SWISH_PAYEE_ALIAS</strong> - Ditt Swish-nummer för företag</li>
+                    {% endif %}
+                    {% if not config.cert_configured %}
+                        <li><strong>SWISH_CERT_PATH</strong> - Sökväg till Swish-certifikat (.p12 fil)</li>
+                        <li><strong>SWISH_CERT_PASSWORD</strong> - Lösenord för certifikatet</li>
+                        <li><strong>SWISH_CA_CERT_PATH</strong> - Sökväg till Swish CA-certifikat (.pem fil)</li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-book"></i> Konfigurationsguide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>1. Registrera dig hos Swish</h6>
+                    <p><small>Gå till <a href="https://www.getswish.se/foretag/" target="_blank">Swish för företag</a> och registrera ditt företag.</small></p>
+                    
+                    <h6>2. Hämta certifikat</h6>
+                    <p><small>Ladda ner ditt Swish-certifikat från din bank eller Swish-portalen.</small></p>
+                    
+                    <h6>3. Konfigurera miljövariabler</h6>
+                    <p><small>Lägg till följande miljövariabler i din Replit:</small></p>
+                    <ul class="small">
+                        <li><code>SWISH_PAYEE_ALIAS</code></li>
+                        <li><code>SWISH_CERT_PATH</code></li>
+                        <li><code>SWISH_CERT_PASSWORD</code></li>
+                        <li><code>SWISH_CA_CERT_PATH</code></li>
+                        <li><code>SWISH_TEST_MODE</code> (true/false)</li>
+                    </ul>
+                    
+                    <h6>4. Testa integrationen</h6>
+                    <p><small>Använd testläget för att verifiera att allt fungerar innan du går live.</small></p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-link"></i> Användbara Länkar</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="https://developer.swish.nu/" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt"></i> Swish Developer Portal
+                        </a></li>
+                        <li class="mt-2"><a href="https://developer.swish.nu/api/payment-request/v2" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-book"></i> API Dokumentation
+                        </a></li>
+                        <li class="mt-2"><a href="{{ url_for('donations') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-heart"></i> Testa Donationssida
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Configuration Section -->
+    {% if config.payee_alias and config.cert_configured %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-flask"></i> Testa Konfiguration</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Konfigurationen verkar komplett. Du kan nu testa Swish-integrationen genom att gå till donationssidan.
+            </div>
+            
+            <div class="text-center">
+                <a href="{{ url_for('donations') }}" class="btn btn-success">
+                    <i class="fas fa-heart"></i> Testa Donation
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye"></i> Visa Betalningar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

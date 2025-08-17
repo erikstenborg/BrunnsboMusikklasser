@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Betalningshistorik - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-credit-card"></i> Swish Betalningar</h2>
+        <div>
+            <a href="{{ url_for('admin_swish_config') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-cog"></i> Swish Inställningar
+            </a>
+            <a href="{{ url_for('admin_events') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Tillbaka till Admin
+            </a>
+        </div>
+    </div>
+
+    {% if payments %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Datum</th>
+                            <th>Referens</th>
+                            <th>Belopp</th>
+                            <th>Status</th>
+                            <th>Meddelande</th>
+                            <th>Telefon</th>
+                            <th>Användare</th>
+                            <th>Betald</th>
+                            <th>Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <code>{{ payment.payee_payment_reference }}</code>
+                                <br><small class="text-muted">{{ payment.id[:8] }}...</small>
+                            </td>
+                            <td>
+                                <strong>{{ "%.2f"|format(payment.amount) }} SEK</strong>
+                            </td>
+                            <td>
+                                {% if payment.status == 'PAID' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> Betald
+                                    </span>
+                                {% elif payment.status == 'PENDING' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock"></i> Väntar
+                                    </span>
+                                {% elif payment.status == 'DECLINED' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times"></i> Nekad
+                                    </span>
+                                {% elif payment.status == 'ERROR' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Fel
+                                    </span>
+                                {% elif payment.status == 'CANCELLED' %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-ban"></i> Avbruten
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ payment.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.message %}
+                                    {{ payment.message }}
+                                {% else %}
+                                    <em class="text-muted">Inget meddelande</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.payer_alias %}
+                                    <i class="fas fa-mobile-alt"></i> {{ payment.payer_alias }}
+                                {% else %}
+                                    <i class="fas fa-qrcode"></i> QR-kod
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.user %}
+                                    {{ payment.user.first_name }} {{ payment.user.last_name }}
+                                    <br><small class="text-muted">{{ payment.user.email }}</small>
+                                {% else %}
+                                    <em class="text-muted">Anonym</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.date_paid %}
+                                    {{ payment.date_paid.strftime('%Y-%m-%d %H:%M') }}
+                                    {% if payment.payment_reference %}
+                                        <br><small class="text-muted">{{ payment.payment_reference[:8] }}...</small>
+                                    {% endif %}
+                                {% else %}
+                                    <em class="text-muted">-</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('payment_status', payment_id=payment.id) }}" 
+                                       class="btn btn-outline-primary btn-sm"
+                                       title="Visa betalning">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    {% if payment.status == 'PENDING' %}
+                                    <button class="btn btn-outline-danger btn-sm"
+                                            onclick="cancelPayment('{{ payment.id }}')"
+                                            title="Avbryt betalning">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if payment.error_message %}
+                                <div class="mt-1">
+                                    <small class="text-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ payment.error_message[:50] }}{% if payment.error_message|length > 50 %}...{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-check-circle"></i> Betalda</h5>
+                    <h3>{{ payments|selectattr('status', 'equalto', 'PAID')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-clock"></i> Väntande</h5>
+                    <h3>{{ payments|selectattr('status', 'equalto', 'PENDING')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-times-circle"></i> Nekade/Fel</h5>
+                    <h3>{{ (payments|selectattr('status', 'equalto', 'DECLINED')|list|length) + (payments|selectattr('status', 'equalto', 'ERROR')|list|length) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5><i class="fas fa-coins"></i> Totalt belopp</h5>
+                    <h3>{{ "%.0f"|format(payments|selectattr('status', 'equalto', 'PAID')|map(attribute='amount')|sum) }} SEK</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center">
+        <h4><i class="fas fa-info-circle"></i> Inga betalningar ännu</h4>
+        <p>När användare gör donationer via Swish kommer de att visas här.</p>
+        <a href="{{ url_for('donations') }}" class="btn btn-gold">
+            <i class="fas fa-heart"></i> Testa donationssidan
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function cancelPayment(paymentId) {
+    if (confirm('Är du säker på att du vill avbryta denna betalning?')) {
+        fetch(`/admin/payments/${paymentId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Kunde inte avbryta betalningen: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ett fel uppstod vid avbrytande av betalningen.');
+        });
+    }
+}
+</script>
+{% endblock %}

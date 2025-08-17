@@ -3,8 +3,8 @@ from flask import render_template, request, redirect, url_for, flash, session, j
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
-from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode
-from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm, RegisterForm, VerifyEmailForm
+from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm, RegisterForm, VerifyEmailForm, SwishPaymentForm, DonationForm
 from utils import create_confirmation_code, verify_confirmation_code, generate_confirmation_code
 from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
@@ -1138,3 +1138,156 @@ def admin_event_delete(event_id):
         flash('Ett fel uppstod när evenemanget skulle tas bort.', 'error')
     
     return redirect(url_for('admin_events'))
+
+# Swish Payment Routes
+@app.route('/donations', methods=['GET', 'POST'])
+def donations():
+    """Donation page with Swish payment integration"""
+    form = DonationForm()
+    
+    if form.validate_on_submit():
+        # Determine amount
+        amount = form.amount.data
+        if amount == 'custom':
+            if not form.custom_amount.data:
+                flash('Ange ett belopp för din donation.', 'error')
+                return render_template('donations.html', form=form)
+            amount = form.custom_amount.data
+        
+        # Validate amount
+        try:
+            from decimal import Decimal
+            amount_decimal = Decimal(amount)
+            if amount_decimal < Decimal('1.00'):
+                flash('Minsta donationsbelopp är 1 SEK.', 'error')
+                return render_template('donations.html', form=form)
+        except:
+            flash('Ogiltigt belopp.', 'error')
+            return render_template('donations.html', form=form)
+        
+        # Create donation payment
+        from swish_service import SwishService, validate_swish_phone
+        
+        swish_service = SwishService()
+        
+        # Validate and format phone number if provided
+        payer_phone = None
+        if form.donor_phone.data:
+            payer_phone = validate_swish_phone(form.donor_phone.data)
+            if not payer_phone:
+                flash('Ogiltigt telefonnummer. Ange ett svenskt mobilnummer.', 'error')
+                return render_template('donations.html', form=form)
+        
+        # Create message
+        if form.donor_name.data and not form.anonymous.data:
+            message = f"Donation från {form.donor_name.data}"
+        else:
+            message = "Donation till Brunnsbo Musikklasser"
+        
+        if form.message.data:
+            message = form.message.data[:50]
+        
+        # Create payment request
+        payment = swish_service.create_payment_request(
+            amount=amount_decimal,
+            message=message,
+            payer_alias=payer_phone,
+            user_id=current_user.id if current_user.is_authenticated else None
+        )
+        
+        if payment.status == 'PENDING':
+            return redirect(url_for('payment_status', payment_id=payment.id))
+        else:
+            flash(f'Ett fel uppstod: {payment.error_message}', 'error')
+    
+    return render_template('donations.html', form=form)
+
+@app.route('/payment/<payment_id>')
+def payment_status(payment_id):
+    """Display payment status and QR code for Swish"""
+    payment = SwishPayment.query.get_or_404(payment_id)
+    
+    return render_template('payment_status.html', payment=payment)
+
+@app.route('/payment/<payment_id>/check')
+def check_payment_status(payment_id):
+    """AJAX endpoint to check payment status"""
+    payment = SwishPayment.query.get_or_404(payment_id)
+    
+    # Update status from Swish API if still pending
+    if payment.status == 'PENDING':
+        from swish_service import SwishService
+        swish_service = SwishService()
+        status_data = swish_service.get_payment_status(payment_id)
+        
+        if status_data:
+            payment.status = status_data.get('status', payment.status)
+            if payment.status == 'PAID':
+                payment.payment_reference = status_data.get('paymentReference')
+                payment.date_paid = datetime.utcnow()
+            elif payment.status in ['DECLINED', 'ERROR', 'CANCELLED']:
+                payment.error_code = status_data.get('errorCode')
+                payment.error_message = status_data.get('errorMessage', '')
+            
+            db.session.commit()
+    
+    return jsonify({
+        'status': payment.status,
+        'error_message': payment.error_message,
+        'date_paid': payment.date_paid.isoformat() if payment.date_paid else None
+    })
+
+@app.route('/swish/callback/<payment_id>', methods=['POST'])
+def swish_callback(payment_id):
+    """Callback endpoint for Swish payment status updates"""
+    try:
+        callback_identifier = request.headers.get('callbackIdentifier')
+        callback_data = request.get_json()
+        
+        if not callback_identifier or not callback_data:
+            app.logger.error('Invalid Swish callback: missing data')
+            return '', 400
+        
+        from swish_service import SwishService
+        swish_service = SwishService()
+        
+        success = swish_service.process_callback(
+            payment_id, 
+            callback_data, 
+            callback_identifier
+        )
+        
+        if success:
+            return '', 200
+        else:
+            return '', 400
+            
+    except Exception as e:
+        app.logger.error(f'Swish callback error: {str(e)}')
+        return '', 500
+
+@app.route('/admin/payments')
+@admin_required
+def admin_payments():
+    """Admin page to view all payments"""
+    payments = SwishPayment.query.order_by(SwishPayment.date_created.desc()).all()
+    return render_template('admin_payments.html', payments=payments)
+
+# Configuration endpoint for Swish settings (admin only)
+@app.route('/admin/swish-config', methods=['GET', 'POST'])
+@admin_required
+def admin_swish_config():
+    """Admin page for Swish configuration"""
+    if request.method == 'POST':
+        # This would handle Swish configuration updates
+        # For security, sensitive settings should be managed via environment variables
+        flash('Swish-inställningar uppdaterade. Starta om applikationen för att aktivera ändringarna.', 'success')
+        return redirect(url_for('admin_swish_config'))
+    
+    config = {
+        'test_mode': app.config.get('SWISH_TEST_MODE', True),
+        'payee_alias': app.config.get('SWISH_PAYEE_ALIAS', 'Ej konfigurerat'),
+        'cert_configured': bool(app.config.get('SWISH_CERT_PATH'))
+    }
+    
+    return render_template('admin_swish_config.html', config=config)

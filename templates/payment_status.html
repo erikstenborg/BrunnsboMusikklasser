@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Betalningsstatus - Brunnsbo Musikklasser{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-gold text-white">
+                    <h3 class="mb-0"><i class="fas fa-credit-card"></i> Betalningsstatus</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div id="payment-status">
+                        {% if payment.status == 'PENDING' %}
+                            <div class="alert alert-warning">
+                                <h4><i class="fas fa-clock"></i> Väntar på betalning</h4>
+                                <p>Din betalningsbegäran har skapats. Följ instruktionerna nedan för att slutföra betalningen.</p>
+                            </div>
+                            
+                            {% if payment.payer_alias %}
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-mobile-alt"></i> M-commerce betalning</h5>
+                                    <p>Du kommer att få en push-notifikation i Swish-appen på telefonnummer <strong>{{ payment.payer_alias }}</strong>.</p>
+                                    <p>Öppna Swish-appen och godkänn betalningen för att slutföra transaktionen.</p>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-qrcode"></i> QR-kod betalning</h5>
+                                    <p>Scanna QR-koden nedan med Swish-appen för att slutföra betalningen.</p>
+                                    
+                                    <!-- QR Code placeholder - In production, you would generate this with the Swish API -->
+                                    <div class="qr-code-placeholder border p-4 mb-3" style="background-color: #f8f9fa;">
+                                        <i class="fas fa-qrcode" style="font-size: 8rem; color: #ddd;"></i>
+                                        <p class="mt-2 text-muted">QR-kod genereras av Swish</p>
+                                    </div>
+                                    
+                                    <p><small class="text-muted">Kan du inte scanna? Öppna Swish och ange mottagarnummer manuellt.</small></p>
+                                </div>
+                            {% endif %}
+                            
+                        {% elif payment.status == 'PAID' %}
+                            <div class="alert alert-success">
+                                <h4><i class="fas fa-check-circle"></i> Betalning slutförd!</h4>
+                                <p>Tack för din donation! Betalningen har genomförts framgångsrikt.</p>
+                                {% if payment.date_paid %}
+                                    <p><small>Betald: {{ payment.date_paid.strftime('%Y-%m-%d %H:%M') }}</small></p>
+                                {% endif %}
+                            </div>
+                            
+                        {% elif payment.status == 'DECLINED' %}
+                            <div class="alert alert-danger">
+                                <h4><i class="fas fa-times-circle"></i> Betalning nekad</h4>
+                                <p>Betalningen kunde inte genomföras.</p>
+                                {% if payment.error_message %}
+                                    <p><small>{{ payment.error_message }}</small></p>
+                                {% endif %}
+                            </div>
+                            
+                        {% elif payment.status == 'ERROR' %}
+                            <div class="alert alert-danger">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Betalningsfel</h4>
+                                <p>Ett fel uppstod vid betalningen.</p>
+                                {% if payment.error_message %}
+                                    <p><small>{{ payment.error_message }}</small></p>
+                                {% endif %}
+                            </div>
+                            
+                        {% elif payment.status == 'CANCELLED' %}
+                            <div class="alert alert-secondary">
+                                <h4><i class="fas fa-ban"></i> Betalning avbruten</h4>
+                                <p>Betalningen har avbrutits.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="payment-details mt-4">
+                        <h5>Betalningsdetaljer</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Belopp:</strong></td>
+                                <td>{{ "%.2f"|format(payment.amount) }} SEK</td>
+                            </tr>
+                            {% if payment.message %}
+                            <tr>
+                                <td><strong>Meddelande:</strong></td>
+                                <td>{{ payment.message }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td><strong>Referens:</strong></td>
+                                <td>{{ payment.payee_payment_reference }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Skapad:</strong></td>
+                                <td>{{ payment.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% if payment.payment_reference %}
+                            <tr>
+                                <td><strong>Swish-referens:</strong></td>
+                                <td>{{ payment.payment_reference }}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4">
+                        {% if payment.status == 'PENDING' %}
+                            <button class="btn btn-secondary" onclick="checkPaymentStatus()" id="refresh-btn">
+                                <i class="fas fa-sync-alt"></i> Uppdatera status
+                            </button>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('donations') }}" class="btn btn-gold">
+                            <i class="fas fa-arrow-left"></i> Tillbaka till donationer
+                        </a>
+                        
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home"></i> Startsida
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if payment.status == 'PENDING' %}
+<script>
+let checkInterval;
+let checkCount = 0;
+const maxChecks = 60; // Stop checking after 5 minutes (60 * 5 seconds)
+
+function checkPaymentStatus() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const statusDiv = document.getElementById('payment-status');
+    
+    if (refreshBtn) {
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kontrollerar...';
+        refreshBtn.disabled = true;
+    }
+    
+    fetch('/payment/{{ payment.id }}/check')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'PENDING') {
+                // Payment status changed, reload the page to show updated status
+                location.reload();
+            } else {
+                // Still pending, enable button again
+                if (refreshBtn) {
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Uppdatera status';
+                    refreshBtn.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking payment status:', error);
+            if (refreshBtn) {
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Uppdatera status';
+                refreshBtn.disabled = false;
+            }
+        });
+}
+
+// Auto-check payment status every 5 seconds for pending payments
+document.addEventListener('DOMContentLoaded', function() {
+    checkInterval = setInterval(function() {
+        checkCount++;
+        
+        if (checkCount >= maxChecks) {
+            clearInterval(checkInterval);
+            return;
+        }
+        
+        fetch('/payment/{{ payment.id }}/check')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'PENDING') {
+                    clearInterval(checkInterval);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Auto-check error:', error);
+            });
+    }, 5000);
+});
+
+// Clean up interval when leaving page
+window.addEventListener('beforeunload', function() {
+    if (checkInterval) {
+        clearInterval(checkInterval);
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
