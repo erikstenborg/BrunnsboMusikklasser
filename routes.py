@@ -1199,7 +1199,11 @@ def donations():
         if payment.status == 'PENDING':
             return redirect(url_for('payment_status', payment_id=payment.id))
         else:
-            flash(f'Ett fel uppstod: {payment.error_message}', 'error')
+            # Check if it's a SSL/TLS error (expected in development)
+            if 'SSL' in payment.error_message and 'handshake failure' in payment.error_message:
+                flash('Betalningssystemet är för närvarande inte tillgängligt i utvecklingsmiljön. Kontakta skolan för att göra en donation.', 'warning')
+            else:
+                flash(f'Ett fel uppstod: {payment.error_message}', 'error')
     
     return render_template('donations.html', form=form)
 
