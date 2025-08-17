@@ -118,7 +118,11 @@ class SwishService:
                 
         except Exception as e:
             payment.status = 'ERROR'
-            payment.error_message = str(e)
+            # Truncate error message to fit database field
+            error_msg = str(e)
+            if len(error_msg) > 950:  # Leave some margin
+                error_msg = error_msg[:950] + "...[truncated]"
+            payment.error_message = error_msg
             db.session.commit()
             current_app.logger.error(f"Swish API error: {str(e)}")
             return payment

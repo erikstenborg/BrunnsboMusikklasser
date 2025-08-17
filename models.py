@@ -51,7 +51,7 @@ class SwishPayment(db.Model):
     status = db.Column(String(20), default='CREATED')  # CREATED, PAID, DECLINED, ERROR, CANCELLED
     payment_reference = db.Column(String(32))  # From Swish when paid
     error_code = db.Column(String(10))
-    error_message = db.Column(String(200))
+    error_message = db.Column(String(1000))  # Increased size for detailed error messages
     
     # Timestamps
     date_created = db.Column(DateTime, default=datetime.utcnow)
