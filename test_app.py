@@ -3,13 +3,8 @@ Streamlined test suite for Brunnsbo Musikklasser Flask application
 Tests core functionality to prevent server crashes and template errors
 """
 import pytest
-import tempfile
-import os
 from datetime import datetime, timedelta
-# Import models within test context to avoid circular imports
-# from models import User, Event, EventTask, Group, Application, SwishPayment
-# from forms import LoginForm, EventForm, ApplicationForm, DonationForm
-# from permissions import requires_role
+from forms import LoginForm, EventForm, ApplicationForm
 
 # Test client is now provided by conftest.py
 
@@ -18,9 +13,7 @@ from datetime import datetime, timedelta
 def test_user(test_app):
     """Create a test user"""
     with test_app.app_context():
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
-        from models import User  # Import here to avoid circular import
+        from models import User
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -39,8 +32,7 @@ def test_user(test_app):
 def test_admin(test_app):
     """Create a test admin user"""
     with test_app.app_context():
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import User, Group
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -65,8 +57,7 @@ def test_admin(test_app):
 def test_event_manager(client):
     """Create a test event manager user"""
     with test_app.app_context():
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import User, Group
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -91,8 +82,7 @@ def test_event_manager(client):
 def test_event(client):
     """Create a test event"""
     with test_app.app_context():
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import Event
         event = Event(title='Test Event',
                       description='Test event description',
                       event_date=datetime.now() + timedelta(days=30),
@@ -110,8 +100,7 @@ class TestModels:
     def test_user_creation(self, test_app, client):
         """Test user model creation"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import User
             user = User(first_name='John',
                         last_name='Doe',
                         email='john@example.com',
@@ -128,8 +117,7 @@ class TestModels:
     def test_user_roles(self, test_user, test_app, client):
         """Test user role functionality"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import User, Group
             user = User.query.get(test_user.id)
 
             # Test no roles initially
@@ -145,8 +133,7 @@ class TestModels:
 
     def test_event_creation(self, test_app, client):
         """Test event model creation"""
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import Event
         with test_app.app_context():
             event = Event(title='Concert 2025',
                           description='Annual concert',
@@ -162,8 +149,7 @@ class TestModels:
 
     def test_application_creation(self, test_app, client):
         """Test application model creation"""
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import Application
         with test_app.app_context():
             application = Application(
                 student_name='Child Smith',
@@ -189,8 +175,7 @@ class TestModels:
 
     def test_event_task_creation(self, test_event, client):
         """Test event task model creation"""
-        from models import User, Event, EventTask, Group, Application, SwishPayment
-        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import Event, EventTask
         with test_app.app_context():
             event = Event.query.get(test_event.id)
             task = EventTask(event_id=event.id,
@@ -314,8 +299,7 @@ class TestCriticalRoutes:
             sess['_fresh'] = True
 
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import User, Group
             user = User.query.get(test_user.id)
             parent_group = Group.query.filter_by(name='parent').first()
             if parent_group:
@@ -330,19 +314,10 @@ class TestCriticalRoutes:
 class TestPermissions:
     """Test permission decorators"""
 
-    def test_requires_role_decorator(self, client, test_admin):
-        """Test requires_role decorator"""
-        # Test is in the context where permissions can be checked
-        with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
-            assert True  # Basic test that decorator loads
-
     def test_user_has_role(self, test_admin, client):
         """Test user role checking"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import User
             admin = User.query.get(test_admin.id)
             assert admin.has_role('admin')
             assert not admin.has_role('parent')
@@ -360,8 +335,7 @@ class TestErrorHandling:
                                     test_event_manager):
         """Test event with coordinator assigned"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import User, Event
             event = Event.query.get(test_event.id)
             manager = User.query.get(test_event_manager.id)
             event.coordinator_id = manager.id
@@ -374,8 +348,7 @@ class TestErrorHandling:
     def test_task_completion(self, client, test_event, test_user):
         """Test task completion functionality"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import EventTask
             # Create task
             task = EventTask(event_id=test_event.id,
                              title='Test Task',
@@ -404,8 +377,7 @@ class TestDatabaseIntegrity:
     def test_user_event_task_relationship(self, client, test_user, test_event):
         """Test user-event-task relationships"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import EventTask
             task = EventTask(event_id=test_event.id,
                              title='Relationship Test',
                              assigned_to_user_id=test_user.id)
@@ -419,8 +391,7 @@ class TestDatabaseIntegrity:
     def test_cascade_deletion(self, client, test_event):
         """Test cascade deletion of related objects"""
         with test_app.app_context():
-            from models import User, Event, EventTask, Group, Application, SwishPayment
-            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+            from models import Event, EventTask
             # Create task for event
             task = EventTask(
                 event_id=test_event.id,
