@@ -4,9 +4,7 @@ Handles Swish m-commerce API integration for payment processing
 """
 
 import requests
-import json
 import uuid
-import os
 from datetime import datetime
 from decimal import Decimal
 from flask import current_app, url_for
