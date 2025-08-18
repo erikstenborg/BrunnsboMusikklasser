@@ -14,16 +14,22 @@ from permissions import requires_role
 
 @pytest.fixture
 def client():
-    """Create test client with temporary database"""
-    # Create temporary database file
-    db_fd, temp_db_path = tempfile.mkstemp()
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{temp_db_path}'
+    """Create test client with isolated in-memory database"""
+    # Use in-memory SQLite database for faster tests
+    original_db_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
+    
+    # Configure test environment
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
     app.config['SESSION_SECRET'] = 'test-secret-key'
     
-    with app.test_client() as client:
-        with app.app_context():
+    # Force SQLAlchemy to use the new configuration
+    with app.app_context():
+        # Recreate the database engine with the new URI
+        db.engine.dispose()  # Close existing connections
+        
+        with app.test_client() as client:
             # Drop all tables and recreate to ensure clean state
             db.drop_all()
             db.create_all()
@@ -40,9 +46,9 @@ def client():
                 print(f"Error creating groups: {e}")
             
             yield client
-            
-        os.close(db_fd)
-        os.unlink(temp_db_path)
+    
+    # Restore original database configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = original_db_uri
 
 
 @pytest.fixture
