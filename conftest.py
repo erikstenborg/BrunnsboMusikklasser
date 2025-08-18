@@ -26,9 +26,15 @@ def test_app():
         db.drop_all()
         db.create_all()
         
-        # Create test groups
-        for group_name in ['admin', 'event_manager', 'parent', 'applications_manager']:
-            group = Group(name=group_name, description=f'Test {group_name} group')
+        # Create test groups in logical order
+        test_groups = [
+            ('admin', 'Fullständig tillgång till alla administrativa funktioner och användarhantering'),
+            ('applications_manager', 'Kan hantera och granska studentansökningar samt godkänna nya elever'),
+            ('event_manager', 'Kan skapa, redigera och hantera evenemang samt tilldela uppgifter'),
+            ('parent', 'Förälder med tillgång till barnspecifik information och uppgifter')
+        ]
+        for group_name, description in test_groups:
+            group = Group(name=group_name, description=description)
             db.session.add(group)
         
         try:
