@@ -73,7 +73,7 @@ def test_app():
         # Create all tables
         db.create_all()
         
-        # Create test groups in logical order
+        # Create test groups
         test_groups = [
             ('admin', 'Fullständig tillgång till alla administrativa funktioner och användarhantering'),
             ('applications_manager', 'Kan hantera och granska studentansökningar samt godkänna nya elever'),
