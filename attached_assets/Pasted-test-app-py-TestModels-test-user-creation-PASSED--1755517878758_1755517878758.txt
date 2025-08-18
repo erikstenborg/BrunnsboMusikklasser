@@ -1,0 +1,408 @@
+test_app.py::TestModels::test_user_creation PASSED                                                     [  5%]
+test_app.py::TestModels::test_user_roles FAILED                                                        [ 10%]
+test_app.py::TestModels::test_event_creation PASSED                                                    [ 15%]
+test_app.py::TestModels::test_application_creation FAILED                                              [ 21%]
+test_app.py::TestModels::test_event_task_creation PASSED                                               [ 26%]
+test_app.py::TestForms::test_login_form_valid PASSED                                                   [ 31%]
+test_app.py::TestForms::test_login_form_invalid_email PASSED                                           [ 36%]
+test_app.py::TestForms::test_event_form_valid FAILED                                                   [ 42%]
+test_app.py::TestForms::test_event_form_invalid_title FAILED                                           [ 47%]
+test_app.py::TestForms::test_application_form_valid FAILED                                             [ 52%]
+test_app.py::TestCriticalRoutes::test_public_routes_no_crash PASSED                                    [ 57%]
+test_app.py::TestCriticalRoutes::test_task_route_with_user PASSED                                      [ 63%]
+test_app.py::TestPermissions::test_requires_role_decorator PASSED                                      [ 68%]
+test_app.py::TestPermissions::test_user_has_role FAILED                                                [ 73%]
+test_app.py::TestErrorHandling::test_nonexistent_route PASSED                                          [ 78%]
+test_app.py::TestErrorHandling::test_event_with_coordinator FAILED                                     [ 84%]
+test_app.py::TestErrorHandling::test_task_completion FAILED                                            [ 89%]
+test_app.py::TestDatabaseIntegrity::test_user_event_task_relationship FAILED                           [ 94%]
+test_app.py::TestDatabaseIntegrity::test_cascade_deletion PASSED                                       [100%]
+
+================================================== FAILURES ==================================================
+_________________________________________ TestModels.test_user_roles _________________________________________
+
+self = <test_app.TestModels object at 0x7f9470f01490>
+test_user = <User test_f4263342@example.com - Test User>, client = <FlaskClient <Flask 'app'>>
+
+    def test_user_roles(self, test_user, client):
+        """Test user role functionality"""
+        with app.app_context():
+            user = User.query.get(test_user.id)
+    
+            # Test no roles initially
+            assert not user.has_role('admin')
+    
+            # Add admin role
+            admin_group = Group.query.filter_by(name='admin').first()
+            user.groups.append(admin_group)
+>           db.session.commit()
+
+test_app.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py:599: in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2032: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1313: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1288: in _prepare_impl
+    self.session.flush()
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4345: in flush
+    self._flush(objects)
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4480: in _flush
+    with util.safe_reraise():
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4441: in _flush
+    flush_context.execute()
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py:466: in execute
+    rec.execute(self)
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py:591: in execute
+    self.dependency_processor.process_saves(uow, states)
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/dependency.py:1152: in process_saves
+    if not self._synchronize(
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/dependency.py:1266: in _synchronize
+    self._verify_canload(child)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ManyToManyDP(User.groups), state = None
+
+    def _verify_canload(self, state):
+        if self.prop.uselist and state is None:
+>           raise exc.FlushError(
+                "Can't flush None value found in "
+                "collection %s" % (self.prop,)
+E               sqlalchemy.orm.exc.FlushError: Can't flush None value found in collection User.groups
+
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/dependency.py:268: FlushError
+____________________________________ TestModels.test_application_creation ____________________________________
+
+self = <test_app.TestModels object at 0x7f9470f026d0>, client = <FlaskClient <Flask 'app'>>
+
+    def test_application_creation(self, client):
+        """Test application model creation"""
+        with app.app_context():
+>           application = Application(
+                parent_first_name='Jane',
+                parent_last_name='Smith',
+                parent_email='jane@example.com',
+                child_first_name='Child',
+                child_last_name='Smith',
+                child_personnummer='1234567890',
+                child_phone='123456789',
+                child_postal_code='12345',
+                child_city='Stockholm',
+                application_year='2025/2026',
+                status='applied'
+            )
+
+test_app.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<string>:4: in __init__
+    ???
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state.py:571: in _initialize_instance
+    with util.safe_reraise():
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state.py:569: in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Application None - None>
+kwargs = {'application_year': '2025/2026', 'child_city': 'Stockholm', 'child_first_name': 'Child', 'child_last_name': 'Smith', ...}
+cls_ = <class 'models.Application'>, k = 'parent_first_name'
+
+    def _declarative_constructor(self: Any, **kwargs: Any) -> None:
+        """A simple constructor that allows initialization from kwargs.
+    
+        Sets attributes on the constructed instance using the names and
+        values in ``kwargs``.
+    
+        Only keys that are present as
+        attributes of the instance's class are allowed. These could be,
+        for example, any mapped columns or relationships.
+        """
+        cls_ = type(self)
+        for k in kwargs:
+            if not hasattr(cls_, k):
+>               raise TypeError(
+                    "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+                )
+E               TypeError: 'parent_first_name' is an invalid keyword argument for Application
+
+.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/decl_base.py:2173: TypeError
+______________________________________ TestForms.test_event_form_valid _______________________________________
+
+self = <test_app.TestForms object at 0x7f94713f3110>, client = <FlaskClient <Flask 'app'>>
+
+    def test_event_form_valid(self, client):
+        """Test valid event form"""
+        with app.app_context():
+            form_data = {
+                'title': 'New Event',
+                'description': 'Event description',
+                'event_date': datetime.now() + timedelta(days=30),
+                'location': 'Event Location',
+                'is_active': True,
+                'coordinator_id': 0  # No coordinator
+            }
+            form = EventForm(data=form_data)
+>           assert form.validate()
+                   ^^^^^^^^^^^^^^^
+
+test_app.py:268: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pythonlibs/lib/python3.11/site-packages/wtforms/form.py:330: in validate
+    return super().validate(extra)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/wtforms/form.py:147: in validate
+    if not field.validate(self, extra):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/wtforms/fields/core.py:223: in validate
+    self.pre_validate(form)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wtforms.fields.choices.SelectField object at 0x7f9470014b90>
+form = <forms.EventForm object at 0x7f9470f7b810>
+
+    def pre_validate(self, form):
+        if not self.validate_choice:
+            return
+    
+        if self.choices is None:
+>           raise TypeError(self.gettext("Choices cannot be None."))
+E           TypeError: Choices cannot be None.
+
+.pythonlibs/lib/python3.11/site-packages/wtforms/fields/choices.py:149: TypeError
+__________________________________ TestForms.test_event_form_invalid_title ___________________________________
+
+self = <test_app.TestForms object at 0x7f94713f3610>, client = <FlaskClient <Flask 'app'>>
+
+    def test_event_form_invalid_title(self, client):
+        """Test event form with invalid title"""
+        with app.app_context():
+            form_data = {
+                'title': 'A',  # Too short
+                'description': 'Event description',
+                'event_date': datetime.now() + timedelta(days=30),
+                'location': 'Event Location',
+                'is_active': True,
+                'coordinator_id': 0
+            }
+            form = EventForm(data=form_data)
+>           assert not form.validate()
+                       ^^^^^^^^^^^^^^^
+
+test_app.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pythonlibs/lib/python3.11/site-packages/wtforms/form.py:330: in validate
+    return super().validate(extra)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/wtforms/form.py:147: in validate
+    if not field.validate(self, extra):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pythonlibs/lib/python3.11/site-packages/wtforms/fields/core.py:223: in validate
+    self.pre_validate(form)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wtforms.fields.choices.SelectField object at 0x7f9470b4a890>
+form = <forms.EventForm object at 0x7f94706c4f90>
+
+    def pre_validate(self, form):
+        if not self.validate_choice:
+            return
+    
+        if self.choices is None:
+>           raise TypeError(self.gettext("Choices cannot be None."))
+E           TypeError: Choices cannot be None.
+
+.pythonlibs/lib/python3.11/site-packages/wtforms/fields/choices.py:149: TypeError
+___________________________________ TestForms.test_application_form_valid ____________________________________
+
+self = <test_app.TestForms object at 0x7f94713f08d0>, client = <FlaskClient <Flask 'app'>>
+
+    def test_application_form_valid(self, client):
+        """Test valid application form"""
+        with app.app_context():
+            form_data = {
+                'parent_first_name': 'Jane',
+                'parent_last_name': 'Doe',
+                'parent_email': 'jane@example.com',
+                'parent_phone': '123456789',
+                'child_first_name': 'John',
+                'child_last_name': 'Doe',
+                'child_personnummer': '1234567890',
+                'child_phone': '987654321',
+                'child_postal_code': '12345',
+                'child_city': 'Stockholm',
+                'musical_experience': 'Some experience',
+                'instrument_interest': 'Piano',
+                'academic_performance': 'Good',
+                'has_transportation': True,
+                'additional_info': 'Additional information'
+            }
+            form = ApplicationForm(data=form_data)
+>           assert form.validate()
+E           assert False
+E            +  where False = validate()
+E            +    where validate = <forms.ApplicationForm object at 0x7f947077af10>.validate
+
+test_app.py:306: AssertionError
+_____________________________________ TestPermissions.test_user_has_role _____________________________________
+
+self = <test_app.TestPermissions object at 0x7f9470f00fd0>
+test_admin = <User admin_4fc82cb6@example.com - Admin User>, client = <FlaskClient <Flask 'app'>>
+
+    def test_user_has_role(self, test_admin, client):
+        """Test user role checking"""
+        with app.app_context():
+            admin = User.query.get(test_admin.id)
+>           assert admin.has_role('admin')
+E           AssertionError: assert False
+E            +  where False = has_role('admin')
+E            +    where has_role = <User admin_4fc82cb6@example.com - Admin User>.has_role
+
+test_app.py:366: AssertionError
+_______________________________ TestErrorHandling.test_event_with_coordinator ________________________________
+
+self = <test_app.TestErrorHandling object at 0x7f94713f2490>, client = <FlaskClient <Flask 'app'>>
+test_event = <Evenemang Test Event>, test_event_manager = <User manager_fd739a97@example.com - Event Manager>
+
+    def test_event_with_coordinator(self, client, test_event, test_event_manager):
+        """Test event with coordinator assigned"""
+        with app.app_context():
+            event = Event.query.get(test_event.id)
+            manager = User.query.get(test_event_manager.id)
+            event.coordinator_id = manager.id
+            db.session.commit()
+    
+            # Test that coordinator is properly linked
+            assert event.coordinator is not None
+>           assert event.coordinator.email == 'manager@example.com'
+E           AssertionError: assert 'manager_fd739a97@example.com' == 'manager@example.com'
+E             
+E             - manager@example.com
+E             + manager_fd739a97@example.com
+E             ?        +++++++++
+
+test_app.py:388: AssertionError
+___________________________________ TestErrorHandling.test_task_completion ___________________________________
+
+self = <test_app.TestErrorHandling object at 0x7f94713f28d0>, client = <FlaskClient <Flask 'app'>>
+test_event = <Evenemang Test Event>, test_user = <User test_3eea6519@example.com - Test User>
+
+    def test_task_completion(self, client, test_event, test_user):
+        """Test task completion functionality"""
+        with app.app_context():
+            # Create task
+            task = EventTask(
+                event_id=test_event.id,
+                title='Test Task',
+                description='Test task description',
+                assigned_to_user_id=test_user.id
+            )
+            db.session.add(task)
+            db.session.commit()
+    
+            # Check task is not completed initially
+            assert task.completed_at is None
+            assert not task.completed
+    
+            # Mark as completed
+            task.completed_at = datetime.now()
+            task.completed_by_user_id = test_user.id
+            db.session.commit()
+    
+            # Check task is completed
+            assert task.completed_at is not None
+>           assert task.completed
+E           assert False
+E            +  where False = <EventTask Test Task>.completed
+
+test_app.py:414: AssertionError
+__________________________ TestDatabaseIntegrity.test_user_event_task_relationship ___________________________
+
+self = <test_app.TestDatabaseIntegrity object at 0x7f94713e2010>, client = <FlaskClient <Flask 'app'>>
+test_user = <User test_88b07b9e@example.com - Test User>, test_event = <Evenemang Test Event>
+
+    def test_user_event_task_relationship(self, client, test_user, test_event):
+        """Test user-event-task relationships"""
+        with app.app_context():
+            task = EventTask(
+                event_id=test_event.id,
+                title='Relationship Test',
+                assigned_to_user_id=test_user.id
+            )
+            db.session.add(task)
+            db.session.commit()
+    
+            # Test relationships
+            assert task.event.title == 'Test Event'
+>           assert task.assigned_to.email == 'test@example.com'
+E           AssertionError: assert 'test_88b07b9e@example.com' == 'test@example.com'
+E             
+E             - test@example.com
+E             + test_88b07b9e@example.com
+E             ?     +++++++++
+
+test_app.py:433: AssertionError
+============================================== warnings summary ==============================================
+test_app.py::TestModels::test_user_roles
+  /home/runner/workspace/test_app.py:161: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    user = User.query.get(test_user.id)
+
+test_app.py::TestModels::test_event_task_creation
+  /home/runner/workspace/test_app.py:216: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    event = Event.query.get(test_event.id)
+
+test_app.py::TestCriticalRoutes::test_task_route_with_user
+  /home/runner/workspace/test_app.py:338: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    user = User.query.get(test_user.id)
+
+test_app.py::TestCriticalRoutes::test_task_route_with_user
+  /home/runner/workspace/app.py:76: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    user = models.User.query.get(int(user_id))
+
+test_app.py::TestPermissions::test_user_has_role
+  /home/runner/workspace/test_app.py:365: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    admin = User.query.get(test_admin.id)
+
+test_app.py::TestErrorHandling::test_event_with_coordinator
+  /home/runner/workspace/test_app.py:381: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    event = Event.query.get(test_event.id)
+
+test_app.py::TestErrorHandling::test_event_with_coordinator
+  /home/runner/workspace/test_app.py:382: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    manager = User.query.get(test_event_manager.id)
+
+test_app.py::TestDatabaseIntegrity::test_cascade_deletion
+  /home/runner/workspace/test_app.py:450: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    event = Event.query.get(test_event.id)
+
+test_app.py::TestDatabaseIntegrity::test_cascade_deletion
+  /home/runner/workspace/test_app.py:455: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    deleted_task = EventTask.query.get(task_id)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+========================================== short test summary info ===========================================
+FAILED test_app.py::TestModels::test_user_roles - sqlalchemy.orm.exc.FlushError: Can't flush None value found in collection User.groups
+FAILED test_app.py::TestModels::test_application_creation - TypeError: 'parent_first_name' is an invalid keyword argument for Application
+FAILED test_app.py::TestForms::test_event_form_valid - TypeError: Choices cannot be None.
+FAILED test_app.py::TestForms::test_event_form_invalid_title - TypeError: Choices cannot be None.
+FAILED test_app.py::TestForms::test_application_form_valid - assert False
+FAILED test_app.py::TestPermissions::test_user_has_role - AssertionError: assert False
+FAILED test_app.py::TestErrorHandling::test_event_with_coordinator - AssertionError: assert 'manager_fd739a97@example.com' == 'manager@example.com'
+FAILED test_app.py::TestErrorHandling::test_task_completion - assert False
+FAILED test_app.py::TestDatabaseIntegrity::test_user_event_task_relationship - AssertionError: assert 'test_88b07b9e@example.com' == 'test@example.com'
+================================= 9 failed, 10 passed, 9 warnings in 26.85s ==================================
