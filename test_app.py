@@ -29,7 +29,7 @@ def client():
             db.create_all()
             
             # Create test groups
-            for group_name in ['Admin', 'event_manager', 'parent', 'applications_manager']:
+            for group_name in ['admin', 'event_manager', 'parent', 'applications_manager']:
                 group = Group(name=group_name)
                 db.session.add(group)
             
@@ -81,7 +81,7 @@ def test_admin(client):
         admin.set_password('adminpassword')
         
         # Add admin role
-        admin_group = Group.query.filter_by(name='Admin').first()
+        admin_group = Group.query.filter_by(name='admin').first()
         if admin_group:
             admin.groups.append(admin_group)
         
@@ -161,15 +161,15 @@ class TestModels:
             user = User.query.get(test_user.id)
             
             # Test no roles initially
-            assert not user.has_role('Admin')
+            assert not user.has_role('admin')
             
             # Add admin role
-            admin_group = Group.query.filter_by(name='Admin').first()
+            admin_group = Group.query.filter_by(name='admin').first()
             if admin_group:
                 user.groups.append(admin_group)
             db.session.commit()
             
-            assert user.has_role('Admin')
+            assert user.has_role('admin')
     
     def test_event_creation(self, client):
         """Test event model creation"""
@@ -366,7 +366,7 @@ class TestPermissions:
         """Test user role checking"""
         with app.app_context():
             admin = User.query.get(test_admin.id)
-            assert admin.has_role('Admin')
+            assert admin.has_role('admin')
             assert not admin.has_role('parent')
 
 

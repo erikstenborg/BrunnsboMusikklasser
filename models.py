@@ -183,7 +183,7 @@ class User(UserMixin, db.Model):
     
     def is_admin(self):
         """Check if user is an admin"""
-        return self.has_role('Admin')
+        return self.has_role('admin')
     
     def is_applications_manager(self):
         """Check if user can manage applications"""

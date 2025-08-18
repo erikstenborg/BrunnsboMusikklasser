@@ -9,7 +9,7 @@ from flask_login import current_user, login_required
 def requires_role(role_name):
     """
     Decorator that requires a user to have a specific role
-    Usage: @requires_role('Admin')
+    Usage: @requires_role('admin')
     """
     def decorator(f):
         @wraps(f)
@@ -49,19 +49,19 @@ def requires_any_role(*role_names):
 
 def admin_required(f):
     """Decorator for admin-only routes"""
-    return requires_role('Admin')(f)
+    return requires_role('admin')(f)
 
 def applications_manager_required(f):
     """Decorator for application management routes"""
-    return requires_any_role('Admin', 'applications_manager')(f)
+    return requires_any_role('admin', 'applications_manager')(f)
 
 def event_manager_required(f):
     """Decorator for event management routes"""
-    return requires_any_role('Admin', 'event_manager')(f)
+    return requires_any_role('admin', 'event_manager')(f)
 
 def parent_access_required(f):
     """Decorator for parent-only features"""
-    return requires_any_role('Admin', 'parent')(f)
+    return requires_any_role('admin', 'parent')(f)
 
 def authenticated_required(f):
     """Decorator for any authenticated user (regardless of role)"""

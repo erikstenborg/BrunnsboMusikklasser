@@ -28,7 +28,7 @@ def client():
             db.create_all()
             
             # Create test groups
-            for group_name in ['Admin', 'event_manager', 'parent', 'applications_manager']:
+            for group_name in ['admin', 'event_manager', 'parent', 'applications_manager']:
                 group = Group(name=group_name)
                 db.session.add(group)
             
@@ -58,7 +58,7 @@ class TestBasicFunctionality:
             groups = Group.query.all()
             assert len(groups) == 4
             group_names = [g.name for g in groups]
-            assert 'Admin' in group_names
+            assert 'admin' in group_names
             assert 'event_manager' in group_names
     
     def test_user_creation(self, client):
