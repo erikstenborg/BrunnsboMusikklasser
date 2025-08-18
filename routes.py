@@ -504,6 +504,9 @@ def admin_user_roles(user_id):
     user = User.query.get_or_404(user_id)
     
     if request.method == 'POST':
+        # Update active status
+        user.active = 'active' in request.form
+        
         # Get selected roles from form
         selected_roles = request.form.getlist('roles')
         
@@ -517,7 +520,7 @@ def admin_user_roles(user_id):
                 user.groups.append(group)
         
         db.session.commit()
-        flash(f'Roller uppdaterade för {user.username}', 'success')
+        flash(f'Roller och status uppdaterade för {user.username}', 'success')
         return redirect(url_for('admin_users'))
     
     # Get all available groups

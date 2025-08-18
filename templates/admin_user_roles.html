@@ -51,6 +51,19 @@
                 </div>
                 <div class="card-body">
                     <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Användarstatus:</strong></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="active" value="true" 
+                                       id="user_active"
+                                       {% if user.active %}checked{% endif %}>
+                                <label class="form-check-label" for="user_active">
+                                    <strong>Aktiv användare</strong> - Användaren kan logga in och använda systemet
+                                </label>
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
                             <label class="form-label"><strong>Tillgängliga roller:</strong></label>
                             <div class="mt-2">
@@ -61,18 +74,18 @@
                                            id="role_{{ group.name }}"
                                            {% if group.name in user_groups %}checked{% endif %}>
                                     <label class="form-check-label" for="role_{{ group.name }}">
-                                        {% if group.name == 'Admin' %}
+                                        {% if group.name == 'admin' %}
                                             <span class="badge bg-danger me-2">Admin</span>
-                                            <strong>Administratör</strong> - Full åtkomst till alla funktioner
+                                            <strong>Administratör</strong> - {{ group.description or 'Fullständig tillgång till alla administrativa funktioner' }}
                                         {% elif group.name == 'applications_manager' %}
                                             <span class="badge bg-info me-2">Ansökan</span>
-                                            <strong>Ansökningshanterare</strong> - Kan visa och hantera studentansökningar
+                                            <strong>Ansökningshanterare</strong> - {{ group.description or 'Kan hantera och granska studentansökningar' }}
                                         {% elif group.name == 'event_manager' %}
                                             <span class="badge bg-success me-2">Event</span>
-                                            <strong>Eventhanterare</strong> - Kan skapa och hantera evenemang
+                                            <strong>Eventhanterare</strong> - {{ group.description or 'Kan skapa och hantera evenemang' }}
                                         {% elif group.name == 'parent' %}
                                             <span class="badge bg-warning me-2">Förälder</span>
-                                            <strong>Förälder</strong> - Kan se förälder-specifik information och uppgifter
+                                            <strong>Förälder</strong> - {{ group.description or 'Kan se förälder-specifik information och uppgifter' }}
                                         {% endif %}
                                     </label>
                                 </div>
@@ -102,8 +115,8 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
                         {% for group in user.groups %}
-                            {% if group.name == 'Admin' %}
-                                <span class="badge bg-danger">{{ group.name }}</span>
+                            {% if group.name == 'admin' %}
+                                <span class="badge bg-danger">Administratör</span>
                             {% elif group.name == 'applications_manager' %}
                                 <span class="badge bg-info">Ansökningshanterare</span>
                             {% elif group.name == 'event_manager' %}
