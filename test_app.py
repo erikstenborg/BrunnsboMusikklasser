@@ -7,7 +7,9 @@ import tempfile
 import os
 from datetime import datetime, timedelta
 from app import app, db
-from models import User, Event, EventTask, Group
+from models import User, Event, EventTask, Group, Application, SwishPayment
+from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+from permissions import requires_role
 
 
 @pytest.fixture
@@ -22,17 +24,20 @@ def client():
     
     with app.test_client() as client:
         with app.app_context():
+            # Drop all tables and recreate to ensure clean state
+            db.drop_all()
             db.create_all()
-            # Create test groups only if they don't exist
-            for group_name in ['admin', 'event_manager', 'parent', 'applications_manager']:
-                if not Group.query.filter_by(name=group_name).first():
-                    group = Group(name=group_name)
-                    db.session.add(group)
+            
+            # Create test groups
+            for group_name in ['Admin', 'event_manager', 'parent', 'applications_manager']:
+                group = Group(name=group_name)
+                db.session.add(group)
             
             try:
                 db.session.commit()
-            except Exception:
+            except Exception as e:
                 db.session.rollback()
+                print(f"Error creating groups: {e}")
             
             yield client
             
@@ -44,15 +49,19 @@ def client():
 def test_user(client):
     """Create a test user"""
     with app.app_context():
+        # Generate unique email to avoid conflicts
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         user = User(
             first_name='Test',
             last_name='User',
-            email='test@example.com',
+            email=f'test_{unique_id}@example.com',
             active=True
         )
         user.set_password('testpassword')
         db.session.add(user)
         db.session.commit()
+        db.session.refresh(user)  # Refresh to get the ID
         return user
 
 
@@ -60,20 +69,25 @@ def test_user(client):
 def test_admin(client):
     """Create a test admin user"""
     with app.app_context():
+        # Generate unique email to avoid conflicts
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         admin = User(
             first_name='Admin',
             last_name='User',
-            email='admin@example.com',
+            email=f'admin_{unique_id}@example.com',
             active=True
         )
         admin.set_password('adminpassword')
         
         # Add admin role
-        admin_group = Group.query.filter_by(name='admin').first()
-        admin.groups.append(admin_group)
+        admin_group = Group.query.filter_by(name='Admin').first()
+        if admin_group:
+            admin.groups.append(admin_group)
         
         db.session.add(admin)
         db.session.commit()
+        db.session.refresh(admin)  # Refresh to get the ID
         return admin
 
 
@@ -81,20 +95,25 @@ def test_admin(client):
 def test_event_manager(client):
     """Create a test event manager user"""
     with app.app_context():
+        # Generate unique email to avoid conflicts
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         manager = User(
             first_name='Event',
             last_name='Manager',
-            email='manager@example.com',
+            email=f'manager_{unique_id}@example.com',
             active=True
         )
         manager.set_password('managerpassword')
         
         # Add event_manager role
         manager_group = Group.query.filter_by(name='event_manager').first()
-        manager.groups.append(manager_group)
+        if manager_group:
+            manager.groups.append(manager_group)
         
         db.session.add(manager)
         db.session.commit()
+        db.session.refresh(manager)  # Refresh to get the ID
         return manager
 
 
@@ -111,6 +130,7 @@ def test_event(client):
         )
         db.session.add(event)
         db.session.commit()
+        db.session.refresh(event)  # Refresh to get the ID
         return event
 
 

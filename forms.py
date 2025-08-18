@@ -72,6 +72,36 @@ class ApplicationForm(FlaskForm):
     # School information
     current_school = StringField('Nuvarande skola',
                                  validators=[Length(max=100)])
+    
+    grade_applying_for = SelectField(
+        'Årskurs som du söker till',
+        choices=[('4', 'Årskurs 4'), ('5', 'Årskurs 5'), ('6', 'Årskurs 6'),
+                 ('7', 'Årskurs 7'), ('8', 'Årskurs 8'), ('9', 'Årskurs 9')],
+        validators=[DataRequired(message='Välj årskurs')])
+
+    # Musical background
+    musical_experience = TextAreaField(
+        'Berätta om elevens musikbakgrund och tidigare erfarenheter',
+        validators=[
+            Length(max=1000, message='Texten får vara max 1000 tecken')
+        ])
+
+    motivation = TextAreaField(
+        'Varför vill eleven gå i musikklass?',
+        validators=[
+            DataRequired(message='Motivation är obligatorisk'),
+            Length(min=50,
+                   max=1000,
+                   message='Motivationen måste vara mellan 50 och 1000 tecken')
+        ])
+
+    # Practical information
+    has_transportation = BooleanField(
+        'Eleven har möjlighet att ta sig till och från skolan')
+
+    additional_info = TextAreaField(
+        'Övrig information',
+        validators=[Length(max=500, message='Texten får vara max 500 tecken')])
 
 
 class SwishPaymentForm(FlaskForm):
@@ -148,36 +178,6 @@ class DonationForm(FlaskForm):
         default='Donation till Brunnsbo Musikklasser')
     
     anonymous = BooleanField('Anonym donation')
-
-    grade_applying_for = SelectField(
-        'Årskurs som du söker till',
-        choices=[('4', 'Årskurs 4'), ('5', 'Årskurs 5'), ('6', 'Årskurs 6'),
-                 ('7', 'Årskurs 7'), ('8', 'Årskurs 8'), ('9', 'Årskurs 9')],
-        validators=[DataRequired(message='Välj årskurs')])
-
-    # Musical background
-    musical_experience = TextAreaField(
-        'Berätta om elevens musikbakgrund och tidigare erfarenheter',
-        validators=[
-            Length(max=1000, message='Texten får vara max 1000 tecken')
-        ])
-
-    motivation = TextAreaField(
-        'Varför vill eleven gå i musikklass?',
-        validators=[
-            DataRequired(message='Motivation är obligatorisk'),
-            Length(min=50,
-                   max=1000,
-                   message='Motivationen måste vara mellan 50 och 1000 tecken')
-        ])
-
-    # Practical information
-    has_transportation = BooleanField(
-        'Eleven har möjlighet att ta sig till och från skolan')
-
-    additional_info = TextAreaField(
-        'Övrig information',
-        validators=[Length(max=500, message='Texten får vara max 500 tecken')])
 
 
 class ContactForm(FlaskForm):
