@@ -79,7 +79,7 @@
                         <!-- User Menu - Desktop Dropdown -->
                         <li class="nav-item dropdown d-none d-lg-block">
                             <a class="nav-link dropdown-toggle {% if request.endpoint and (request.endpoint.startswith('admin') or request.endpoint == 'user_profile') %}active{% endif %}" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                                <i class="fas fa-user me-1"></i>{{ current_user.first_name or current_user.email.split('@')[0] }}
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="{{ url_for('user_profile') }}">
@@ -89,7 +89,7 @@
                                 
                                 <!-- Role-based navigation -->
                                 {% for group in current_user.groups %}
-                                    {% if group.name == 'Admin' %}
+                                    {% if group.name == 'admin' %}
                                         <li><a class="dropdown-item {% if request.endpoint == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
                                             <i class="fas fa-users-cog me-2"></i>Användarhantering
                                         </a></li>
@@ -97,12 +97,12 @@
                                             <i class="fas fa-credit-card me-2"></i>Swish Betalningar
                                         </a></li>
                                     {% endif %}
-                                    {% if group.name in ['Admin', 'event_manager'] %}
+                                    {% if group.name in ['admin', 'event_manager'] %}
                                         <li><a class="dropdown-item {% if request.endpoint == 'admin_events' %}active{% endif %}" href="{{ url_for('admin_events') }}">
                                             <i class="fas fa-calendar-alt me-2"></i>Hantera evenemang
                                         </a></li>
                                     {% endif %}
-                                    {% if group.name in ['Admin', 'applications_manager'] %}
+                                    {% if group.name in ['admin', 'applications_manager'] %}
                                         <li><a class="dropdown-item {% if request.endpoint == 'admin_applications' %}active{% endif %}" href="{{ url_for('admin_applications') }}">
                                             <i class="fas fa-file-alt me-2"></i>Hantera ansökningar
                                         </a></li>
@@ -136,7 +136,7 @@
                         
                         <!-- Role-based mobile navigation -->
                         {% for group in current_user.groups %}
-                            {% if group.name == 'Admin' %}
+                            {% if group.name == 'admin' %}
                                 <li class="nav-item d-lg-none">
                                     <a class="nav-link {% if request.endpoint == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
                                         <i class="fas fa-users-cog me-1"></i>Användarhantering
@@ -148,14 +148,14 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if group.name in ['Admin', 'event_manager'] %}
+                            {% if group.name in ['admin', 'event_manager'] %}
                                 <li class="nav-item d-lg-none">
                                     <a class="nav-link {% if request.endpoint == 'admin_events' %}active{% endif %}" href="{{ url_for('admin_events') }}">
                                         <i class="fas fa-calendar-alt me-1"></i>Hantera evenemang
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if group.name in ['Admin', 'applications_manager'] %}
+                            {% if group.name in ['admin', 'applications_manager'] %}
                                 <li class="nav-item d-lg-none">
                                     <a class="nav-link {% if request.endpoint == 'admin_applications' %}active{% endif %}" href="{{ url_for('admin_applications') }}">
                                         <i class="fas fa-file-alt me-1"></i>Hantera ansökningar
