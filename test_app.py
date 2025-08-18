@@ -6,10 +6,10 @@ import pytest
 import tempfile
 import os
 from datetime import datetime, timedelta
-from app import app, db
-from models import User, Event, EventTask, Group, Application, SwishPayment
-from forms import LoginForm, EventForm, ApplicationForm, DonationForm
-from permissions import requires_role
+# Import models within test context to avoid circular imports
+# from models import User, Event, EventTask, Group, Application, SwishPayment
+# from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+# from permissions import requires_role
 
 
 # Test client is now provided by conftest.py
@@ -19,6 +19,9 @@ from permissions import requires_role
 def test_user(test_app):
     """Create a test user"""
     with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
+        from models import User  # Import here to avoid circular import
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -39,6 +42,8 @@ def test_user(test_app):
 def test_admin(test_app):
     """Create a test admin user"""
     with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -64,7 +69,9 @@ def test_admin(test_app):
 @pytest.fixture
 def test_event_manager(client):
     """Create a test event manager user"""
-    with app.app_context():
+    with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -81,16 +88,18 @@ def test_event_manager(client):
         if manager_group:
             manager.groups.append(manager_group)
         
-        db.session.add(manager)
-        db.session.commit()
-        db.session.refresh(manager)  # Refresh to get the ID
+        test_app.db.session.add(manager)
+        test_app.db.session.commit()
+        test_app.db.session.refresh(manager)  # Refresh to get the ID
         return manager
 
 
 @pytest.fixture
 def test_event(client):
     """Create a test event"""
-    with app.app_context():
+    with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
         event = Event(
             title='Test Event',
             description='Test event description',
@@ -98,18 +107,20 @@ def test_event(client):
             location='Test Location',
             is_active=True
         )
-        db.session.add(event)
-        db.session.commit()
-        db.session.refresh(event)  # Refresh to get the ID
+        test_app.db.session.add(event)
+        test_app.db.session.commit()
+        test_app.db.session.refresh(event)  # Refresh to get the ID
         return event
 
 
 class TestModels:
     """Test model functionality"""
     
-    def test_user_creation(self, client):
+    def test_user_creation(self, test_app, client):
         """Test user model creation"""
-        with app.app_context():
+        with test_app.app_context():
+            from models import User, Event, EventTask, Group, Application, SwishPayment
+            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             user = User(
                 first_name='John',
                 last_name='Doe',
@@ -117,17 +128,19 @@ class TestModels:
                 active=True
             )
             user.set_password('password123')
-            db.session.add(user)
-            db.session.commit()
+            test_app.db.session.add(user)
+            test_app.db.session.commit()
             
             assert user.id is not None
             assert user.email == 'john@example.com'
             assert user.check_password('password123')
             assert not user.check_password('wrongpassword')
     
-    def test_user_roles(self, test_user, client):
+    def test_user_roles(self, test_user, test_app, client):
         """Test user role functionality"""
-        with app.app_context():
+        with test_app.app_context():
+            from models import User, Event, EventTask, Group, Application, SwishPayment
+            from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             user = User.query.get(test_user.id)
             
             # Test no roles initially
@@ -137,13 +150,15 @@ class TestModels:
             admin_group = Group.query.filter_by(name='admin').first()
             if admin_group:
                 user.groups.append(admin_group)
-            db.session.commit()
+            test_app.db.session.commit()
             
             assert user.has_role('admin')
     
-    def test_event_creation(self, client):
+    def test_event_creation(self, test_app, client):
         """Test event model creation"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             event = Event(
                 title='Concert 2025',
                 description='Annual concert',
@@ -151,16 +166,18 @@ class TestModels:
                 location='Main Hall',
                 is_active=True
             )
-            db.session.add(event)
-            db.session.commit()
+            test_app.db.session.add(event)
+            test_app.db.session.commit()
             
             assert event.id is not None
             assert event.title == 'Concert 2025'
             assert event.is_active is True
     
-    def test_application_creation(self, client):
+    def test_application_creation(self, test_app, client):
         """Test application model creation"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             application = Application(
                 student_name='Child Smith',
                 student_personnummer='20101201-1234',
@@ -176,8 +193,8 @@ class TestModels:
                 application_year='2025/2026',
                 status='applied'
             )
-            db.session.add(application)
-            db.session.commit()
+            test_app.db.session.add(application)
+            test_app.db.session.commit()
             
             assert application.id is not None
             assert application.parent_email == 'jane@example.com'
@@ -186,7 +203,9 @@ class TestModels:
     
     def test_event_task_creation(self, test_event, client):
         """Test event task model creation"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             event = Event.query.get(test_event.id)
             task = EventTask(
                 event_id=event.id,
@@ -195,8 +214,8 @@ class TestModels:
                 due_offset_days=7,
                 due_offset_hours=0
             )
-            db.session.add(task)
-            db.session.commit()
+            test_app.db.session.add(task)
+            test_app.db.session.commit()
             
             assert task.id is not None
             assert task.title == 'Setup stage'
@@ -206,9 +225,9 @@ class TestModels:
 class TestForms:
     """Test form validation"""
     
-    def test_login_form_valid(self, client):
+    def test_login_form_valid(self, test_app, client):
         """Test valid login form"""
-        with app.app_context():
+        with test_app.test_request_context():
             form_data = {
                 'email': 'test@example.com',
                 'password': 'password123'
@@ -216,9 +235,9 @@ class TestForms:
             form = LoginForm(data=form_data)
             assert form.validate()
     
-    def test_login_form_invalid_email(self, client):
+    def test_login_form_invalid_email(self, test_app, client):
         """Test login form with invalid email"""
-        with app.app_context():
+        with test_app.test_request_context():
             form_data = {
                 'email': 'invalid-email',
                 'password': 'password123'
@@ -227,9 +246,9 @@ class TestForms:
             assert not form.validate()
             assert 'email' in form.errors
     
-    def test_event_form_valid(self, client):
+    def test_event_form_valid(self, test_app, client):
         """Test valid event form"""
-        with app.app_context():
+        with test_app.test_request_context():
             form_data = {
                 'title': 'New Event',
                 'description': 'Event description',
@@ -243,9 +262,9 @@ class TestForms:
             form.coordinator_id.choices = [(0, 'Ingen koordinator')] + [(u.id, u.full_name) for u in User.query.all()]
             assert form.validate()
     
-    def test_event_form_invalid_title(self, client):
+    def test_event_form_invalid_title(self, test_app, client):
         """Test event form with invalid title"""
-        with app.app_context():
+        with test_app.test_request_context():
             form_data = {
                 'title': 'A',  # Too short
                 'description': 'Event description',
@@ -260,9 +279,9 @@ class TestForms:
             assert not form.validate()
             assert 'title' in form.errors
     
-    def test_application_form_valid(self, client):
+    def test_application_form_valid(self, test_app, client):
         """Test valid application form"""
-        with app.app_context():
+        with test_app.test_request_context():
             form_data = {
                 'student_name': 'John Doe',
                 'student_personnummer': '20101201-1234',
@@ -286,7 +305,7 @@ class TestForms:
 class TestCriticalRoutes:
     """Test critical routes that prevent server crashes"""
     
-    def test_public_routes_no_crash(self, client):
+    def test_public_routes_no_crash(self, test_app, client):
         """Test all public routes don't crash"""
         public_routes = [
             '/',
@@ -311,12 +330,14 @@ class TestCriticalRoutes:
             sess['_user_id'] = str(test_user.id)
             sess['_fresh'] = True
         
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             user = User.query.get(test_user.id)
             parent_group = Group.query.filter_by(name='parent').first()
             if parent_group:
                 user.groups.append(parent_group)
-                db.session.commit()
+                test_app.db.session.commit()
         
         response = client.get('/tasks')
         # Should not crash
@@ -329,12 +350,16 @@ class TestPermissions:
     def test_requires_role_decorator(self, client, test_admin):
         """Test requires_role decorator"""
         # Test is in the context where permissions can be checked
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             assert True  # Basic test that decorator loads
     
     def test_user_has_role(self, test_admin, client):
         """Test user role checking"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             admin = User.query.get(test_admin.id)
             assert admin.has_role('admin')
             assert not admin.has_role('parent')
@@ -343,18 +368,20 @@ class TestPermissions:
 class TestErrorHandling:
     """Test error handling and edge cases"""
     
-    def test_nonexistent_route(self, client):
+    def test_nonexistent_route(self, test_app, client):
         """Test 404 error handling"""
         response = client.get('/nonexistent-page')
         assert response.status_code == 404
     
     def test_event_with_coordinator(self, client, test_event, test_event_manager):
         """Test event with coordinator assigned"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             event = Event.query.get(test_event.id)
             manager = User.query.get(test_event_manager.id)
             event.coordinator_id = manager.id
-            db.session.commit()
+            test_app.db.session.commit()
             
             # Test that coordinator is properly linked
             assert event.coordinator is not None
@@ -362,7 +389,9 @@ class TestErrorHandling:
     
     def test_task_completion(self, client, test_event, test_user):
         """Test task completion functionality"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             # Create task
             task = EventTask(
                 event_id=test_event.id,
@@ -370,8 +399,8 @@ class TestErrorHandling:
                 description='Test task description',
                 assigned_to_user_id=test_user.id
             )
-            db.session.add(task)
-            db.session.commit()
+            test_app.db.session.add(task)
+            test_app.db.session.commit()
             
             # Check task is not completed initially
             assert task.completed_at is None
@@ -380,7 +409,7 @@ class TestErrorHandling:
             # Mark as completed
             task.completed_at = datetime.now()
             task.completed_by_user_id = test_user.id
-            db.session.commit()
+            test_app.db.session.commit()
             
             # Check task is completed
             assert task.completed_at is not None
@@ -392,14 +421,16 @@ class TestDatabaseIntegrity:
     
     def test_user_event_task_relationship(self, client, test_user, test_event):
         """Test user-event-task relationships"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             task = EventTask(
                 event_id=test_event.id,
                 title='Relationship Test',
                 assigned_to_user_id=test_user.id
             )
-            db.session.add(task)
-            db.session.commit()
+            test_app.db.session.add(task)
+            test_app.db.session.commit()
             
             # Test relationships
             assert task.event.title == 'Test Event'
@@ -407,22 +438,24 @@ class TestDatabaseIntegrity:
     
     def test_cascade_deletion(self, client, test_event):
         """Test cascade deletion of related objects"""
-        with app.app_context():
+        with test_app.app_context():
+        from models import User, Event, EventTask, Group, Application, SwishPayment
+        from forms import LoginForm, EventForm, ApplicationForm, DonationForm
             # Create task for event
             task = EventTask(
                 event_id=test_event.id,
                 title='Will be deleted',
                 description='This task should be deleted with event'
             )
-            db.session.add(task)
-            db.session.commit()
+            test_app.db.session.add(task)
+            test_app.db.session.commit()
             
             task_id = task.id
             
             # Delete event
             event = Event.query.get(test_event.id)
-            db.session.delete(event)
-            db.session.commit()
+            test_app.db.session.delete(event)
+            test_app.db.session.commit()
             
             # Check task is also deleted
             deleted_task = EventTask.query.get(task_id)
