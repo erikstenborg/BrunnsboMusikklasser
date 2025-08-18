@@ -55,3 +55,8 @@ The application employs a traditional Flask web architecture, utilizing server-s
 
 ### Database
 - **PostgreSQL**: Primary database solution, with SQLAlchemy ORM.
+
+### Testing Infrastructure
+- **pytest**: Comprehensive test suite with proper database isolation.
+- **SQLite in-memory**: Tests use isolated SQLite databases to prevent interference with development data.
+- **conftest.py**: Centralized test configuration ensuring all tests run against temporary test databases.

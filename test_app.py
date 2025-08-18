@@ -12,49 +12,13 @@ from forms import LoginForm, EventForm, ApplicationForm, DonationForm
 from permissions import requires_role
 
 
-@pytest.fixture
-def client():
-    """Create test client with isolated in-memory database"""
-    # Use in-memory SQLite database for faster tests
-    original_db_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
-    
-    # Configure test environment
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['TESTING'] = True
-    app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
-    app.config['SESSION_SECRET'] = 'test-secret-key'
-    
-    # Force SQLAlchemy to use the new configuration
-    with app.app_context():
-        # Recreate the database engine with the new URI
-        db.engine.dispose()  # Close existing connections
-        
-        with app.test_client() as client:
-            # Drop all tables and recreate to ensure clean state
-            db.drop_all()
-            db.create_all()
-            
-            # Create test groups
-            for group_name in ['admin', 'event_manager', 'parent', 'applications_manager']:
-                group = Group(name=group_name)
-                db.session.add(group)
-            
-            try:
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                print(f"Error creating groups: {e}")
-            
-            yield client
-    
-    # Restore original database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = original_db_uri
+# Test client is now provided by conftest.py
 
 
 @pytest.fixture
-def test_user(client):
+def test_user(test_app):
     """Create a test user"""
-    with app.app_context():
+    with test_app.app_context():
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -72,9 +36,9 @@ def test_user(client):
 
 
 @pytest.fixture
-def test_admin(client):
+def test_admin(test_app):
     """Create a test admin user"""
-    with app.app_context():
+    with test_app.app_context():
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
