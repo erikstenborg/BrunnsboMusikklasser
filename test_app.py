@@ -29,9 +29,9 @@ def test_user(test_app):
             active=True
         )
         user.set_password('testpassword')
-        db.session.add(user)
-        db.session.commit()
-        db.session.refresh(user)  # Refresh to get the ID
+        test_app.db.session.add(user)
+        test_app.db.session.commit()
+        test_app.db.session.refresh(user)  # Refresh to get the ID
         return user
 
 
@@ -55,9 +55,9 @@ def test_admin(test_app):
         if admin_group:
             admin.groups.append(admin_group)
         
-        db.session.add(admin)
-        db.session.commit()
-        db.session.refresh(admin)  # Refresh to get the ID
+        test_app.db.session.add(admin)
+        test_app.db.session.commit()
+        test_app.db.session.refresh(admin)  # Refresh to get the ID
         return admin
 
 

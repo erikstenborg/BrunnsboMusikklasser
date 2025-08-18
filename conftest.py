@@ -1,29 +1,50 @@
 """
-Pytest configuration for database isolation
+Pytest configuration for complete database isolation
 """
 import pytest
 import tempfile
 import os
-from app import app, db
-from models import Group
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from flask_login import LoginManager
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 @pytest.fixture(scope="function")
 def test_app():
-    """Create a test Flask app with isolated database"""
-    # Save original configuration
-    original_config = {}
-    for key in ['SQLALCHEMY_DATABASE_URI', 'TESTING', 'WTF_CSRF_ENABLED', 'SESSION_SECRET']:
-        original_config[key] = app.config.get(key)
+    """Create completely isolated test Flask app"""
+    # Create fresh Flask app instance
+    app = Flask(__name__)
+    app.secret_key = 'test-secret-key'
     
     # Configure test environment
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
     app.config['SESSION_SECRET'] = 'test-secret-key'
     
+    # Initialize extensions for test app
+    db = SQLAlchemy(app, model_class=Base)
+    mail = Mail(app)
+    login_manager = LoginManager(app)
+    login_manager.login_view = 'login'
+    
     with app.app_context():
-        # Recreate the database with new configuration
-        db.drop_all()
+        # Import models within app context to avoid circular imports
+        from models import Group, User
+        
+        # Set up user loader
+        @login_manager.user_loader
+        def load_user(user_id):
+            return User.query.get(int(user_id))
+        
+        # Create all tables
         db.create_all()
         
         # Create test groups in logical order
@@ -43,12 +64,9 @@ def test_app():
             db.session.rollback()
             print(f"Error creating test groups: {e}")
         
+        # Make db available to tests
+        app.db = db
         yield app
-    
-    # Restore original configuration
-    for key, value in original_config.items():
-        if value is not None:
-            app.config[key] = value
 
 @pytest.fixture
 def client(test_app):
