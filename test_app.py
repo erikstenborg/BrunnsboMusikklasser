@@ -119,16 +119,6 @@ class TestBasicFunctionality:
             assert 'applications_manager' in group_names
             assert 'parent' in group_names
 
-    def test_admin_routes_redirect(self, client):
-        """Test admin routes redirect to login when not authenticated"""
-        admin_routes = ['/admin/events', '/admin/users', '/admin/payments']
-        
-        for route in admin_routes:
-            response = client.get(route)
-            # Should redirect to login or return 404 (route not implemented)
-            assert response.status_code in [302, 403, 404]
-
-
 class TestModels:
     """Test model functionality"""
 
@@ -302,19 +292,75 @@ class TestCriticalRoutes:
 
     def test_public_routes_no_crash(self, test_app, client):
         """Test all public routes don't crash"""
-        # Use actual Swedish route names from the app
+        # Public routes that should be accessible without authentication
         public_routes = [
-            '/', '/evenemang', '/kontakt', '/donations', '/ansokan', '/login'
+            '/', '/om-oss', '/evenemang', '/kontakt', '/ansokan', '/login', 
+            '/register', '/forgot-password', '/donations', '/verify-email'
         ]
 
         for route in public_routes:
             response = client.get(route)
             # Should not be 500 (server error)
             assert response.status_code != 500, f"Route {route} returned server error"
-            # Should be 200 or redirect
+            # Should be 200 (OK), 302 (redirect), or 404 (not found - acceptable for test)
             assert response.status_code in [
                 200, 302, 404
             ], f"Route {route} returned unexpected status: {response.status_code}"
+
+    def test_admin_routes_redirect(self, client):
+        """Test admin routes redirect to login when not authenticated"""
+        # All admin routes that should require authentication
+        admin_routes = [
+            '/admin/applications',
+            '/admin/events', 
+            '/admin/users',
+            '/admin/payments',
+            '/admin/events/new',
+            '/admin/create-user',
+            '/admin/change-password',
+            '/admin/swish-config',
+            '/profile',
+            '/user/tasks'
+        ]
+        
+        for route in admin_routes:
+            response = client.get(route)
+            # Should redirect to login (302) or return 403/404 (permission denied/not found)
+            assert response.status_code in [302, 403, 404], f"Route {route} returned unexpected status: {response.status_code}"
+
+    def test_authenticated_routes_with_user(self, test_app, client, test_user):
+        """Test routes that require authentication work with logged-in user"""
+        # Login as user
+        with client.session_transaction() as sess:
+            sess['_user_id'] = str(test_user.id)
+            sess['_fresh'] = True
+
+        # Routes that should work for authenticated users
+        authenticated_routes = [
+            '/profile',
+            '/admin/logout'  # Should redirect after logout
+        ]
+        
+        for route in authenticated_routes:
+            response = client.get(route)
+            # Should not crash (500) - may redirect or show content
+            assert response.status_code != 500, f"Route {route} crashed with authenticated user"
+            assert response.status_code in [200, 302, 403, 404], f"Route {route} returned unexpected status: {response.status_code}"
+
+    def test_parametric_routes_no_crash(self, test_app, client, test_event, test_user):
+        """Test parametric routes with valid IDs don't crash"""
+        # Routes with parameters that need valid IDs
+        parametric_routes = [
+            f'/events/{test_event.id}/tasks',
+            f'/admin/users/{test_user.id}/roles',
+            f'/admin/events/{test_event.id}/tasks'
+        ]
+        
+        for route in parametric_routes:
+            response = client.get(route)
+            # Should not crash - may require authentication but shouldn't error
+            assert response.status_code != 500, f"Route {route} returned server error"
+            assert response.status_code in [200, 302, 403, 404], f"Route {route} returned unexpected status: {response.status_code}"
 
     def test_task_route_with_user(self, test_app, client, test_user):
         """Test task route doesn't crash with logged in user"""
