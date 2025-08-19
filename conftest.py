@@ -97,7 +97,12 @@ def test_app():
             event_date = Column(DateTime, nullable=False)
             location = Column(String(200))
             is_active = Column(Boolean, default=True)
+            coordinator_id = Column(Integer, ForeignKey('users.id'))
             created_at = Column(DateTime, default=datetime.utcnow)
+            
+            # Relationships
+            coordinator = relationship('User', foreign_keys=[coordinator_id])
+            tasks = relationship('EventTask', back_populates='event', cascade='all, delete-orphan')
         
         class Application(db.Model):
             __tablename__ = 'applications'
@@ -120,8 +125,8 @@ def test_app():
             completed_by_user_id = Column(Integer, ForeignKey('users.id'))
             created_at = Column(DateTime, default=datetime.utcnow)
             
-            # Relationships
-            event = relationship('Event', backref='tasks')
+            # Relationships with cascade delete
+            event = relationship('Event', back_populates='tasks')
             assigned_to = relationship('User', foreign_keys=[assigned_to_user_id])
             completed_by = relationship('User', foreign_keys=[completed_by_user_id])
             
