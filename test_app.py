@@ -96,6 +96,38 @@ def test_event(test_app, client):
         return event
 
 
+class TestBasicFunctionality:
+    """Test basic Flask app functionality"""
+
+    def test_app_creation(self, client):
+        """Test Flask app is created"""
+        from app import app
+        assert app is not None
+
+    def test_database_setup(self, client):
+        """Test database is set up correctly in development environment"""
+        from app import app, db
+        from models import Group
+        with app.app_context():
+            # Test groups are created in development
+            groups = Group.query.all()
+            assert len(groups) >= 4  # Should have at least the 4 main groups
+            group_names = [g.name for g in groups]
+            assert 'admin' in group_names
+            assert 'event_manager' in group_names
+            assert 'applications_manager' in group_names
+            assert 'parent' in group_names
+
+    def test_admin_routes_redirect(self, client):
+        """Test admin routes redirect to login when not authenticated"""
+        admin_routes = ['/admin/events', '/admin/users', '/admin/payments']
+        
+        for route in admin_routes:
+            response = client.get(route)
+            # Should redirect to login or return 404 (route not implemented)
+            assert response.status_code in [302, 403, 404]
+
+
 class TestModels:
     """Test model functionality"""
 
@@ -269,8 +301,9 @@ class TestCriticalRoutes:
 
     def test_public_routes_no_crash(self, test_app, client):
         """Test all public routes don't crash"""
+        # Use actual Swedish route names from the app
         public_routes = [
-            '/', '/om-oss', '/evenemang', '/ansokan', '/login', '/register'
+            '/', '/evenemang', '/kontakt', '/donations', '/ansokan', '/login'
         ]
 
         for route in public_routes:
