@@ -121,7 +121,7 @@ class TestModels:
         with test_app.app_context():
             User = test_app.User  # Get models from test app
             Group = test_app.Group
-            user = User.query.get(test_user.id)
+            user = test_app.db.session.get(User, test_user.id)
 
             # Test no roles initially
             assert not user.has_role('admin')
@@ -171,7 +171,7 @@ class TestModels:
         with test_app.app_context():
             EventTask = test_app.EventTask  # Get EventTask model from test app
             Event = test_app.Event
-            event = Event.query.get(test_event.id)
+            event = test_app.db.session.get(Event, test_event.id)
             task = EventTask(event_id=event.id,
                              title='Setup stage',
                              description='Setup stage equipment',
@@ -292,7 +292,7 @@ class TestCriticalRoutes:
         with test_app.app_context():
             User = test_app.User  # Get models from test app
             Group = test_app.Group
-            user = User.query.get(test_user.id)
+            user = test_app.db.session.get(User, test_user.id)
             parent_group = Group.query.filter_by(name='parent').first()
             if parent_group:
                 user.groups.append(parent_group)
@@ -310,7 +310,7 @@ class TestPermissions:
         """Test user role checking"""
         with test_app.app_context():
             User = test_app.User  # Get User model from test app
-            admin = User.query.get(test_admin.id)
+            admin = test_app.db.session.get(User, test_admin.id)
             assert admin.has_role('admin')
             assert not admin.has_role('parent')
 
@@ -329,8 +329,8 @@ class TestErrorHandling:
         with test_app.app_context():
             Event = test_app.Event  # Get models from test app
             User = test_app.User
-            event = Event.query.get(test_event.id)
-            manager = User.query.get(test_event_manager.id)
+            event = test_app.db.session.get(Event, test_event.id)
+            manager = test_app.db.session.get(User, test_event_manager.id)
             event.coordinator_id = manager.id
             test_app.db.session.commit()
 
@@ -399,13 +399,13 @@ class TestDatabaseIntegrity:
             task_id = task.id
 
             # Delete event
-            event = Event.query.get(test_event.id)
+            event = test_app.db.session.get(Event, test_event.id)
             test_app.db.session.delete(event)
             test_app.db.session.commit()
 
             # Check task is also deleted (cascade deletion)
             # For this simple test, we'll just check that event was deleted
-            deleted_event = Event.query.get(test_event.id)
+            deleted_event = test_app.db.session.get(Event, test_event.id)
             assert deleted_event is None
 
 
