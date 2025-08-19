@@ -534,6 +534,81 @@ footer a:hover {
     }
 }
 
+/* Smooth responsive tables */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-smooth-responsive {
+    width: 100%;
+    table-layout: auto;
+    overflow-wrap: break-word;
+}
+
+.table-smooth-responsive th,
+.table-smooth-responsive td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    padding: 0.75rem 0.5rem;
+}
+
+.table-smooth-responsive .badge {
+    font-size: 0.75em;
+    white-space: nowrap;
+}
+
+/* Allow specific columns to wrap on mobile */
+@media (max-width: 992px) {
+    .table-smooth-responsive th:nth-child(1),
+    .table-smooth-responsive td:nth-child(1) {
+        min-width: 120px;
+        max-width: 150px;
+    }
+    
+    .table-smooth-responsive th:nth-child(2),
+    .table-smooth-responsive td:nth-child(2) {
+        min-width: 150px;
+        max-width: 200px;
+    }
+    
+    .table-smooth-responsive th:nth-child(3),
+    .table-smooth-responsive td:nth-child(3) {
+        min-width: 80px;
+        max-width: 120px;
+    }
+    
+    .table-smooth-responsive th:nth-child(4),
+    .table-smooth-responsive td:nth-child(4) {
+        min-width: 60px;
+        max-width: 80px;
+    }
+    
+    .table-smooth-responsive th:nth-child(5),
+    .table-smooth-responsive td:nth-child(5) {
+        display: none; /* Hide last login on mobile */
+    }
+    
+    .table-smooth-responsive th:nth-child(6),
+    .table-smooth-responsive td:nth-child(6) {
+        display: none; /* Hide created date on mobile */
+    }
+}
+
+@media (max-width: 768px) {
+    .table-smooth-responsive th:nth-child(3),
+    .table-smooth-responsive td:nth-child(3) {
+        font-size: 0.85em;
+    }
+    
+    .table-smooth-responsive .btn-sm {
+        font-size: 0.75em;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
 @media (max-width: 576px) {
     .navbar-brand img {
         height: 60px;
