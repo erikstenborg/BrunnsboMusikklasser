@@ -62,6 +62,7 @@ def google_login():
     logging.info(f"Google OAuth redirect_uri: {redirect_uri}")
     logging.info(f"Request URL root: {request.url_root}")
     logging.info(f"Generated callback URL: {url_for('google_auth.google_callback')}")
+    logging.info(f"Client ID being used: {GOOGLE_CLIENT_ID[:20]}...")
     
     # Request the user's profile information
     request_uri = client.prepare_request_uri(
@@ -69,6 +70,9 @@ def google_login():
         redirect_uri=redirect_uri,
         scope=["openid", "email", "profile"],
     )
+    
+    # Also log the full OAuth request URL for debugging
+    logging.info(f"Full OAuth request URL: {request_uri}")
     
     return redirect(request_uri)
 
