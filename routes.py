@@ -1303,3 +1303,8 @@ def admin_swish_config():
     }
     
     return render_template('admin_swish_config.html', config=config)
+
+@app.route('/gdpr')
+def gdpr():
+    """GDPR privacy policy page"""
+    return render_template('gdpr.html')
