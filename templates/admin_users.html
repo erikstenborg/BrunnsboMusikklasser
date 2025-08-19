@@ -41,8 +41,8 @@
                             <td>
                                 {% if user.groups %}
                                     {% for group in user.groups %}
-                                        {% if group.name == 'Admin' %}
-                                            <span class="badge bg-danger me-1">{{ group.name }}</span>
+                                        {% if group.name == 'admin' %}
+                                            <span class="badge bg-danger me-1">Admin</span>
                                         {% elif group.name == 'applications_manager' %}
                                             <span class="badge bg-info me-1">Ansökan</span>
                                         {% elif group.name == 'event_manager' %}
