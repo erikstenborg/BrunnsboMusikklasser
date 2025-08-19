@@ -29,8 +29,14 @@ def test_app():
     app.config['WTF_CSRF_CHECK_DEFAULT'] = False
     app.config['SESSION_SECRET'] = 'test-secret-key'
     
+    # Create completely fresh Base class for each test to avoid metadata conflicts
+    from sqlalchemy.orm import DeclarativeBase
+    
+    class TestBase(DeclarativeBase):
+        pass
+
     # Initialize extensions for test app
-    db = SQLAlchemy(app, model_class=Base)
+    db = SQLAlchemy(app, model_class=TestBase)
     mail = Mail(app)
     login_manager = LoginManager(app)
     login_manager.login_view = 'login'
@@ -43,14 +49,11 @@ def test_app():
         from werkzeug.security import generate_password_hash, check_password_hash
         from flask_login import UserMixin
         
-        # User-Group association table (only create if not exists)
-        if 'user_groups' not in db.metadata.tables:
-            user_groups = Table('user_groups', db.metadata,
-                Column('user_id', Integer, ForeignKey('users.id')),
-                Column('group_id', Integer, ForeignKey('groups.id'))
-            )
-        else:
-            user_groups = db.metadata.tables['user_groups']
+        # User-Group association table
+        user_groups = Table('user_groups', db.metadata,
+            Column('user_id', Integer, ForeignKey('users.id')),
+            Column('group_id', Integer, ForeignKey('groups.id'))
+        )
         
         # Define models directly in test context
         class User(UserMixin, db.Model):
@@ -103,12 +106,35 @@ def test_app():
             parent_email = Column(String(120), nullable=False)
             status = Column(String(20), default='pending')
             created_at = Column(DateTime, default=datetime.utcnow)
+
+        class EventTask(db.Model):
+            __tablename__ = 'event_tasks'
+            id = Column(Integer, primary_key=True)
+            event_id = Column(Integer, ForeignKey('events.id'), nullable=False)
+            title = Column(String(200), nullable=False)
+            description = Column(Text)
+            due_offset_days = Column(Integer, default=0)
+            due_offset_hours = Column(Integer, default=0)
+            assigned_to_user_id = Column(Integer, ForeignKey('users.id'))
+            completed_at = Column(DateTime)
+            completed_by_user_id = Column(Integer, ForeignKey('users.id'))
+            created_at = Column(DateTime, default=datetime.utcnow)
+            
+            # Relationships
+            event = relationship('Event', backref='tasks')
+            assigned_to = relationship('User', foreign_keys=[assigned_to_user_id])
+            completed_by = relationship('User', foreign_keys=[completed_by_user_id])
+            
+            @property
+            def completed(self):
+                return self.completed_at is not None
             
         # Make models available to test app
         app.User = User
         app.Group = Group
         app.Event = Event
         app.Application = Application
+        app.EventTask = EventTask
         
         # Set up user loader
         @login_manager.user_loader

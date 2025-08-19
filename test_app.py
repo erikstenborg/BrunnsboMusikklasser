@@ -55,10 +55,11 @@ def test_admin(test_app):
 
 
 @pytest.fixture
-def test_event_manager(client):
+def test_event_manager(test_app, client):
     """Create a test event manager user"""
     with test_app.app_context():
-        # Using test app models instead of imports User, Group
+        User = test_app.User  # Get models from test app
+        Group = test_app.Group
         # Generate unique email to avoid conflicts
         import uuid
         unique_id = str(uuid.uuid4())[:8]
@@ -80,10 +81,10 @@ def test_event_manager(client):
 
 
 @pytest.fixture
-def test_event(client):
+def test_event(test_app, client):
     """Create a test event"""
     with test_app.app_context():
-        # Using test app models instead of imports Event
+        Event = test_app.Event  # Get Event model from test app
         event = Event(title='Test Event',
                       description='Test event description',
                       event_date=datetime.now() + timedelta(days=30),
@@ -165,10 +166,11 @@ class TestModels:
             assert application.student_name == 'Child Smith'
             assert application.status == 'pending'
 
-    def test_event_task_creation(self, test_event, client):
+    def test_event_task_creation(self, test_app, test_event, client):
         """Test event task model creation"""
-        # Using test app models instead of imports Event, EventTask
         with test_app.app_context():
+            EventTask = test_app.EventTask  # Get EventTask model from test app
+            Event = test_app.Event
             event = Event.query.get(test_event.id)
             task = EventTask(event_id=event.id,
                              title='Setup stage',
