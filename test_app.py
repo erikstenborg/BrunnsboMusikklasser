@@ -3,6 +3,7 @@ Streamlined test suite for Brunnsbo Musikklasser Flask application
 Tests core functionality to prevent server crashes and template errors
 """
 import pytest
+import unittest
 from datetime import datetime, timedelta
 from forms import LoginForm, EventForm, ApplicationForm
 from decimal import Decimal
@@ -688,6 +689,90 @@ class TestSwishPayments:
             assert payment.status == 'ERROR'
             assert payment.error_code == 'FF08'
             assert payment.error_message == 'PayeeSSN is invalid'
+
+
+# Test for user registration role assignments
+def test_new_email_registration_no_groups(test_app):
+    """Test that regular email registration doesn't assign any groups"""
+    with test_app.app_context():
+        User = test_app.User
+        Group = test_app.Group
+        
+        # Create a user (simulating email registration)
+        user = User(
+            first_name="Test",
+            last_name="User",
+            email="test@example.com",
+            password_hash="hashed_password",
+            active=True
+        )
+        test_app.db.session.add(user)
+        test_app.db.session.commit()
+        
+        # Verify user has no groups assigned
+        assert len(user.groups) == 0, "New email-registered users should have no groups"
+
+def test_new_oauth_user_no_groups(test_app):
+    """Test that OAuth users don't get automatic group assignment"""
+    with test_app.app_context():
+        from models import User, Group, OAuthConnection
+        
+        # Create a user (simulating OAuth registration)
+        user = User(
+            first_name="OAuth",
+            last_name="User", 
+            email="oauth@example.com",
+            password_hash=None,  # OAuth users have no password
+            active=True
+        )
+        test_app.db.session.add(user)
+        test_app.db.session.flush()
+        
+        # Create OAuth connection
+        oauth_connection = OAuthConnection(
+            user_id=user.id,
+            provider='google',
+            provider_user_id='123456789',
+            provider_email='oauth@example.com',
+            provider_name='OAuth User',
+            provider_picture_url='https://example.com/pic.jpg'
+        )
+        test_app.db.session.add(oauth_connection)
+        test_app.db.session.commit()
+        
+        # Verify OAuth user has no groups assigned
+        assert len(user.groups) == 0, "New OAuth users should have no groups"
+
+def test_manual_group_assignment_works(test_app):
+    """Test that administrators can manually assign groups"""
+    with test_app.app_context():
+        User = test_app.User
+        Group = test_app.Group
+        
+        # Create user and parent group
+        user = User(
+            first_name="Manual",
+            last_name="User",
+            email="manual@example.com",
+            active=True
+        )
+        
+        parent_group = Group.query.filter_by(name='parent').first()
+        if not parent_group:
+            parent_group = Group(name='parent', description='Parents of students')
+            test_app.db.session.add(parent_group)
+            test_app.db.session.flush()
+        
+        test_app.db.session.add(user)
+        test_app.db.session.flush()
+        
+        # Manually assign group (as admin would do)
+        user.groups.append(parent_group)
+        test_app.db.session.commit()
+        
+        # Verify manual assignment works
+        assert len(user.groups) == 1
+        assert user.groups[0].name == 'parent'
 
 
 if __name__ == '__main__':

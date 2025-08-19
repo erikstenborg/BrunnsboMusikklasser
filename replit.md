@@ -26,7 +26,7 @@ The application employs a traditional Flask web architecture, utilizing server-s
 - **Student Applications**: Comprehensive forms are validated, stored in PostgreSQL, and trigger email notifications to administrators. Applications are trackable by status.
 - **Content Management**: Events and news are managed via the database and displayed dynamically on the website, with filtering for upcoming items.
 - **Task Management**: A comprehensive system allows event managers to create, edit, and delete tasks, assigning them to users with various roles (parent, event_manager, admin). Parents have a dedicated "Mina uppgifter" page for task completion.
-- **Authentication & Authorization**: Utilizes email-based authentication with Flask-Login for session management, plus Google OAuth integration for seamless login/registration. Features a robust Role-Based Access Control (RBAC) system (Admin, applications_manager, event_manager, parent roles) and email-based password reset. OAuth-only users can create passwords via password reset feature.
+- **Authentication & Authorization**: Utilizes email-based authentication with Flask-Login for session management, plus Google OAuth integration for seamless login/registration. Features a robust Role-Based Access Control (RBAC) system (Admin, applications_manager, event_manager, parent roles) and email-based password reset. OAuth-only users can create passwords via password reset feature. **IMPORTANT**: New users (both email and OAuth registration) receive NO automatic role assignments - administrators must manually assign roles.
 
 ### UI/UX Decisions
 - **Responsive Design**: Implemented with Bootstrap 5.

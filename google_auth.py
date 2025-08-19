@@ -313,10 +313,8 @@ def create_new_google_user(google_id, email, first_name, last_name, picture_url)
     
     db.session.add(oauth_connection)
     
-    # Assign default parent role to new Google users
-    parent_group = Group.query.filter_by(name='parent').first()
-    if parent_group:
-        user.groups.append(parent_group)
+    # Note: New users should not have any groups assigned by default
+    # Administrators will assign appropriate roles manually
     
     db.session.commit()
     login_user(user)
