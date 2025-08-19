@@ -56,6 +56,19 @@
                             </button>
                         </div>
                         
+                        <!-- OAuth divider -->
+                        <div class="text-center my-4">
+                            <hr class="my-2">
+                            <span class="text-muted bg-white px-2">eller</span>
+                        </div>
+                        
+                        <!-- Google OAuth button -->
+                        <div class="d-grid mb-3">
+                            <a href="{{ url_for('google_auth.google_login') }}" class="btn btn-outline-danger">
+                                <i class="fab fa-google me-2"></i>Fortsätt med Google
+                            </a>
+                        </div>
+                        
                         <div class="text-center mt-3">
                             <div class="mb-2">
                                 <a href="{{ url_for('forgot_password') }}" class="btn btn-link btn-sm p-0 text-decoration-none">

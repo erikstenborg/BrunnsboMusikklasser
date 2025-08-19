@@ -3,9 +3,10 @@ from flask import render_template, request, redirect, url_for, flash, session, j
 from flask_mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, mail
-from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment, OAuthConnection
 from forms import ApplicationForm, ContactForm, LoginForm, EventForm, ChangePasswordForm, CreateAdminForm, EditApplicationForm, CreateUserForm, EventTaskForm, ForgotPasswordForm, ResetPasswordForm, RegisterForm, VerifyEmailForm, SwishPaymentForm, DonationForm
 from utils import create_confirmation_code, verify_confirmation_code, generate_confirmation_code
+from google_auth import google_auth
 from permissions import (
     admin_required, applications_manager_required, event_manager_required, 
     parent_access_required, authenticated_required, requires_any_role
@@ -13,6 +14,9 @@ from permissions import (
 from user_utils import get_assignable_users, can_manage_tasks, can_access_tasks, get_user_choices_for_forms
 from datetime import datetime, timedelta
 import logging
+
+# Register Google OAuth blueprint
+app.register_blueprint(google_auth, url_prefix='/auth')
 
 @app.route('/')
 def index():

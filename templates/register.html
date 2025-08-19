@@ -15,6 +15,20 @@
                 <div class="card-body">
                     <p class="text-muted mb-4">Skapa ett konto för att få tillgång till våra tjänster. Du behöver bekräfta din e-postadress.</p>
                     
+                    <!-- Google OAuth option -->
+                    <div class="mb-4">
+                        <div class="d-grid mb-3">
+                            <a href="{{ url_for('google_auth.google_login') }}" class="btn btn-outline-danger">
+                                <i class="fab fa-google me-2"></i>Registrera med Google
+                            </a>
+                        </div>
+                        
+                        <div class="text-center my-3">
+                            <hr class="my-2">
+                            <span class="text-muted bg-white px-2">eller skapa konto med e-post</span>
+                        </div>
+                    </div>
+                    
                     <form method="POST">
                         {{ form.hidden_tag() }}
                         

@@ -157,7 +157,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(String(50), nullable=False)
     last_name = db.Column(String(50), nullable=False)
     email = db.Column(String(120), unique=True, nullable=False)
-    password_hash = db.Column(String(256), nullable=False)
+    password_hash = db.Column(String(256), nullable=True)  # Allow null for OAuth-only users
     active = db.Column(Boolean, default=True)
     created_at = db.Column(DateTime, default=datetime.utcnow)
     last_login = db.Column(DateTime)
@@ -165,12 +165,17 @@ class User(UserMixin, db.Model):
     # Many-to-many relationship with groups
     groups = relationship('Group', secondary=user_groups, back_populates='users')
     
+    # OAuth connections
+    oauth_connections = relationship('OAuthConnection', back_populates='user', cascade='all, delete-orphan')
+    
     def set_password(self, password):
         """Set password hash"""
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         """Check if provided password matches hash"""
+        if not self.password_hash:
+            return False  # OAuth-only users don't have passwords
         return check_password_hash(self.password_hash, password)
     
     def has_role(self, role_name):
@@ -206,6 +211,17 @@ class User(UserMixin, db.Model):
     def username(self):
         """Backwards compatibility property that returns full name"""
         return self.full_name
+    
+    def has_oauth_connection(self, provider):
+        """Check if user has an OAuth connection for a specific provider"""
+        return any(conn.provider == provider for conn in self.oauth_connections)
+    
+    def get_oauth_connection(self, provider):
+        """Get OAuth connection for a specific provider"""
+        for conn in self.oauth_connections:
+            if conn.provider == provider:
+                return conn
+        return None
     
     def __repr__(self):
         return f'<User {self.email} - {self.full_name}>'
@@ -275,3 +291,28 @@ class EventTask(db.Model):
     
     def __repr__(self):
         return f'<EventTask {self.title}>'
+
+class OAuthConnection(db.Model):
+    """Model for storing OAuth connections (Google, etc.)"""
+    __tablename__ = 'oauth_connections'
+    
+    id = db.Column(Integer, primary_key=True)
+    user_id = db.Column(Integer, ForeignKey('users.id'), nullable=False)
+    provider = db.Column(String(50), nullable=False)  # 'google', 'facebook', etc.
+    provider_user_id = db.Column(String(100), nullable=False)  # User ID from the OAuth provider
+    provider_email = db.Column(String(120))  # Email from the OAuth provider
+    provider_name = db.Column(String(100))  # Full name from the OAuth provider
+    provider_picture_url = db.Column(String(500))  # Profile picture URL
+    access_token = db.Column(Text)  # OAuth access token (encrypted in production)
+    refresh_token = db.Column(Text)  # OAuth refresh token (encrypted in production)
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+    updated_at = db.Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = relationship('User', back_populates='oauth_connections')
+    
+    # Unique constraint: one connection per provider per user
+    __table_args__ = (db.UniqueConstraint('user_id', 'provider', name='uq_user_provider'),)
+    
+    def __repr__(self):
+        return f'<OAuthConnection {self.provider} for user {self.user_id}>'
