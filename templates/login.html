@@ -64,9 +64,15 @@
                         
                         <!-- Google OAuth button -->
                         <div class="d-grid mb-3">
-                            <a href="{{ url_for('google_auth.google_login') }}" class="btn btn-outline-danger">
+                            <a href="{{ url_for('google_auth.google_login') }}" class="btn btn-outline-danger" onclick="console.log('Google OAuth login clicked - check server logs for OAuth URL details');">
                                 <i class="fab fa-google me-2"></i>Fortsätt med Google
                             </a>
+                        </div>
+                        
+                        <!-- Test mode info (can be removed after OAuth works) -->
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <strong>Testkonto:</strong> Google OAuth är i testläge. Kontakta administratören om du inte kan logga in.
                         </div>
                         
                         <div class="text-center mt-3">

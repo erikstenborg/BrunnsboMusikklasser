@@ -65,14 +65,19 @@ def google_login():
     logging.info(f"Client ID being used: {GOOGLE_CLIENT_ID[:20]}...")
     
     # Request the user's profile information
+    # Note: For test mode apps, ensure minimal scopes and proper parameters
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=redirect_uri,
         scope=["openid", "email", "profile"],
+        access_type="offline",  # This can help with test mode
+        prompt="select_account"  # Allow user to select account
     )
     
-    # Also log the full OAuth request URL for debugging
+    # Debug logging for test mode troubleshooting
     logging.info(f"Full OAuth request URL: {request_uri}")
+    logging.info(f"OAuth scopes requested: openid, email, profile")
+    logging.info(f"Test mode note: Ensure your email is in Google Console test users list")
     
     return redirect(request_uri)
 
