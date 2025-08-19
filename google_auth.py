@@ -58,6 +58,11 @@ def google_login():
     # Store the redirect URI in session for callback
     session['oauth_redirect_uri'] = redirect_uri
     
+    # Debug logging
+    logging.info(f"Google OAuth redirect_uri: {redirect_uri}")
+    logging.info(f"Request URL root: {request.url_root}")
+    logging.info(f"Generated callback URL: {url_for('google_auth.google_callback')}")
+    
     # Request the user's profile information
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
