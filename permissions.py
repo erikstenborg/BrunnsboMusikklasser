@@ -29,7 +29,7 @@ def requires_role(role_name):
 def requires_any_role(*role_names):
     """
     Decorator that requires a user to have at least one of the specified roles
-    Usage: @requires_any_role('Admin', 'applications_manager')
+    Usage: @requires_any_role('admin', 'applications_manager')
     """
     def decorator(f):
         @wraps(f)

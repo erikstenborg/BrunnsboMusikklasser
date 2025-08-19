@@ -45,7 +45,7 @@
                     {% if current_user.groups %}
                         <div class="d-flex flex-wrap gap-2">
                             {% for group in current_user.groups %}
-                                {% if group.name == 'Admin' %}
+                                {% if group.name == 'admin' %}
                                     <span class="badge bg-danger">Administratör</span>
                                 {% elif group.name == 'applications_manager' %}
                                     <span class="badge bg-info">Ansökningshanterare</span>
@@ -61,7 +61,7 @@
                             <p class="mb-2"><strong>Tillgång:</strong></p>
                             <ul class="list-unstyled">
                                 {% for group in current_user.groups %}
-                                    {% if group.name == 'Admin' %}
+                                    {% if group.name == 'admin' %}
                                         <li><i class="fas fa-check text-success me-2"></i>Full administrativ åtkomst</li>
                                         <li><i class="fas fa-check text-success me-2"></i>Användarhantering</li>
                                         <li><i class="fas fa-check text-success me-2"></i>Eventhantering</li>
