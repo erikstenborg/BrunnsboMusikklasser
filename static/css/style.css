@@ -560,8 +560,9 @@ footer a:hover {
     white-space: nowrap;
 }
 
-/* Allow specific columns to wrap on mobile */
+/* Allow specific columns to wrap on mobile - Users table specific */
 @media (max-width: 992px) {
+    /* General column sizing for all tables */
     .table-smooth-responsive th:nth-child(1),
     .table-smooth-responsive td:nth-child(1) {
         min-width: 120px;
@@ -574,26 +575,33 @@ footer a:hover {
         max-width: 200px;
     }
     
-    .table-smooth-responsive th:nth-child(3),
-    .table-smooth-responsive td:nth-child(3) {
-        min-width: 80px;
-        max-width: 120px;
-    }
-    
-    .table-smooth-responsive th:nth-child(4),
-    .table-smooth-responsive td:nth-child(4) {
-        min-width: 60px;
-        max-width: 80px;
-    }
-    
-    .table-smooth-responsive th:nth-child(5),
-    .table-smooth-responsive td:nth-child(5) {
+    /* Specific rules for admin_users.html - hide less important columns */
+    .admin-users-table .table-smooth-responsive th:nth-child(5),
+    .admin-users-table .table-smooth-responsive td:nth-child(5) {
         display: none; /* Hide last login on mobile */
     }
     
-    .table-smooth-responsive th:nth-child(6),
-    .table-smooth-responsive td:nth-child(6) {
+    .admin-users-table .table-smooth-responsive th:nth-child(6),
+    .admin-users-table .table-smooth-responsive td:nth-child(6) {
         display: none; /* Hide created date on mobile */
+    }
+    
+    /* Events table - ensure actions column stays visible */
+    .admin-events-table .table-smooth-responsive th:last-child,
+    .admin-events-table .table-smooth-responsive td:last-child {
+        min-width: 140px;
+        white-space: nowrap;
+    }
+    
+    /* Applications table - hide less important columns */
+    .admin-applications-table .table-smooth-responsive th:nth-child(7),
+    .admin-applications-table .table-smooth-responsive td:nth-child(7) {
+        display: none; /* Hide email confirmation on mobile */
+    }
+    
+    .admin-applications-table .table-smooth-responsive th:nth-child(8),
+    .admin-applications-table .table-smooth-responsive td:nth-child(8) {
+        display: none; /* Hide application date on mobile */
     }
 }
 
