@@ -134,12 +134,40 @@ def test_app():
             def completed(self):
                 return self.completed_at is not None
             
+        class SwishPayment(db.Model):
+            __tablename__ = 'swish_payments'
+            id = Column(String(32), primary_key=True)
+            payee_payment_reference = Column(String(35), nullable=False, unique=True)
+            payer_alias = Column(String(15))
+            payee_alias = Column(String(15), nullable=False)
+            amount = Column(db.Numeric(12, 2), nullable=False)
+            currency = Column(String(3), nullable=False, default='SEK')
+            message = Column(String(50))
+            callback_url = Column(String(500), nullable=False)
+            callback_identifier = Column(String(36), nullable=False)
+            status = Column(String(20), default='CREATED')
+            payment_reference = Column(String(32))
+            error_code = Column(String(10))
+            error_message = Column(String(1000))
+            date_created = Column(DateTime, default=datetime.utcnow)
+            date_paid = Column(DateTime)
+            date_cancelled = Column(DateTime)
+            user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+            application_id = Column(Integer, ForeignKey('applications.id'), nullable=True)
+            event_id = Column(Integer, ForeignKey('events.id'), nullable=True)
+            
+            # Relationships
+            user = relationship('User', foreign_keys=[user_id])
+            application = relationship('Application', foreign_keys=[application_id])
+            event = relationship('Event', foreign_keys=[event_id])
+
         # Make models available to test app
         app.User = User
         app.Group = Group
         app.Event = Event
         app.Application = Application
         app.EventTask = EventTask
+        app.SwishPayment = SwishPayment
         
         # Set up user loader
         @login_manager.user_loader

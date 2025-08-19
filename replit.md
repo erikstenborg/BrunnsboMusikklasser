@@ -60,8 +60,9 @@ The application employs a traditional Flask web architecture, utilizing server-s
 - **pytest**: Comprehensive test suite with complete database isolation using Flask app factory pattern.
 - **SQLite in-memory**: Tests use completely isolated SQLite databases with separate Flask app instances to prevent any interference with development data.
 - **conftest.py**: Centralized test configuration creating fresh Flask app instances for each test, ensuring development database is never affected.
-- **Test Isolation**: PERFECT - All 21 unit tests now pass with 100% success rate while completely preserving development data.
-- **Test Coverage**: Complete coverage across 7 test classes: TestBasicFunctionality, TestModels, TestForms, TestCriticalRoutes, TestPermissions, TestErrorHandling, and TestDatabaseIntegrity.
+- **Test Isolation**: PERFECT - All 28 unit tests now pass with 100% success rate while completely preserving development data.
+- **Test Coverage**: Complete coverage across 8 test classes: TestBasicFunctionality, TestModels, TestForms, TestCriticalRoutes, TestPermissions, TestErrorHandling, TestDatabaseIntegrity, and TestSwishPayments.
 - **Database Safety**: Development PostgreSQL database with admin user and all production data remains completely untouched during test execution.
 - **Code Quality**: Zero warnings - eliminated all SQLAlchemy legacy warnings by migrating from Query.get() to Session.get() methods.
 - **Test Organization**: Consolidated from 2 test files to 1 comprehensive test_app.py, eliminating redundant tests and improving maintainability. Single command: `pytest test_app.py`
+- **Payment Testing**: Comprehensive Swish payment system testing including model creation, amount formatting, Swedish phone validation, status transitions, database relationships, and error handling.

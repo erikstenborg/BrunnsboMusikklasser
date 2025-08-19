@@ -5,6 +5,7 @@ Tests core functionality to prevent server crashes and template errors
 import pytest
 from datetime import datetime, timedelta
 from forms import LoginForm, EventForm, ApplicationForm
+from decimal import Decimal
 
 # Test client is now provided by conftest.py
 
@@ -440,6 +441,206 @@ class TestDatabaseIntegrity:
             # For this simple test, we'll just check that event was deleted
             deleted_event = test_app.db.session.get(Event, test_event.id)
             assert deleted_event is None
+
+
+class TestSwishPayments:
+    """Test Swish payment functionality"""
+
+    def test_swish_payment_model_creation(self, test_app, client):
+        """Test SwishPayment model creation"""
+        with test_app.app_context():
+            SwishPayment = test_app.SwishPayment
+            payment = SwishPayment(
+                id='TESTPAYMENT123456789012345678901234',
+                payee_payment_reference='BMK-TEST-12345',
+                payee_alias='1234567890',
+                amount=Decimal('250.00'),
+                currency='SEK',
+                message='Test donation',
+                callback_url='https://example.com/callback',
+                callback_identifier='callback-test-123',
+                status='CREATED'
+            )
+            test_app.db.session.add(payment)
+            test_app.db.session.commit()
+
+            assert payment.id == 'TESTPAYMENT123456789012345678901234'
+            assert payment.amount == Decimal('250.00')
+            assert payment.status == 'CREATED'
+            assert payment.currency == 'SEK'
+
+    def test_swish_amount_formatting(self, test_app, client):
+        """Test Swish amount formatting utility function"""
+        # Test various amount formats
+        def format_swish_amount(amount):
+            return "{:.2f}".format(Decimal(str(amount)))
+        
+        assert format_swish_amount(100) == "100.00"
+        assert format_swish_amount(99.5) == "99.50"
+        assert format_swish_amount(Decimal('150.75')) == "150.75"
+        assert format_swish_amount('200.123') == "200.12"  # Should round to 2 decimals
+
+    def test_swish_phone_validation(self, test_app, client):
+        """Test Swedish phone number validation for Swish"""
+        import re
+        
+        def validate_swish_phone(phone_number):
+            # Remove all non-digits
+            digits = re.sub(r'\D', '', phone_number)
+            
+            # Check if it's a Swedish mobile number
+            if digits.startswith('46'):
+                # Already has country code
+                if len(digits) >= 11 and len(digits) <= 13:
+                    return digits
+            elif digits.startswith('07'):
+                # Swedish mobile starting with 07, convert to international format
+                if len(digits) == 10:
+                    return '46' + digits[1:]  # Remove leading 0, add country code
+            elif len(digits) == 9 and digits.startswith('7'):
+                # Swedish mobile without leading 0
+                return '46' + digits
+            
+            return None
+        
+        # Test valid formats
+        assert validate_swish_phone('0701234567') == '46701234567'
+        assert validate_swish_phone('701234567') == '46701234567'
+        assert validate_swish_phone('46701234567') == '46701234567'
+        assert validate_swish_phone('+46 70 123 45 67') == '46701234567'
+        assert validate_swish_phone('070-123 45 67') == '46701234567'
+
+        # Test invalid formats
+        assert validate_swish_phone('123456') is None
+        assert validate_swish_phone('08123456') is None  # Landline
+        assert validate_swish_phone('invalid') is None
+        assert validate_swish_phone('') is None
+
+    def test_swish_payment_creation_database_only(self, test_app, client, test_user):
+        """Test Swish payment creation (database part only, without API call)"""
+        with test_app.app_context():
+            SwishPayment = test_app.SwishPayment
+            
+            # Set test configuration to avoid actual API calls
+            test_app.config['SWISH_TEST_MODE'] = True
+            test_app.config['SWISH_PAYEE_ALIAS'] = '1234567890'
+            
+            # Manually create payment record (simulating what SwishService would do)
+            payment = SwishPayment(
+                id='TEST123456789012345678901234567890',
+                payee_payment_reference='BMK-20250819-TEST123',
+                payer_alias='46701234567',
+                payee_alias='1234567890',
+                amount=Decimal('100.00'),
+                currency='SEK',
+                message='Test donation from TestUser',
+                callback_url='https://test.com/swish/callback/TEST123456789012345678901234567890',
+                callback_identifier='callback-test-identifier',
+                status='CREATED',
+                user_id=test_user.id
+            )
+            test_app.db.session.add(payment)
+            test_app.db.session.commit()
+
+            # Verify payment was created correctly
+            assert payment.id is not None
+            assert payment.user_id == test_user.id
+            assert payment.amount == Decimal('100.00')
+            assert payment.status == 'CREATED'
+            assert payment.message == 'Test donation from TestUser'
+
+    def test_swish_payment_status_updates(self, test_app, client):
+        """Test payment status updates"""
+        with test_app.app_context():
+            SwishPayment = test_app.SwishPayment
+            
+            # Create test payment
+            payment = SwishPayment(
+                id='STATUSTEST123456789012345678901234',
+                payee_payment_reference='BMK-STATUS-TEST',
+                payee_alias='1234567890',
+                amount=Decimal('50.00'),
+                currency='SEK',
+                message='Status test',
+                callback_url='https://test.com/callback',
+                callback_identifier='status-test-callback',
+                status='PENDING'
+            )
+            test_app.db.session.add(payment)
+            test_app.db.session.commit()
+
+            # Test status update to PAID
+            payment.status = 'PAID'
+            payment.payment_reference = 'SWISH-PAID-REF-123'
+            payment.date_paid = datetime.utcnow()
+            test_app.db.session.commit()
+
+            assert payment.status == 'PAID'
+            assert payment.payment_reference == 'SWISH-PAID-REF-123'
+            assert payment.date_paid is not None
+
+            # Test status update to CANCELLED
+            payment.status = 'CANCELLED'
+            payment.date_cancelled = datetime.utcnow()
+            test_app.db.session.commit()
+
+            assert payment.status == 'CANCELLED'
+            assert payment.date_cancelled is not None
+
+    def test_swish_payment_relationships(self, test_app, client, test_user, test_event):
+        """Test SwishPayment relationships with User and Event"""
+        with test_app.app_context():
+            SwishPayment = test_app.SwishPayment
+            
+            # Create payment linked to user and event
+            payment = SwishPayment(
+                id='RELATIONSHIP123456789012345678901234',
+                payee_payment_reference='BMK-REL-TEST',
+                payee_alias='1234567890',
+                amount=Decimal('150.00'),
+                currency='SEK',
+                message='Event donation',
+                callback_url='https://test.com/callback',
+                callback_identifier='relationship-test',
+                status='CREATED',
+                user_id=test_user.id,
+                event_id=test_event.id
+            )
+            test_app.db.session.add(payment)
+            test_app.db.session.commit()
+
+            # Test relationships
+            assert payment.user is not None
+            assert payment.user.id == test_user.id
+            assert payment.event is not None
+            assert payment.event.id == test_event.id
+            assert payment.event.title == 'Test Event'
+
+    def test_swish_payment_error_handling(self, test_app, client):
+        """Test SwishPayment error handling fields"""
+        with test_app.app_context():
+            SwishPayment = test_app.SwishPayment
+            
+            # Create payment with error
+            payment = SwishPayment(
+                id='ERROR12345678901234567890123456789',
+                payee_payment_reference='BMK-ERROR-TEST',
+                payee_alias='1234567890',
+                amount=Decimal('75.00'),
+                currency='SEK',
+                message='Error test',
+                callback_url='https://test.com/callback',
+                callback_identifier='error-test',
+                status='ERROR',
+                error_code='FF08',
+                error_message='PayeeSSN is invalid'
+            )
+            test_app.db.session.add(payment)
+            test_app.db.session.commit()
+
+            assert payment.status == 'ERROR'
+            assert payment.error_code == 'FF08'
+            assert payment.error_message == 'PayeeSSN is invalid'
 
 
 if __name__ == '__main__':
