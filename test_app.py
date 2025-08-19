@@ -100,17 +100,18 @@ def test_event(test_app, client):
 class TestBasicFunctionality:
     """Test basic Flask app functionality"""
 
-    def test_app_creation(self, client):
-        """Test Flask app is created"""
-        from app import app
-        assert app is not None
+    def test_app_creation(self, test_app, client):
+        """Test Flask test app is created with proper isolation"""
+        # Test the isolated test app, not the development app
+        assert test_app is not None
+        assert test_app.config['TESTING'] is True
+        assert test_app.config['SQLALCHEMY_DATABASE_URI'] == 'sqlite:///:memory:'
 
-    def test_database_setup(self, client):
-        """Test database is set up correctly in development environment"""
-        from app import app, db
-        from models import Group
-        with app.app_context():
-            # Test groups are created in development
+    def test_database_setup(self, test_app, client):
+        """Test database is set up correctly in test environment"""
+        with test_app.app_context():
+            # Test groups are created in test database (not development!)
+            Group = test_app.Group  # Use test app models
             groups = Group.query.all()
             assert len(groups) >= 4  # Should have at least the 4 main groups
             group_names = [g.name for g in groups]
