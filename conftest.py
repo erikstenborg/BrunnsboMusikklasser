@@ -36,9 +36,79 @@ def test_app():
     login_manager.login_view = 'login'
     
     with app.app_context():
-        # Import all models within app context to avoid circular imports
-        import models  # This imports all models
-        from models import Group, User
+        # Create models directly to avoid circular import
+        from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, Table
+        from sqlalchemy.orm import relationship
+        from datetime import datetime
+        from werkzeug.security import generate_password_hash, check_password_hash
+        from flask_login import UserMixin
+        
+        # User-Group association table (only create if not exists)
+        if 'user_groups' not in db.metadata.tables:
+            user_groups = Table('user_groups', db.metadata,
+                Column('user_id', Integer, ForeignKey('users.id')),
+                Column('group_id', Integer, ForeignKey('groups.id'))
+            )
+        else:
+            user_groups = db.metadata.tables['user_groups']
+        
+        # Define models directly in test context
+        class User(UserMixin, db.Model):
+            __tablename__ = 'users'
+            id = Column(Integer, primary_key=True)
+            first_name = Column(String(50), nullable=False)
+            last_name = Column(String(50), nullable=False)
+            email = Column(String(120), unique=True, nullable=False)
+            password_hash = Column(String(256))
+            active = Column(Boolean, default=True)
+            created_at = Column(DateTime, default=datetime.utcnow)
+            last_login = Column(DateTime)
+            groups = relationship('Group', secondary=user_groups, back_populates='users')
+            
+            def set_password(self, password):
+                self.password_hash = generate_password_hash(password)
+            
+            def check_password(self, password):
+                return check_password_hash(self.password_hash, password)
+                
+            def has_role(self, role_name):
+                return any(group.name == role_name for group in self.groups)
+            
+            @property
+            def full_name(self):
+                return f"{self.first_name} {self.last_name}"
+        
+        class Group(db.Model):
+            __tablename__ = 'groups'
+            id = Column(Integer, primary_key=True)
+            name = Column(String(50), unique=True, nullable=False)
+            description = Column(Text)
+            created_at = Column(DateTime, default=datetime.utcnow)
+            users = relationship('User', secondary=user_groups, back_populates='groups')
+        
+        class Event(db.Model):
+            __tablename__ = 'events'
+            id = Column(Integer, primary_key=True)
+            title = Column(String(100), nullable=False)
+            description = Column(Text)
+            event_date = Column(DateTime, nullable=False)
+            location = Column(String(200))
+            is_active = Column(Boolean, default=True)
+            created_at = Column(DateTime, default=datetime.utcnow)
+        
+        class Application(db.Model):
+            __tablename__ = 'applications'
+            id = Column(Integer, primary_key=True)
+            student_name = Column(String(100), nullable=False)
+            parent_email = Column(String(120), nullable=False)
+            status = Column(String(20), default='pending')
+            created_at = Column(DateTime, default=datetime.utcnow)
+            
+        # Make models available to test app
+        app.User = User
+        app.Group = Group
+        app.Event = Event
+        app.Application = Application
         
         # Set up user loader
         @login_manager.user_loader

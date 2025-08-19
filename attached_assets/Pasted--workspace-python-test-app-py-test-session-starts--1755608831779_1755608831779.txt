@@ -1,0 +1,841 @@
+~/workspace$ python test_app.py
+=========================================== test session starts ============================================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /home/runner/workspace/.pythonlibs/bin/python
+cachedir: .pytest_cache
+rootdir: /home/runner/workspace
+configfile: pyproject.toml
+plugins: Flask-Dance-7.1.0, flask-1.3.0
+collected 18 items                                                                                         
+
+test_app.py::TestModels::test_user_creation ERROR                                                    [  5%]
+test_app.py::TestModels::test_user_roles ERROR                                                       [ 11%]
+test_app.py::TestModels::test_event_creation ERROR                                                   [ 16%]
+test_app.py::TestModels::test_application_creation ERROR                                             [ 22%]
+test_app.py::TestModels::test_event_task_creation ERROR                                              [ 27%]
+test_app.py::TestForms::test_login_form_valid ERROR                                                  [ 33%]
+test_app.py::TestForms::test_login_form_invalid_email ERROR                                          [ 38%]
+test_app.py::TestForms::test_event_form_valid ERROR                                                  [ 44%]
+test_app.py::TestForms::test_event_form_invalid_title ERROR                                          [ 50%]
+test_app.py::TestForms::test_application_form_valid ERROR                                            [ 55%]
+test_app.py::TestCriticalRoutes::test_public_routes_no_crash ERROR                                   [ 61%]
+test_app.py::TestCriticalRoutes::test_task_route_with_user ERROR                                     [ 66%]
+test_app.py::TestPermissions::test_user_has_role ERROR                                               [ 72%]
+test_app.py::TestErrorHandling::test_nonexistent_route ERROR                                         [ 77%]
+test_app.py::TestErrorHandling::test_event_with_coordinator ERROR                                    [ 83%]
+test_app.py::TestErrorHandling::test_task_completion ERROR                                           [ 88%]
+test_app.py::TestDatabaseIntegrity::test_user_event_task_relationship ERROR                          [ 94%]
+test_app.py::TestDatabaseIntegrity::test_cascade_deletion ERROR                                      [100%]
+
+================================================== ERRORS ==================================================
+_____________________________ ERROR at setup of TestModels.test_user_creation ______________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_______________________________ ERROR at setup of TestModels.test_user_roles _______________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_____________________________ ERROR at setup of TestModels.test_event_creation _____________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+__________________________ ERROR at setup of TestModels.test_application_creation __________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+__________________________ ERROR at setup of TestModels.test_event_task_creation ___________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+____________________________ ERROR at setup of TestForms.test_login_form_valid _____________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+________________________ ERROR at setup of TestForms.test_login_form_invalid_email _________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+____________________________ ERROR at setup of TestForms.test_event_form_valid _____________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+________________________ ERROR at setup of TestForms.test_event_form_invalid_title _________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_________________________ ERROR at setup of TestForms.test_application_form_valid __________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_____________________ ERROR at setup of TestCriticalRoutes.test_public_routes_no_crash _____________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+______________________ ERROR at setup of TestCriticalRoutes.test_task_route_with_user ______________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+___________________________ ERROR at setup of TestPermissions.test_user_has_role ___________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+________________________ ERROR at setup of TestErrorHandling.test_nonexistent_route ________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_____________________ ERROR at setup of TestErrorHandling.test_event_with_coordinator ______________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+_________________________ ERROR at setup of TestErrorHandling.test_task_completion _________________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+________________ ERROR at setup of TestDatabaseIntegrity.test_user_event_task_relationship _________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+______________________ ERROR at setup of TestDatabaseIntegrity.test_cascade_deletion _______________________
+
+    @pytest.fixture(scope="function")
+    def test_app():
+        """Create completely isolated test Flask app"""
+        # Create fresh Flask app instance
+        app = Flask(__name__)
+        app.secret_key = 'test-secret-key'
+    
+        # Configure test environment
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+        app.config['SESSION_SECRET'] = 'test-secret-key'
+    
+        # Initialize extensions for test app
+        db = SQLAlchemy(app, model_class=Base)
+        mail = Mail(app)
+        login_manager = LoginManager(app)
+        login_manager.login_view = 'login'
+    
+        with app.app_context():
+            # Import all models within app context to avoid circular imports
+>           import models  # This imports all models
+            ^^^^^^^^^^^^^
+
+conftest.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+models.py:1: in <module>
+    from app import db
+app.py:70: in <module>
+    import routes
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    from flask import render_template, request, redirect, url_for, flash, session, jsonify
+    from flask_mail import Message
+    from flask_login import login_user, logout_user, login_required, current_user
+    from app import app, db, mail
+>   from models import Event, Application, NewsPost, Contact, User, Group, EventTask, ConfirmationCode, SwishPayment
+E   ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to a circular import) (/home/runner/workspace/models.py)
+
+routes.py:6: ImportError
+========================================= short test summary info ==========================================
+ERROR test_app.py::TestModels::test_user_creation - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestModels::test_user_roles - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestModels::test_event_creation - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestModels::test_application_creation - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestModels::test_event_task_creation - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestForms::test_login_form_valid - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestForms::test_login_form_invalid_email - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestForms::test_event_form_valid - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestForms::test_event_form_invalid_title - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestForms::test_application_form_valid - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestCriticalRoutes::test_public_routes_no_crash - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestCriticalRoutes::test_task_route_with_user - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestPermissions::test_user_has_role - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestErrorHandling::test_nonexistent_route - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestErrorHandling::test_event_with_coordinator - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestErrorHandling::test_task_completion - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestDatabaseIntegrity::test_user_event_task_relationship - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+ERROR test_app.py::TestDatabaseIntegrity::test_cascade_deletion - ImportError: cannot import name 'Event' from partially initialized module 'models' (most likely due to ...
+============================================ 18 errors in 0.95s ============================================
