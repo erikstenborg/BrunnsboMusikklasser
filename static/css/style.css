@@ -586,7 +586,12 @@ footer a:hover {
         display: none; /* Hide created date on mobile */
     }
     
-    /* Events table - ensure actions column stays visible */
+    /* Events table - hide created date column and ensure actions stay visible */
+    .admin-events-table .table-smooth-responsive th:nth-child(5),
+    .admin-events-table .table-smooth-responsive td:nth-child(5) {
+        display: none; /* Hide "Skapad" (created date) column on mobile */
+    }
+    
     .admin-events-table .table-smooth-responsive th:last-child,
     .admin-events-table .table-smooth-responsive td:last-child {
         min-width: 140px;
